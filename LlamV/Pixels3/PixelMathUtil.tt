@@ -1,0 +1,80 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".cs" #>
+<#
+	var Type = new List<string>()
+	{
+		"Byte",
+		"UInt16",
+		"UInt32",
+		"UInt64",
+		"Int16",
+		"Int32",
+		"Int64",
+		"Single",
+		"Double"
+	};
+#>
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
+
+using Pixels;
+
+namespace Pixels.Math
+{
+    public static partial class PixelMath
+    {
+	    public static void ConvertToByte<T>(Pixel<T> src, byte[] dst) where T : struct, IComparable
+        {
+            int c = 0;
+            switch((object)src)
+            {
+<# foreach (var T in Type){ #>
+                case Pixel<<#= T #>> h:
+                    for (int y = 0; y < h.Height; y++)
+                        for (int x = 0; x < h.Width; x++)
+                        {
+                            var hoge = h[x, y].ConvertToByte();
+                            dst[c++] = hoge;
+                            dst[c++] = hoge;
+                            dst[c++] = hoge;
+                        }
+                    break;
+<# } #>
+                default:
+                    throw new NotSupportedException($"{typeof(T)}");
+            }
+        }
+	    public static void ConvertToByteColor<T>(Pixel<T> src, byte[] dst) where T : struct, IComparable
+        {
+            int c = 0;
+            switch((object)src)
+            {
+<# foreach (var T in Type){ #>
+                case Pixel<<#= T #>> h:
+                    for (int y = 0; y < h.Height; y++)
+                        for (int x = 0; x < h.Width; x++)
+                        {
+                            var hoge = h[x, y].ConvertToByte();
+                            dst[c++] = hoge;
+                        }
+                    break;
+<# } #>
+                default:
+                    throw new NotSupportedException($"{typeof(T)}");
+            }
+        }
+
+<# foreach (var T in Type){ #>
+        public static byte ConvertToByte(this <#= T #> value) => (byte)(value > 255 ? 255 : value < 0 ? 0 : value);
+<# } #>
+    }
+}

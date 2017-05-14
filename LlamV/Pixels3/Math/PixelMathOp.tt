@@ -1,0 +1,136 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".cs" #>
+<#
+	var Type = new List<string>()
+	{
+		"Byte",
+		"UInt16",
+		"UInt32",
+		"UInt64",
+		"Int16",
+		"Int32",
+		"Int64",
+		"Single",
+		"Double"
+	};
+	//.Where(x=>x!="Int32" && x!="Double")
+#>
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
+
+using Pixels;
+
+namespace Pixels.Math
+{
+    public static partial class PixelMath
+    {
+		//Cast
+<# foreach (var T in Type){ #>
+<# foreach (var U in Type){ #>
+        public static Pixel<<#= U #>> ToPixel<#= U #>(this Pixel<<#= T #>> val)
+		{
+			<#= U #>[] dst = new <#= U #>[val.pixel.Length];
+			int c = 0;
+			foreach(var i in val.pixel)
+			{
+				dst[c++] = (<#= U #>)i;
+			}
+			return PixelFactory.Create<<#= U #>>(val.Maps, dst);
+		}
+<# } #>
+<# } #>
+
+<# foreach (var T in Type){ #>
+
+<# } #>
+
+<# foreach (var F in new Dictionary<string,string>()
+{
+	["Add"] = "src[x,y] + value",
+	["Sub"] = "src[x,y] - value",
+	["Mul"] = "src[x,y] * value",
+	["Div"] = "src[x,y] / value",
+}){ #>
+<# foreach (var T in Type){ #>
+
+		public static Pixel<<#= T #>> <#= F.Key #>Self(this Pixel<<#= T #>> src, <#= T #> value) => <#= F.Key #>(src, src, value);
+		public static Pixel<<#= T #>> <#= F.Key #>(this Pixel<<#= T #>> src, <#= T #> value) => <#= F.Key #>(src, src.Clone(), value);
+
+		public static Pixel<<#= T #>> <#= F.Key #>(this Pixel<<#= T #>> src, Pixel<<#= T #>> dst, <#= T #> value)
+        {
+            for (int y = 0; y < src.Height; y++)
+                for (int x = 0; x < src.Width; x++)
+                    dst[x, y] = (<#= T #>)(<#= F.Value #>);
+            return dst;
+        }
+<# } #>
+<# } #>
+<# foreach (var F in new Dictionary<string,string>()
+{
+	["Mul"] = "src[x,y] * value",
+	["Div"] = "src[x,y] / value",
+}){ #>
+<# foreach (var T in Type.Where(x=>x!="Int32" && x!="Double")){ #>
+
+		public static Pixel<<#= T #>> <#= F.Key #>Self(this Pixel<<#= T #>> src, double value) => <#= F.Key #>(src, src, value);
+		public static Pixel<<#= T #>> <#= F.Key #>(this Pixel<<#= T #>> src, double value) => <#= F.Key #>(src, src.Clone(), value);
+
+		public static Pixel<<#= T #>> <#= F.Key #>(this Pixel<<#= T #>> src, Pixel<<#= T #>> dst, double value)
+        {
+            for (int y = 0; y < src.Height; y++)
+                for (int x = 0; x < src.Width; x++)
+                    dst[x, y] = (<#= T #>)(<#= F.Value #>);
+            return dst;
+        }
+<# } #>
+<# } #>
+<# foreach (var F in new Dictionary<string,string>()
+{
+	["Add"] = "src1[x,y] + src2[x,y]",
+	["Sub"] = "src1[x,y] - src2[x,y]",
+	["Mul"] = "src1[x,y] * src2[x,y]",
+	["Div"] = "src1[x,y] / src2[x,y]",
+
+}){ #>
+<# foreach (var T in Type){ #>
+		public static Pixel<<#= T #>> <#= F.Key #>Self(this Pixel<<#= T #>> src1, Pixel<<#= T #>> src2) => <#= F.Key #>(src1, src1, src2);
+		public static Pixel<<#= T #>> <#= F.Key #>(this Pixel<<#= T #>> src1, Pixel<<#= T #>> src2) => <#= F.Key #>(src1, src1.Clone(), src2);
+        public static Pixel<<#= T #>> <#= F.Key #>(this Pixel<<#= T #>> src1, Pixel<<#= T #>> dst, Pixel<<#= T #>> src2)
+        {
+            for (int y = 0; y < src1.Height; y++)
+                for (int x = 0; x < src1.Width; x++)
+                    dst[x, y] = (<#= T #>)(<#= F.Value #>);
+            return dst;
+        }
+<# } #>
+<# } #>
+
+
+<# foreach (var F in new Dictionary<string,string>()
+{
+	["ShiftLeft"] = "src[x,y] << value",
+	["ShiftRight"] = "src[x,y] >> value",
+}){ #>
+<# foreach (var T in Type.Where(x=>x!="Single" && x!="Double")){ #>
+		public static Pixel<<#= T #>> <#= F.Key #>Self(this Pixel<<#= T #>> src, int value) => <#= F.Key #>(src, src, value);
+		public static Pixel<<#= T #>> <#= F.Key #>(this Pixel<<#= T #>> src, int value) => <#= F.Key #>(src, src.Clone(), value);
+        public static Pixel<<#= T #>> <#= F.Key #>(this Pixel<<#= T #>> src, Pixel<<#= T #>> dst, int value)
+        {
+            for (int y = 0; y < src.Height; y++)
+                for (int x = 0; x < src.Width; x++)
+                    dst[x, y] = (<#= T #>)(<#= F.Value #>);
+            return src;
+        }
+<# } #>
+<# } #>
+    }
+}

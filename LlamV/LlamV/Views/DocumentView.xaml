@@ -1,0 +1,76 @@
+﻿<UserControl x:Class="LlamV.Views.DocumentView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:prism="http://prismlibrary.com/"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             xmlns:r="clr-namespace:Reactive.Bindings.Interactivity;assembly=ReactiveProperty.NET46"
+             xmlns:behav="clr-namespace:LlamV.Behavior">
+            <!--prism:ViewModelLocator.AutoWireViewModel="True"-->
+
+    
+    <ScrollViewer
+        VerticalScrollBarVisibility="Auto"
+        HorizontalScrollBarVisibility="Auto">
+        
+        <i:Interaction.Behaviors>
+            <behav:FileDropBehavior TargetCommand="{Binding FileDropCommand}" />
+            <behav:ScroolBarBehavior
+                ScrollBarPosition="{Binding ScrollBar.Value, Mode=TwoWay}" />
+        </i:Interaction.Behaviors>
+
+        <Grid Background="{Binding Background.Value}">
+            <i:Interaction.Behaviors>
+                <behav:GridBehavior
+                    MouseWheel ="{Binding MouseWheel.Value, Mode=TwoWay}"/>
+            </i:Interaction.Behaviors>
+            <Grid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Capture">
+                        <MenuItem Header="Full-Area to File" Command="{Binding CaptureCommand}" CommandParameter="FullToFile"/>
+                        <!--<MenuItem Header="Selected-Area to File" Command="{Binding CaptureCommand}" CommandParameter="SelectedToFile"/>-->
+                        <MenuItem Header="Full-Area to Clipbord" Command="{Binding CaptureCommand}" CommandParameter="FullToClipbord"/>
+                        <!--<MenuItem Header="Selected-Area to Clipbord" Command="{Binding CaptureCommand}" CommandParameter="SelectedToClipbord"/>-->
+                    </MenuItem>
+                    <MenuItem Header="Raw">
+                        <MenuItem Header="Full-Area to File" Command="{Binding RawCommand}" CommandParameter="FullToFile"/>
+                        <MenuItem Header="Selected-Area to File" Command="{Binding RawCommand}" CommandParameter="SelectedToFile"/>
+                        <!--<MenuItem Header="Full-Area to Clipbord" Command="{Binding CSVCommand}" CommandParameter="FullToClipbord"/>-->
+                        <!--<MenuItem Header="Selected-Area to Clipbord" Command="{Binding CSVCommand}" CommandParameter="SelectedToClipbord"/>-->
+                    </MenuItem>
+                    <MenuItem Header="CSV">
+                        <MenuItem Header="Full-Area to File" Command="{Binding CSVCommand}" CommandParameter="FullToFile"/>
+                        <MenuItem Header="Selected-Area to File" Command="{Binding CSVCommand}" CommandParameter="SelectedToFile"/>
+                        <MenuItem Header="Full-Area to Clipbord" Command="{Binding CSVCommand}" CommandParameter="FullToClipbord"/>
+                        <MenuItem Header="Selected-Area to Clipbord" Command="{Binding CSVCommand}" CommandParameter="SelectedToClipbord"/>
+                    </MenuItem>
+                    <Separator />
+                    <MenuItem Header="ReLoad" Command="{Binding ReLoadCommand}"/>
+                    <Separator />
+                    <MenuItem Header="ReLoadAndRun" Command="{Binding ReLoadAndRunCommand}"/>
+                    <MenuItem Header="Run" Command="{Binding ScriptRunCommand}"/>
+                </ContextMenu>
+            </Grid.ContextMenu>
+
+            <Canvas x:Name="cnv"
+                    Margin="50,50,50,50"
+                    Width="{Binding Width.Value}" 
+                    Height="{Binding Height.Value}">
+
+                <i:Interaction.Behaviors>
+                    <behav:CanvasBehavior
+                            Scale="{Binding Scale.Value, Mode=OneWay}"
+                            MouseMove="{Binding MouseMove.Value, Mode=OneWayToSource}"
+                            Shapes="{Binding Shapes.Value, Mode=TwoWay}"
+                            ScalingMode="{Binding model.ScalingMode,  Mode=TwoWay}"
+                            Rect="{Binding RectMove.Value, Mode=OneWayToSource}"
+                            ShortcutCommand="{Binding ShortcutCommand}"/>
+                </i:Interaction.Behaviors>
+
+                <Canvas.Background>
+                    <ImageBrush ImageSource="{Binding img.Value}" Stretch="Fill" />
+                </Canvas.Background>
+
+            </Canvas>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

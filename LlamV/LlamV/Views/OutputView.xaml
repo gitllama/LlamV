@@ -1,0 +1,17 @@
+﻿<UserControl x:Class="LlamV.Views.OutputView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:prism="http://prismlibrary.com/"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             xmlns:r="clr-namespace:Reactive.Bindings.Interactivity;assembly=ReactiveProperty.NET46"
+             xmlns:vm="clr-namespace:LlamV.ViewModels">
+    <Grid>
+        <TextBox Text="{Binding Output}" IsReadOnly="True" 
+                 VerticalScrollBarVisibility="Auto"
+                 HorizontalScrollBarVisibility="Auto">
+            <i:Interaction.Behaviors>
+                <vm:OutputToolBehavior />
+            </i:Interaction.Behaviors>
+        </TextBox>
+    </Grid>
+</UserControl>

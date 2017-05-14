@@ -1,0 +1,236 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".cs" #>
+<#
+	var Type = new List<string>()
+	{
+		"Byte",
+		"UInt16",
+		"UInt32",
+		"UInt64",
+		"Int16",
+		"Int32",
+		"Int64",
+		"Single",
+		"Double"
+	};
+	//.Where(x=>x!="Int32" && x!="Double")
+#>
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
+
+using Pixels;
+
+namespace Pixels.Math
+{
+    public static partial class PixelMath
+    {
+
+
+<# foreach (var T in Type){ #>
+        public static int Count(Pixel<<#= T #>> src1, <#= T #> thr, INEQUALITY ine = INEQUALITY.GreaterThan,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
+        {
+			int count = 0;
+			switch(ine)
+			{
+				case INEQUALITY.GreaterThan:
+					for (int y = start_y; y < src1.Height; y+=step_y)
+						for (int x = start_x; x < src1.Width; x+=step_x)
+							if(src1[x, y] > thr) count++;
+					return count;
+				case INEQUALITY.GreaterThanOrEqual:
+					for (int y = start_y; y < src1.Height; y+=step_y)
+						for (int x = start_x; x < src1.Width; x+=step_x)
+							if(src1[x, y] >= thr) count++;
+					return count;
+				case INEQUALITY.LessThan:
+					for (int y = start_y; y < src1.Height; y+=step_y)
+						for (int x = start_x; x < src1.Width; x+=step_x)
+							if(src1[x, y] < thr) count++;
+					return count;
+				case INEQUALITY.LessThanOrEqual:
+					for (int y = start_y; y < src1.Height; y+=step_y)
+						for (int x = start_x; x < src1.Width; x+=step_x)
+							if(src1[x, y] <= thr) count++;
+					return count;
+				case INEQUALITY.Equal:
+					for (int y = start_y; y < src1.Height; y+=step_y)
+						for (int x = start_x; x < src1.Width; x+=step_x)
+							if(src1[x, y] == thr) count++;
+					return count;
+				case INEQUALITY.NotEqual:
+					for (int y = start_y; y < src1.Height; y+=step_y)
+						for (int x = start_x; x < src1.Width; x+=step_x)
+							if(src1[x, y] != thr) count++;
+					return count;
+			}
+			return -1;
+        }
+        public static int Count(Pixel<<#= T #>> src1, Pixel<<#= T #>> src2, <#= T #> thr, INEQUALITY ine = INEQUALITY.GreaterThan,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
+        {
+			int count = 0;
+			switch(ine)
+			{
+				case INEQUALITY.GreaterThan:
+					for (int y = start_y; y < src1.Height; y+=step_y)
+						for (int x = start_x; x < src1.Width; x+=step_x)
+							if((src1[x, y] - src2[x,y]) > thr) count++;
+					return count;
+				case INEQUALITY.GreaterThanOrEqual:
+					for (int y = start_y; y < src1.Height; y+=step_y)
+						for (int x = start_x; x < src1.Width; x+=step_x)
+							if((src1[x, y] - src2[x,y]) >= thr) count++;
+					return count;
+				case INEQUALITY.LessThan:
+					for (int y = start_y; y < src1.Height; y+=step_y)
+						for (int x = start_x; x < src1.Width; x+=step_x)
+							if((src1[x, y] - src2[x,y]) < thr) count++;
+					return count;
+				case INEQUALITY.LessThanOrEqual:
+					for (int y = start_y; y < src1.Height; y+=step_y)
+						for (int x = start_x; x < src1.Width; x+=step_x)
+							if((src1[x, y] - src2[x,y]) <= thr) count++;
+					return count;
+				case INEQUALITY.Equal:
+					for (int y = start_y; y < src1.Height; y+=step_y)
+						for (int x = start_x; x < src1.Width; x+=step_x)
+							if((src1[x, y] - src2[x,y]) == thr) count++;
+					return count;
+				case INEQUALITY.NotEqual:
+					for (int y = start_y; y < src1.Height; y+=step_y)
+						for (int x = start_x; x < src1.Width; x+=step_x)
+							if((src1[x, y] - src2[x,y]) != thr) count++;
+					return count;
+			}
+			return -1;
+        }
+		public static int[] CountBayer(Pixel<<#= T #>> src1, <#= T #> thr, INEQUALITY ine = INEQUALITY.GreaterThan)
+        {
+			List<int> dst = new List<int>();
+			for (int y = 0; y < src1.BayerSizeY; y++)
+				for (int x = 0; x < src1.BayerSizeX; x++)
+					dst.Add(Count(src1,thr,ine,x,y,src1.BayerSizeX,src1.BayerSizeY));
+			return dst.ToArray();
+        }
+		public static int[] CountBayer(Pixel<<#= T #>> src1, Pixel<<#= T #>> src2, <#= T #> thr, INEQUALITY ine = INEQUALITY.GreaterThan)
+        {
+			List<int> dst = new List<int>();
+			for (int y = 0; y < src1.BayerSizeY; y++)
+				for (int x = 0; x < src1.BayerSizeX; x++)
+					dst.Add(Count(src1,src2,thr,ine,x,y,src1.BayerSizeX,src1.BayerSizeY));
+			return dst.ToArray();
+        }
+<# } #>
+
+
+<# foreach (var T in Type){ #>
+
+        public static double Average(this Pixel<<#= T #>> src,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
+        {
+			double dst = 0;
+			int c=0;
+            for (int y = start_y; y < src.Height; y+=step_y)
+                for (int x = start_x; x < src.Width; x+=step_x)
+				{
+					dst+=src[x,y];
+					c++;				
+				}
+            return dst / c;
+        }
+		public static double Deviation(this Pixel<<#= T #>> src, double? average = null, int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
+        {
+			var ave = average ?? Average(src, start_x, start_y, step_x, step_y);
+			double dst = 0;
+			int c=0;
+            for (int y = start_y; y < src.Height; y+=step_y)
+                for (int x = start_x; x < src.Width; x+=step_x)
+				{
+					dst += System.Math.Pow(src[x,y] - ave, 2);
+					c++;				
+				}
+            return System.Math.Sqrt(dst / c);
+        }
+		public static (double Average, double Deviation) Signal(this Pixel<<#= T #>> src,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
+        {
+			double ave = Average(src,start_x,start_y,step_x,step_y);
+			double dev = Deviation(src,ave,start_x,start_y,step_x,step_y);
+
+            return (ave, dev);
+        }
+
+		public static double[] AverageBayer(this Pixel<<#= T #>> src)
+        {
+			List<double> dst = new List<double>();
+			for (int y = 0; y < src.BayerSizeY; y++)
+				for (int x = 0; x < src.BayerSizeX; x++)
+					dst.Add(Average(src,x,y,src.BayerSizeX,src.BayerSizeY));
+			return dst.ToArray();
+        }
+		public static double[] DeviationBayer(this Pixel<<#= T #>> src,double[] average)
+        {
+			var ave = average ?? AverageBayer(src);
+			List<double> dst = new List<double>();
+			int c=0;
+			for (int y = 0; y < src.BayerSizeY; y++)
+				for (int x = 0; x < src.BayerSizeX; x++)
+					dst.Add(Deviation(src, ave[c++], x, y, src.BayerSizeX, src.BayerSizeY));
+			return dst.ToArray();
+        }
+		public static (double[] Average, double[] Deviation) SignalBayer(this Pixel<<#= T #>> src)
+        {
+			double[] ave = AverageBayer(src);
+			double[] dev = DeviationBayer(src,ave);
+
+            return (ave, dev);
+        }
+<# } #>
+
+
+<# foreach (var T in Type){ #>
+		public static double[] AverageH(this Pixel<<#= T #>> src,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
+        {
+			List<double> dst = new List<double>();
+            for (int y = start_y; y < src.Height; y+=step_y)
+			{
+				int c=0;
+				double hoge = 0;
+				for (int x = start_x; x < src.Width; x+=step_x)
+				{
+					hoge+=src[x,y];
+					c++;				
+				}
+				hoge /= c;
+				dst.Add(hoge);
+			}
+            return dst.ToArray();
+        }
+        public static double[] AverageV(this Pixel<<#= T #>> src,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
+        {
+			List<double> dst = new List<double>();
+
+            for (int x = start_x; x < src.Width; x+=step_x)
+			{
+				int c=0;
+				double hoge = 0;
+				for (int y = start_y; y < src.Height; y+=step_y)
+				{
+					hoge+=src[x,y];
+					c++;				
+				}
+				hoge /= c;
+				dst.Add(hoge);
+			}
+            return dst.ToArray();
+        }
+
+<# } #>
+    }
+}

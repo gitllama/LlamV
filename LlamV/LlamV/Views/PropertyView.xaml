@@ -1,0 +1,15 @@
+﻿<UserControl x:Class="LlamV.Views.PropertyView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:prism="http://prismlibrary.com/"
+             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit">
+    <!--prism:ViewModelLocator.AutoWireViewModel="True"-->
+
+        <DockPanel>
+            <ComboBox DockPanel.Dock="Top" ItemsSource="{Binding Documents.Value}" SelectedIndex="{Binding SelectedDoc.Value}"/>
+            <xctk:PropertyGrid 
+            ScrollViewer.VerticalScrollBarVisibility="Auto" 
+            SelectedObject="{Binding obj.Value}"/>
+        </DockPanel>
+
+</UserControl>
