@@ -45,19 +45,19 @@
   <ItemGroup>
     <Compile Include="Pixel.cs" />
     <Compile Include="PixelFactory.cs" />
-    <Compile Include="PixelFilter.cs" />
+    <Compile Include="Math\PixelFilter.cs" />
     <Compile Include="Math\PixelMath.cs" />
     <Compile Include="Math\PixelMathOp.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>PixelMathOp.tt</DependentUpon>
     </Compile>
-    <Compile Include="PixelMathStat.cs">
+    <Compile Include="Math\PixelMathStat.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>PixelMathStat.tt</DependentUpon>
     </Compile>
-    <Compile Include="PixelMathUtil.cs">
+    <Compile Include="Math\PixelMathUtil.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>PixelMathUtil.tt</DependentUpon>
@@ -81,11 +81,11 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="PixelFilterTT.tt">
+    <Content Include="Math\PixelFilterTT.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>PixelFilterTT.txt</LastGenOutput>
     </Content>
-    <Content Include="PixelFilterTT.txt">
+    <Content Include="Math\PixelFilterTT.txt">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>PixelFilterTT.tt</DependentUpon>
@@ -94,11 +94,11 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>PixelMathOp.cs</LastGenOutput>
     </Content>
-    <Content Include="PixelMathStat.tt">
+    <Content Include="Math\PixelMathStat.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>PixelMathStat.cs</LastGenOutput>
     </Content>
-    <Content Include="PixelMathUtil.tt">
+    <Content Include="Math\PixelMathUtil.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>PixelMathUtil.cs</LastGenOutput>
     </Content>

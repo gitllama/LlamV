@@ -36,39 +36,49 @@ using System.Threading.Tasks;
 
 namespace Pixels.Stream
 {
-    public static partial class PixelStream
+    private static partial class PixelStream
     {
-<# foreach (var T in Type){ #>
-        public static Pixel<<#= T #>> Read(this Pixel<<#= T #>> src, string filename, int offsetbyte, String type) =>  Read(src, filename, offsetbyte, System.Type.GetType($"System.{type}"));
-        public static Pixel<<#= T #>> Read(this Pixel<<#= T #>> src, string filename, int offsetbyte = 0, Type type = null)
+        private static void _Read<T>(byte[] src, T[] dst, int offset, string type) where T : struct, IComparable
         {
-            byte[] data;
-            int count_byte = offsetbyte;
-            switch(type?.Name ?? "<#= T #>")
-            {
+			switch((object)dst)
+			{
+<# foreach (var T in Type){ #>
+				case <#= T #>[] n:
+					_Read(src, n, offset, type);
+					break;
+<# } #>
+				default:
+					break;
+            }
+		}
+
+<# foreach (var T in Type){ #>
+        private static void _Read(byte[] src, <#= T #>[] dst, int offset, string type)
+        {
+			int count_byte = offset;
+			switch(type)
+			{
 <# foreach (var T2 in Type.Where(x => x != "Byte").ToArray()){ #>
 				case "<#= T2 #>":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (<#= T #>)BitConverter.To<#= T2 #>(data, count_byte);
-                        count_byte += sizeof(<#= T2 #>);
-                    }
-                    break;
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (<#= T #>)BitConverter.To<#= T2 #>(src, count_byte);
+						count_byte += sizeof(<#= T2 #>);
+					}
+					break;
 <# } #>
                 case "Byte":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                        src.pixel[i] = data[count_byte ++];
+                    for (int i= 0; i< dst.Length; i++)
+                        dst[i] = (<#= T #>)src[count_byte++];
                     break;
                 case "String":
                     break;
-                default:
-                    
-                    break;
-            }
-            return src;
-        }
+				default:
+					break;
+			}
+		}
 <# } #>
+
+
     }
 }

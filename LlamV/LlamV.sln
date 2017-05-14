@@ -8,7 +8,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{DF921099-E2E9-4C6A-AEA2-B45C8BA70843}"
 	ProjectSection(SolutionItems) = preProject
 		Pixels3.md = Pixels3.md
-		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pixels3", "Pixels3\Pixels3.csproj", "{23C0758C-7B1F-4D2D-8767-7C812D7833DE}"

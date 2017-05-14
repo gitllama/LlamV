@@ -23,854 +23,694 @@ using System.Threading.Tasks;
 
 namespace Pixels.Stream
 {
-    public static partial class PixelStream
+    private static partial class PixelStream
     {
-
-        public static Pixel<Byte> Read(this Pixel<Byte> src, string filename, int offsetbyte, String type) =>  Read(src, filename, offsetbyte, System.Type.GetType($"System.{type}"));
-        public static Pixel<Byte> Read(this Pixel<Byte> src, string filename, int offsetbyte = 0, Type type = null)
+        private static void _Read<T>(byte[] src, T[] dst, int offset, string type) where T : struct, IComparable
         {
-            byte[] data;
-            int count_byte = offsetbyte;
-            switch(type?.Name ?? "Byte")
-            {
+			switch((object)dst)
+			{
+				case Byte[] n:
+					_Read(src, n, offset, type);
+					break;
+				case UInt16[] n:
+					_Read(src, n, offset, type);
+					break;
+				case UInt32[] n:
+					_Read(src, n, offset, type);
+					break;
+				case UInt64[] n:
+					_Read(src, n, offset, type);
+					break;
+				case Int16[] n:
+					_Read(src, n, offset, type);
+					break;
+				case Int32[] n:
+					_Read(src, n, offset, type);
+					break;
+				case Int64[] n:
+					_Read(src, n, offset, type);
+					break;
+				case Single[] n:
+					_Read(src, n, offset, type);
+					break;
+				case Double[] n:
+					_Read(src, n, offset, type);
+					break;
+				default:
+					break;
+            }
+		}
 
+
+        private static void _Read(byte[] src, Byte[] dst, int offset, string type)
+        {
+			int count_byte = offset;
+			switch(type)
+			{
 				case "UInt16":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Byte)BitConverter.ToUInt16(data, count_byte);
-                        count_byte += sizeof(UInt16);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Byte)BitConverter.ToUInt16(src, count_byte);
+						count_byte += sizeof(UInt16);
+					}
+					break;
 				case "UInt32":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Byte)BitConverter.ToUInt32(data, count_byte);
-                        count_byte += sizeof(UInt32);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Byte)BitConverter.ToUInt32(src, count_byte);
+						count_byte += sizeof(UInt32);
+					}
+					break;
 				case "UInt64":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Byte)BitConverter.ToUInt64(data, count_byte);
-                        count_byte += sizeof(UInt64);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Byte)BitConverter.ToUInt64(src, count_byte);
+						count_byte += sizeof(UInt64);
+					}
+					break;
 				case "Int16":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Byte)BitConverter.ToInt16(data, count_byte);
-                        count_byte += sizeof(Int16);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Byte)BitConverter.ToInt16(src, count_byte);
+						count_byte += sizeof(Int16);
+					}
+					break;
 				case "Int32":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Byte)BitConverter.ToInt32(data, count_byte);
-                        count_byte += sizeof(Int32);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Byte)BitConverter.ToInt32(src, count_byte);
+						count_byte += sizeof(Int32);
+					}
+					break;
 				case "Int64":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Byte)BitConverter.ToInt64(data, count_byte);
-                        count_byte += sizeof(Int64);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Byte)BitConverter.ToInt64(src, count_byte);
+						count_byte += sizeof(Int64);
+					}
+					break;
 				case "Single":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Byte)BitConverter.ToSingle(data, count_byte);
-                        count_byte += sizeof(Single);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Byte)BitConverter.ToSingle(src, count_byte);
+						count_byte += sizeof(Single);
+					}
+					break;
 				case "Double":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Byte)BitConverter.ToDouble(data, count_byte);
-                        count_byte += sizeof(Double);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Byte)BitConverter.ToDouble(src, count_byte);
+						count_byte += sizeof(Double);
+					}
+					break;
                 case "Byte":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                        src.pixel[i] = data[count_byte ++];
+                    for (int i= 0; i< dst.Length; i++)
+                        dst[i] = (Byte)src[count_byte++];
                     break;
                 case "String":
                     break;
-                default:
-                    
-                    break;
-            }
-            return src;
-        }
+				default:
+					break;
+			}
+		}
 
-        public static Pixel<UInt16> Read(this Pixel<UInt16> src, string filename, int offsetbyte, String type) =>  Read(src, filename, offsetbyte, System.Type.GetType($"System.{type}"));
-        public static Pixel<UInt16> Read(this Pixel<UInt16> src, string filename, int offsetbyte = 0, Type type = null)
+        private static void _Read(byte[] src, UInt16[] dst, int offset, string type)
         {
-            byte[] data;
-            int count_byte = offsetbyte;
-            switch(type?.Name ?? "UInt16")
-            {
-
+			int count_byte = offset;
+			switch(type)
+			{
 				case "UInt16":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (UInt16)BitConverter.ToUInt16(data, count_byte);
-                        count_byte += sizeof(UInt16);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (UInt16)BitConverter.ToUInt16(src, count_byte);
+						count_byte += sizeof(UInt16);
+					}
+					break;
 				case "UInt32":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (UInt16)BitConverter.ToUInt32(data, count_byte);
-                        count_byte += sizeof(UInt32);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (UInt16)BitConverter.ToUInt32(src, count_byte);
+						count_byte += sizeof(UInt32);
+					}
+					break;
 				case "UInt64":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (UInt16)BitConverter.ToUInt64(data, count_byte);
-                        count_byte += sizeof(UInt64);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (UInt16)BitConverter.ToUInt64(src, count_byte);
+						count_byte += sizeof(UInt64);
+					}
+					break;
 				case "Int16":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (UInt16)BitConverter.ToInt16(data, count_byte);
-                        count_byte += sizeof(Int16);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (UInt16)BitConverter.ToInt16(src, count_byte);
+						count_byte += sizeof(Int16);
+					}
+					break;
 				case "Int32":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (UInt16)BitConverter.ToInt32(data, count_byte);
-                        count_byte += sizeof(Int32);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (UInt16)BitConverter.ToInt32(src, count_byte);
+						count_byte += sizeof(Int32);
+					}
+					break;
 				case "Int64":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (UInt16)BitConverter.ToInt64(data, count_byte);
-                        count_byte += sizeof(Int64);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (UInt16)BitConverter.ToInt64(src, count_byte);
+						count_byte += sizeof(Int64);
+					}
+					break;
 				case "Single":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (UInt16)BitConverter.ToSingle(data, count_byte);
-                        count_byte += sizeof(Single);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (UInt16)BitConverter.ToSingle(src, count_byte);
+						count_byte += sizeof(Single);
+					}
+					break;
 				case "Double":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (UInt16)BitConverter.ToDouble(data, count_byte);
-                        count_byte += sizeof(Double);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (UInt16)BitConverter.ToDouble(src, count_byte);
+						count_byte += sizeof(Double);
+					}
+					break;
                 case "Byte":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                        src.pixel[i] = data[count_byte ++];
+                    for (int i= 0; i< dst.Length; i++)
+                        dst[i] = (UInt16)src[count_byte++];
                     break;
                 case "String":
                     break;
-                default:
-                    
-                    break;
-            }
-            return src;
-        }
+				default:
+					break;
+			}
+		}
 
-        public static Pixel<UInt32> Read(this Pixel<UInt32> src, string filename, int offsetbyte, String type) =>  Read(src, filename, offsetbyte, System.Type.GetType($"System.{type}"));
-        public static Pixel<UInt32> Read(this Pixel<UInt32> src, string filename, int offsetbyte = 0, Type type = null)
+        private static void _Read(byte[] src, UInt32[] dst, int offset, string type)
         {
-            byte[] data;
-            int count_byte = offsetbyte;
-            switch(type?.Name ?? "UInt32")
-            {
-
+			int count_byte = offset;
+			switch(type)
+			{
 				case "UInt16":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (UInt32)BitConverter.ToUInt16(data, count_byte);
-                        count_byte += sizeof(UInt16);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (UInt32)BitConverter.ToUInt16(src, count_byte);
+						count_byte += sizeof(UInt16);
+					}
+					break;
 				case "UInt32":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (UInt32)BitConverter.ToUInt32(data, count_byte);
-                        count_byte += sizeof(UInt32);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (UInt32)BitConverter.ToUInt32(src, count_byte);
+						count_byte += sizeof(UInt32);
+					}
+					break;
 				case "UInt64":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (UInt32)BitConverter.ToUInt64(data, count_byte);
-                        count_byte += sizeof(UInt64);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (UInt32)BitConverter.ToUInt64(src, count_byte);
+						count_byte += sizeof(UInt64);
+					}
+					break;
 				case "Int16":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (UInt32)BitConverter.ToInt16(data, count_byte);
-                        count_byte += sizeof(Int16);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (UInt32)BitConverter.ToInt16(src, count_byte);
+						count_byte += sizeof(Int16);
+					}
+					break;
 				case "Int32":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (UInt32)BitConverter.ToInt32(data, count_byte);
-                        count_byte += sizeof(Int32);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (UInt32)BitConverter.ToInt32(src, count_byte);
+						count_byte += sizeof(Int32);
+					}
+					break;
 				case "Int64":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (UInt32)BitConverter.ToInt64(data, count_byte);
-                        count_byte += sizeof(Int64);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (UInt32)BitConverter.ToInt64(src, count_byte);
+						count_byte += sizeof(Int64);
+					}
+					break;
 				case "Single":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (UInt32)BitConverter.ToSingle(data, count_byte);
-                        count_byte += sizeof(Single);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (UInt32)BitConverter.ToSingle(src, count_byte);
+						count_byte += sizeof(Single);
+					}
+					break;
 				case "Double":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (UInt32)BitConverter.ToDouble(data, count_byte);
-                        count_byte += sizeof(Double);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (UInt32)BitConverter.ToDouble(src, count_byte);
+						count_byte += sizeof(Double);
+					}
+					break;
                 case "Byte":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                        src.pixel[i] = data[count_byte ++];
+                    for (int i= 0; i< dst.Length; i++)
+                        dst[i] = (UInt32)src[count_byte++];
                     break;
                 case "String":
                     break;
-                default:
-                    
-                    break;
-            }
-            return src;
-        }
+				default:
+					break;
+			}
+		}
 
-        public static Pixel<UInt64> Read(this Pixel<UInt64> src, string filename, int offsetbyte, String type) =>  Read(src, filename, offsetbyte, System.Type.GetType($"System.{type}"));
-        public static Pixel<UInt64> Read(this Pixel<UInt64> src, string filename, int offsetbyte = 0, Type type = null)
+        private static void _Read(byte[] src, UInt64[] dst, int offset, string type)
         {
-            byte[] data;
-            int count_byte = offsetbyte;
-            switch(type?.Name ?? "UInt64")
-            {
-
+			int count_byte = offset;
+			switch(type)
+			{
 				case "UInt16":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (UInt64)BitConverter.ToUInt16(data, count_byte);
-                        count_byte += sizeof(UInt16);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (UInt64)BitConverter.ToUInt16(src, count_byte);
+						count_byte += sizeof(UInt16);
+					}
+					break;
 				case "UInt32":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (UInt64)BitConverter.ToUInt32(data, count_byte);
-                        count_byte += sizeof(UInt32);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (UInt64)BitConverter.ToUInt32(src, count_byte);
+						count_byte += sizeof(UInt32);
+					}
+					break;
 				case "UInt64":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (UInt64)BitConverter.ToUInt64(data, count_byte);
-                        count_byte += sizeof(UInt64);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (UInt64)BitConverter.ToUInt64(src, count_byte);
+						count_byte += sizeof(UInt64);
+					}
+					break;
 				case "Int16":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (UInt64)BitConverter.ToInt16(data, count_byte);
-                        count_byte += sizeof(Int16);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (UInt64)BitConverter.ToInt16(src, count_byte);
+						count_byte += sizeof(Int16);
+					}
+					break;
 				case "Int32":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (UInt64)BitConverter.ToInt32(data, count_byte);
-                        count_byte += sizeof(Int32);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (UInt64)BitConverter.ToInt32(src, count_byte);
+						count_byte += sizeof(Int32);
+					}
+					break;
 				case "Int64":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (UInt64)BitConverter.ToInt64(data, count_byte);
-                        count_byte += sizeof(Int64);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (UInt64)BitConverter.ToInt64(src, count_byte);
+						count_byte += sizeof(Int64);
+					}
+					break;
 				case "Single":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (UInt64)BitConverter.ToSingle(data, count_byte);
-                        count_byte += sizeof(Single);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (UInt64)BitConverter.ToSingle(src, count_byte);
+						count_byte += sizeof(Single);
+					}
+					break;
 				case "Double":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (UInt64)BitConverter.ToDouble(data, count_byte);
-                        count_byte += sizeof(Double);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (UInt64)BitConverter.ToDouble(src, count_byte);
+						count_byte += sizeof(Double);
+					}
+					break;
                 case "Byte":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                        src.pixel[i] = data[count_byte ++];
+                    for (int i= 0; i< dst.Length; i++)
+                        dst[i] = (UInt64)src[count_byte++];
                     break;
                 case "String":
                     break;
-                default:
-                    
-                    break;
-            }
-            return src;
-        }
+				default:
+					break;
+			}
+		}
 
-        public static Pixel<Int16> Read(this Pixel<Int16> src, string filename, int offsetbyte, String type) =>  Read(src, filename, offsetbyte, System.Type.GetType($"System.{type}"));
-        public static Pixel<Int16> Read(this Pixel<Int16> src, string filename, int offsetbyte = 0, Type type = null)
+        private static void _Read(byte[] src, Int16[] dst, int offset, string type)
         {
-            byte[] data;
-            int count_byte = offsetbyte;
-            switch(type?.Name ?? "Int16")
-            {
-
+			int count_byte = offset;
+			switch(type)
+			{
 				case "UInt16":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Int16)BitConverter.ToUInt16(data, count_byte);
-                        count_byte += sizeof(UInt16);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Int16)BitConverter.ToUInt16(src, count_byte);
+						count_byte += sizeof(UInt16);
+					}
+					break;
 				case "UInt32":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Int16)BitConverter.ToUInt32(data, count_byte);
-                        count_byte += sizeof(UInt32);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Int16)BitConverter.ToUInt32(src, count_byte);
+						count_byte += sizeof(UInt32);
+					}
+					break;
 				case "UInt64":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Int16)BitConverter.ToUInt64(data, count_byte);
-                        count_byte += sizeof(UInt64);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Int16)BitConverter.ToUInt64(src, count_byte);
+						count_byte += sizeof(UInt64);
+					}
+					break;
 				case "Int16":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Int16)BitConverter.ToInt16(data, count_byte);
-                        count_byte += sizeof(Int16);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Int16)BitConverter.ToInt16(src, count_byte);
+						count_byte += sizeof(Int16);
+					}
+					break;
 				case "Int32":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Int16)BitConverter.ToInt32(data, count_byte);
-                        count_byte += sizeof(Int32);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Int16)BitConverter.ToInt32(src, count_byte);
+						count_byte += sizeof(Int32);
+					}
+					break;
 				case "Int64":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Int16)BitConverter.ToInt64(data, count_byte);
-                        count_byte += sizeof(Int64);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Int16)BitConverter.ToInt64(src, count_byte);
+						count_byte += sizeof(Int64);
+					}
+					break;
 				case "Single":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Int16)BitConverter.ToSingle(data, count_byte);
-                        count_byte += sizeof(Single);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Int16)BitConverter.ToSingle(src, count_byte);
+						count_byte += sizeof(Single);
+					}
+					break;
 				case "Double":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Int16)BitConverter.ToDouble(data, count_byte);
-                        count_byte += sizeof(Double);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Int16)BitConverter.ToDouble(src, count_byte);
+						count_byte += sizeof(Double);
+					}
+					break;
                 case "Byte":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                        src.pixel[i] = data[count_byte ++];
+                    for (int i= 0; i< dst.Length; i++)
+                        dst[i] = (Int16)src[count_byte++];
                     break;
                 case "String":
                     break;
-                default:
-                    
-                    break;
-            }
-            return src;
-        }
+				default:
+					break;
+			}
+		}
 
-        public static Pixel<Int32> Read(this Pixel<Int32> src, string filename, int offsetbyte, String type) =>  Read(src, filename, offsetbyte, System.Type.GetType($"System.{type}"));
-        public static Pixel<Int32> Read(this Pixel<Int32> src, string filename, int offsetbyte = 0, Type type = null)
+        private static void _Read(byte[] src, Int32[] dst, int offset, string type)
         {
-            byte[] data;
-            int count_byte = offsetbyte;
-            switch(type?.Name ?? "Int32")
-            {
-
+			int count_byte = offset;
+			switch(type)
+			{
 				case "UInt16":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Int32)BitConverter.ToUInt16(data, count_byte);
-                        count_byte += sizeof(UInt16);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Int32)BitConverter.ToUInt16(src, count_byte);
+						count_byte += sizeof(UInt16);
+					}
+					break;
 				case "UInt32":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Int32)BitConverter.ToUInt32(data, count_byte);
-                        count_byte += sizeof(UInt32);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Int32)BitConverter.ToUInt32(src, count_byte);
+						count_byte += sizeof(UInt32);
+					}
+					break;
 				case "UInt64":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Int32)BitConverter.ToUInt64(data, count_byte);
-                        count_byte += sizeof(UInt64);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Int32)BitConverter.ToUInt64(src, count_byte);
+						count_byte += sizeof(UInt64);
+					}
+					break;
 				case "Int16":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Int32)BitConverter.ToInt16(data, count_byte);
-                        count_byte += sizeof(Int16);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Int32)BitConverter.ToInt16(src, count_byte);
+						count_byte += sizeof(Int16);
+					}
+					break;
 				case "Int32":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Int32)BitConverter.ToInt32(data, count_byte);
-                        count_byte += sizeof(Int32);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Int32)BitConverter.ToInt32(src, count_byte);
+						count_byte += sizeof(Int32);
+					}
+					break;
 				case "Int64":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Int32)BitConverter.ToInt64(data, count_byte);
-                        count_byte += sizeof(Int64);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Int32)BitConverter.ToInt64(src, count_byte);
+						count_byte += sizeof(Int64);
+					}
+					break;
 				case "Single":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Int32)BitConverter.ToSingle(data, count_byte);
-                        count_byte += sizeof(Single);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Int32)BitConverter.ToSingle(src, count_byte);
+						count_byte += sizeof(Single);
+					}
+					break;
 				case "Double":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Int32)BitConverter.ToDouble(data, count_byte);
-                        count_byte += sizeof(Double);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Int32)BitConverter.ToDouble(src, count_byte);
+						count_byte += sizeof(Double);
+					}
+					break;
                 case "Byte":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                        src.pixel[i] = data[count_byte ++];
+                    for (int i= 0; i< dst.Length; i++)
+                        dst[i] = (Int32)src[count_byte++];
                     break;
                 case "String":
                     break;
-                default:
-                    
-                    break;
-            }
-            return src;
-        }
+				default:
+					break;
+			}
+		}
 
-        public static Pixel<Int64> Read(this Pixel<Int64> src, string filename, int offsetbyte, String type) =>  Read(src, filename, offsetbyte, System.Type.GetType($"System.{type}"));
-        public static Pixel<Int64> Read(this Pixel<Int64> src, string filename, int offsetbyte = 0, Type type = null)
+        private static void _Read(byte[] src, Int64[] dst, int offset, string type)
         {
-            byte[] data;
-            int count_byte = offsetbyte;
-            switch(type?.Name ?? "Int64")
-            {
-
+			int count_byte = offset;
+			switch(type)
+			{
 				case "UInt16":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Int64)BitConverter.ToUInt16(data, count_byte);
-                        count_byte += sizeof(UInt16);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Int64)BitConverter.ToUInt16(src, count_byte);
+						count_byte += sizeof(UInt16);
+					}
+					break;
 				case "UInt32":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Int64)BitConverter.ToUInt32(data, count_byte);
-                        count_byte += sizeof(UInt32);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Int64)BitConverter.ToUInt32(src, count_byte);
+						count_byte += sizeof(UInt32);
+					}
+					break;
 				case "UInt64":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Int64)BitConverter.ToUInt64(data, count_byte);
-                        count_byte += sizeof(UInt64);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Int64)BitConverter.ToUInt64(src, count_byte);
+						count_byte += sizeof(UInt64);
+					}
+					break;
 				case "Int16":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Int64)BitConverter.ToInt16(data, count_byte);
-                        count_byte += sizeof(Int16);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Int64)BitConverter.ToInt16(src, count_byte);
+						count_byte += sizeof(Int16);
+					}
+					break;
 				case "Int32":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Int64)BitConverter.ToInt32(data, count_byte);
-                        count_byte += sizeof(Int32);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Int64)BitConverter.ToInt32(src, count_byte);
+						count_byte += sizeof(Int32);
+					}
+					break;
 				case "Int64":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Int64)BitConverter.ToInt64(data, count_byte);
-                        count_byte += sizeof(Int64);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Int64)BitConverter.ToInt64(src, count_byte);
+						count_byte += sizeof(Int64);
+					}
+					break;
 				case "Single":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Int64)BitConverter.ToSingle(data, count_byte);
-                        count_byte += sizeof(Single);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Int64)BitConverter.ToSingle(src, count_byte);
+						count_byte += sizeof(Single);
+					}
+					break;
 				case "Double":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Int64)BitConverter.ToDouble(data, count_byte);
-                        count_byte += sizeof(Double);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Int64)BitConverter.ToDouble(src, count_byte);
+						count_byte += sizeof(Double);
+					}
+					break;
                 case "Byte":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                        src.pixel[i] = data[count_byte ++];
+                    for (int i= 0; i< dst.Length; i++)
+                        dst[i] = (Int64)src[count_byte++];
                     break;
                 case "String":
                     break;
-                default:
-                    
-                    break;
-            }
-            return src;
-        }
+				default:
+					break;
+			}
+		}
 
-        public static Pixel<Single> Read(this Pixel<Single> src, string filename, int offsetbyte, String type) =>  Read(src, filename, offsetbyte, System.Type.GetType($"System.{type}"));
-        public static Pixel<Single> Read(this Pixel<Single> src, string filename, int offsetbyte = 0, Type type = null)
+        private static void _Read(byte[] src, Single[] dst, int offset, string type)
         {
-            byte[] data;
-            int count_byte = offsetbyte;
-            switch(type?.Name ?? "Single")
-            {
-
+			int count_byte = offset;
+			switch(type)
+			{
 				case "UInt16":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Single)BitConverter.ToUInt16(data, count_byte);
-                        count_byte += sizeof(UInt16);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Single)BitConverter.ToUInt16(src, count_byte);
+						count_byte += sizeof(UInt16);
+					}
+					break;
 				case "UInt32":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Single)BitConverter.ToUInt32(data, count_byte);
-                        count_byte += sizeof(UInt32);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Single)BitConverter.ToUInt32(src, count_byte);
+						count_byte += sizeof(UInt32);
+					}
+					break;
 				case "UInt64":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Single)BitConverter.ToUInt64(data, count_byte);
-                        count_byte += sizeof(UInt64);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Single)BitConverter.ToUInt64(src, count_byte);
+						count_byte += sizeof(UInt64);
+					}
+					break;
 				case "Int16":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Single)BitConverter.ToInt16(data, count_byte);
-                        count_byte += sizeof(Int16);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Single)BitConverter.ToInt16(src, count_byte);
+						count_byte += sizeof(Int16);
+					}
+					break;
 				case "Int32":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Single)BitConverter.ToInt32(data, count_byte);
-                        count_byte += sizeof(Int32);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Single)BitConverter.ToInt32(src, count_byte);
+						count_byte += sizeof(Int32);
+					}
+					break;
 				case "Int64":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Single)BitConverter.ToInt64(data, count_byte);
-                        count_byte += sizeof(Int64);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Single)BitConverter.ToInt64(src, count_byte);
+						count_byte += sizeof(Int64);
+					}
+					break;
 				case "Single":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Single)BitConverter.ToSingle(data, count_byte);
-                        count_byte += sizeof(Single);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Single)BitConverter.ToSingle(src, count_byte);
+						count_byte += sizeof(Single);
+					}
+					break;
 				case "Double":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Single)BitConverter.ToDouble(data, count_byte);
-                        count_byte += sizeof(Double);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Single)BitConverter.ToDouble(src, count_byte);
+						count_byte += sizeof(Double);
+					}
+					break;
                 case "Byte":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                        src.pixel[i] = data[count_byte ++];
+                    for (int i= 0; i< dst.Length; i++)
+                        dst[i] = (Single)src[count_byte++];
                     break;
                 case "String":
                     break;
-                default:
-                    
-                    break;
-            }
-            return src;
-        }
+				default:
+					break;
+			}
+		}
 
-        public static Pixel<Double> Read(this Pixel<Double> src, string filename, int offsetbyte, String type) =>  Read(src, filename, offsetbyte, System.Type.GetType($"System.{type}"));
-        public static Pixel<Double> Read(this Pixel<Double> src, string filename, int offsetbyte = 0, Type type = null)
+        private static void _Read(byte[] src, Double[] dst, int offset, string type)
         {
-            byte[] data;
-            int count_byte = offsetbyte;
-            switch(type?.Name ?? "Double")
-            {
-
+			int count_byte = offset;
+			switch(type)
+			{
 				case "UInt16":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Double)BitConverter.ToUInt16(data, count_byte);
-                        count_byte += sizeof(UInt16);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Double)BitConverter.ToUInt16(src, count_byte);
+						count_byte += sizeof(UInt16);
+					}
+					break;
 				case "UInt32":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Double)BitConverter.ToUInt32(data, count_byte);
-                        count_byte += sizeof(UInt32);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Double)BitConverter.ToUInt32(src, count_byte);
+						count_byte += sizeof(UInt32);
+					}
+					break;
 				case "UInt64":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Double)BitConverter.ToUInt64(data, count_byte);
-                        count_byte += sizeof(UInt64);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Double)BitConverter.ToUInt64(src, count_byte);
+						count_byte += sizeof(UInt64);
+					}
+					break;
 				case "Int16":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Double)BitConverter.ToInt16(data, count_byte);
-                        count_byte += sizeof(Int16);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Double)BitConverter.ToInt16(src, count_byte);
+						count_byte += sizeof(Int16);
+					}
+					break;
 				case "Int32":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Double)BitConverter.ToInt32(data, count_byte);
-                        count_byte += sizeof(Int32);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Double)BitConverter.ToInt32(src, count_byte);
+						count_byte += sizeof(Int32);
+					}
+					break;
 				case "Int64":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Double)BitConverter.ToInt64(data, count_byte);
-                        count_byte += sizeof(Int64);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Double)BitConverter.ToInt64(src, count_byte);
+						count_byte += sizeof(Int64);
+					}
+					break;
 				case "Single":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Double)BitConverter.ToSingle(data, count_byte);
-                        count_byte += sizeof(Single);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Double)BitConverter.ToSingle(src, count_byte);
+						count_byte += sizeof(Single);
+					}
+					break;
 				case "Double":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                    {
-                        src.pixel[i] = (Double)BitConverter.ToDouble(data, count_byte);
-                        count_byte += sizeof(Double);
-                    }
-                    break;
-
+					for (int i= 0; i< dst.Length; i++)
+					{
+						dst[i] = (Double)BitConverter.ToDouble(src, count_byte);
+						count_byte += sizeof(Double);
+					}
+					break;
                 case "Byte":
-					data = System.IO.File.ReadAllBytes(filename);
-                    for (int i= 0; i< src.pixel.Length; i++)
-                        src.pixel[i] = data[count_byte ++];
+                    for (int i= 0; i< dst.Length; i++)
+                        dst[i] = (Double)src[count_byte++];
                     break;
                 case "String":
                     break;
-                default:
-                    
-                    break;
-            }
-            return src;
-        }
+				default:
+					break;
+			}
+		}
+
+
 
     }
 }

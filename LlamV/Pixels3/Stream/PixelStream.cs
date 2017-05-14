@@ -18,6 +18,15 @@ namespace Pixels.Stream
 {
     public static partial class PixelStream
     {
+        public static Pixel<T> Read<T>(this Pixel<T> src, string filename, int offsetbyte, String type) where T : struct, IComparable
+            => Read(src, filename, offsetbyte, System.Type.GetType($"System.{type}"));
+        public static Pixel<T> Read<T>(this Pixel<T> src, string filename, int offsetbyte = 0, Type type = null) where T : struct, IComparable
+        {
+            byte[] data = System.IO.File.ReadAllBytes(filename);
+            _Read(data, src.pixel, offsetbyte, type?.Name);
+            return src;
+        }
+
         public static void Write<T>(this Pixel<T> src, string filename, bool selected = false) where T : struct, IComparable
         {
             if (!System.IO.Directory.Exists(Path.GetDirectoryName(filename)))
