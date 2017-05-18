@@ -12,11 +12,19 @@ namespace LlamV.Behavior
 {
     public class ScroolBarBehavior : BehaviorBase<ScrollViewer>
     {
+        public static readonly DependencyProperty ScaleProperty = DependencyProperty.Register(
+            "MouseWheel", typeof(double), typeof(ScroolBarBehavior), new UIPropertyMetadata(1.0));
+        public double MouseWheel { get => (double)GetValue(ScaleProperty); set => SetValue(ScaleProperty, value); }
 
 
         public static readonly DependencyProperty ScrollBarPositionProperty = DependencyProperty.Register(
             "ScrollBarPosition", typeof(Point), typeof(ScroolBarBehavior), new UIPropertyMetadata(new Point(0,0), ScrollBarPositionPropertyChanged));
         public Point ScrollBarPosition { get => (Point)GetValue(ScrollBarPositionProperty); set=> SetValue(ScrollBarPositionProperty, value);}
+
+        public ICommand ShortcutCommand { get => (ICommand)GetValue(ShortcutCommandProperty); set => SetValue(ShortcutCommandProperty, value); }
+        public static readonly DependencyProperty ShortcutCommandProperty = DependencyProperty.Register(
+            "ShortcutCommand", typeof(ICommand), typeof(ScroolBarBehavior), new PropertyMetadata(null));
+
 
         private static void ScrollBarPositionPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -35,13 +43,19 @@ namespace LlamV.Behavior
             this.AssociatedObject.Loaded += AssociatedObject_Loaded;
             this.AssociatedObject.ScrollChanged += AssociatedObject_ScrollChanged;
             this.AssociatedObject.MouseMove += AssociatedObject_MouseMove;
-            //this.AssociatedObject.MouseWheel += AssociatedObject_MouseWheel;
+            this.AssociatedObject.PreviewMouseWheel += AssociatedObject_MouseWheel;
+            this.AssociatedObject.MouseDown += AssociatedObject_MouseDown;
+            this.AssociatedObject.PreviewKeyDown += AssociatedObject_KeyDown;
+
         }
         protected override void OnCleanup()
         {
             this.AssociatedObject.ScrollChanged -= AssociatedObject_ScrollChanged;
             this.AssociatedObject.MouseMove -= AssociatedObject_MouseMove;
-            //this.AssociatedObject.MouseWheel -= AssociatedObject_MouseWheel;
+            this.AssociatedObject.PreviewMouseWheel -= AssociatedObject_MouseWheel;
+            this.AssociatedObject.MouseDown -= AssociatedObject_MouseDown;
+            this.AssociatedObject.PreviewKeyDown -= AssociatedObject_KeyDown;
+
             //sv = null;
             base.OnCleanup();
         }
@@ -89,12 +103,59 @@ namespace LlamV.Behavior
         }
 
 
-        //private void AssociatedObject_MouseWheel(object sender, MouseWheelEventArgs e)
-        //{
-        //    //なぜかひろわない
-        //    MouseWheel += e.Delta / 120;
-        //    e.Handled = true;
-        //}
+        private void AssociatedObject_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            var a = System.Math.Pow(2, e.Delta / 120);
+            double x = 0;
+            double y = 0;
+            var i = e.GetPosition(sender as ScrollViewer);
+            MouseWheel *= a;
+
+            if(a>1)
+            {
+                x = (sv.HorizontalOffset * 2) + i.X;
+                y = (sv.VerticalOffset * 2) + i.Y;
+            }
+            else
+            {
+                x = (sv.HorizontalOffset / 2) - i.X;
+                y = (sv.VerticalOffset / 2) - i.Y;
+            }
+            sv.ScrollToHorizontalOffset(x);
+            sv.ScrollToVerticalOffset(y);
+            e.Handled = true;
+        }
+
+        private void AssociatedObject_KeyDown(object sender, KeyEventArgs e)
+        {
+            switch(e.Key)
+            {
+                case Key.Up:
+                    sv.ScrollToVerticalOffset(sv.VerticalOffset - 10);
+                    break;
+                case Key.Down:
+                    sv.ScrollToVerticalOffset(sv.VerticalOffset + 10);
+                    break;
+                case Key.Left:
+                    sv.ScrollToHorizontalOffset(sv.HorizontalOffset - 10);
+                    break;
+                case Key.Right:
+                    sv.ScrollToHorizontalOffset(sv.HorizontalOffset + 10);
+                    break;
+                case Key.Home:
+                    sv.ScrollToVerticalOffset(0);
+                    sv.ScrollToHorizontalOffset(0);
+                    MouseWheel = 1;
+                    break;
+            }
+            if (e.Key == (Key.P & Key.LeftShift))
+                ShortcutCommand.Execute("XButton1");
+        }
+        private void AssociatedObject_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.XButton1 == MouseButtonState.Pressed) ShortcutCommand.Execute("XButton1");
+            if (e.XButton2 == MouseButtonState.Pressed) ShortcutCommand.Execute("XButton2");
+        }
     }
 
 }

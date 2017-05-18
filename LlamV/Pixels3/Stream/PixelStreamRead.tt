@@ -36,7 +36,7 @@ using System.Threading.Tasks;
 
 namespace Pixels.Stream
 {
-    private static partial class PixelStream
+    public static partial class PixelStream
     {
         private static void _Read<T>(byte[] src, T[] dst, int offset, string type) where T : struct, IComparable
         {

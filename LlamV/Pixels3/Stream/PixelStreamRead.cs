@@ -1,11 +1,4 @@
-﻿
-
-
-
-
-
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace Pixels.Stream
 {
-    private static partial class PixelStream
+    public static partial class PixelStream
     {
         private static void _Read<T>(byte[] src, T[] dst, int offset, string type) where T : struct, IComparable
         {
@@ -60,7 +53,6 @@ namespace Pixels.Stream
 					break;
             }
 		}
-
 
         private static void _Read(byte[] src, Byte[] dst, int offset, string type)
         {
@@ -133,7 +125,6 @@ namespace Pixels.Stream
 					break;
 			}
 		}
-
         private static void _Read(byte[] src, UInt16[] dst, int offset, string type)
         {
 			int count_byte = offset;
@@ -205,7 +196,6 @@ namespace Pixels.Stream
 					break;
 			}
 		}
-
         private static void _Read(byte[] src, UInt32[] dst, int offset, string type)
         {
 			int count_byte = offset;
@@ -277,7 +267,6 @@ namespace Pixels.Stream
 					break;
 			}
 		}
-
         private static void _Read(byte[] src, UInt64[] dst, int offset, string type)
         {
 			int count_byte = offset;
@@ -349,7 +338,6 @@ namespace Pixels.Stream
 					break;
 			}
 		}
-
         private static void _Read(byte[] src, Int16[] dst, int offset, string type)
         {
 			int count_byte = offset;
@@ -421,7 +409,6 @@ namespace Pixels.Stream
 					break;
 			}
 		}
-
         private static void _Read(byte[] src, Int32[] dst, int offset, string type)
         {
 			int count_byte = offset;
@@ -493,7 +480,6 @@ namespace Pixels.Stream
 					break;
 			}
 		}
-
         private static void _Read(byte[] src, Int64[] dst, int offset, string type)
         {
 			int count_byte = offset;
@@ -565,7 +551,6 @@ namespace Pixels.Stream
 					break;
 			}
 		}
-
         private static void _Read(byte[] src, Single[] dst, int offset, string type)
         {
 			int count_byte = offset;
@@ -637,7 +622,6 @@ namespace Pixels.Stream
 					break;
 			}
 		}
-
         private static void _Read(byte[] src, Double[] dst, int offset, string type)
         {
 			int count_byte = offset;
@@ -709,7 +693,6 @@ namespace Pixels.Stream
 					break;
 			}
 		}
-
 
 
     }

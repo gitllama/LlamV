@@ -15,14 +15,12 @@
         <i:Interaction.Behaviors>
             <behav:FileDropBehavior TargetCommand="{Binding FileDropCommand}" />
             <behav:ScroolBarBehavior
-                ScrollBarPosition="{Binding ScrollBar.Value, Mode=TwoWay}" />
+                ScrollBarPosition="{Binding ScrollBar.Value, Mode=TwoWay}" 
+                MouseWheel="{Binding MouseWheel.Value, Mode=TwoWay}"
+                ShortcutCommand="{Binding ShortcutCommand}"/>
         </i:Interaction.Behaviors>
 
         <Grid Background="{Binding Background.Value}">
-            <i:Interaction.Behaviors>
-                <behav:GridBehavior
-                    MouseWheel ="{Binding MouseWheel.Value, Mode=TwoWay}"/>
-            </i:Interaction.Behaviors>
             <Grid.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Capture">
@@ -52,7 +50,7 @@
             </Grid.ContextMenu>
 
             <Canvas x:Name="cnv"
-                    Margin="50,50,50,50"
+                    Margin="{Binding Margin}"
                     Width="{Binding Width.Value}" 
                     Height="{Binding Height.Value}">
 
@@ -62,8 +60,7 @@
                             MouseMove="{Binding MouseMove.Value, Mode=OneWayToSource}"
                             Shapes="{Binding Shapes.Value, Mode=TwoWay}"
                             ScalingMode="{Binding model.ScalingMode,  Mode=TwoWay}"
-                            Rect="{Binding RectMove.Value, Mode=OneWayToSource}"
-                            ShortcutCommand="{Binding ShortcutCommand}"/>
+                            Rect="{Binding RectMove.Value, Mode=OneWayToSource}"/>
                 </i:Interaction.Behaviors>
 
                 <Canvas.Background>

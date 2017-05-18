@@ -60,7 +60,7 @@ namespace LlamV.ViewModels
         [Browsable(false)]
         public ReactiveProperty<bool> isLinkage { get; private set; }
 
-        public ReactiveProperty<int> MouseWheel { get; private set; }
+        public ReactiveProperty<double> MouseWheel { get; private set; }
 
         public ReactiveProperty<List<Shape>> Shapes { get; private set; }
         [Browsable(false)]
@@ -105,12 +105,16 @@ namespace LlamV.ViewModels
 
             isLinkage = model.ObserveProperty(x => x.isLinkage).ToReactiveProperty().AddTo(this.Disposable);
 
+            //MouseWheel = model.ToReactivePropertyAsSynchronized(
+            //    x => x.Scale,
+            //    convert: x => (int)Math.Log(x, 2),
+            //    convertBack: x => Math.Pow(2, x))
+            //    .AddTo(this.Disposable);
             MouseWheel = model.ToReactivePropertyAsSynchronized(
                 x => x.Scale,
-                convert: x => (int)Math.Log(x, 2),
-                convertBack: x => Math.Pow(2, x))
+                convert: x => x,
+                convertBack: x => x)
                 .AddTo(this.Disposable);
-
 
             ScrollBar = model.ToReactivePropertyAsSynchronized(
                 x => x.ScrollBar,
@@ -206,7 +210,7 @@ namespace LlamV.ViewModels
                         model.DocumentDatas[this.ContentId].Images.Save(DateTime.Now.ToString("yyyyMMddHHmmss") + ".png");
                         break;
                     case "SelectedToFile":
-                        model.DocumentDatas[this.ContentId]["Trim"].Images.Save(DateTime.Now.ToString("yyyyMMddHHmmss") + ".png");
+                        //model.DocumentDatas[this.ContentId]["Trim"].Images.Save(DateTime.Now.ToString("yyyyMMddHHmmss") + ".png");
                         break;
                     //case "FullToClipbord":
                     //    model.DocumentDatas[this.ContentId].Images.ToClipboard();
@@ -319,6 +323,7 @@ namespace LlamV.ViewModels
             this.Disposable.Dispose();
         }
     }
+
 }
 
 

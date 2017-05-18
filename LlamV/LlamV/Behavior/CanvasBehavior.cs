@@ -13,42 +13,8 @@ using YamlDotNet.Serialization;
 
 namespace LlamV.Behavior
 {
-    public class GridBehavior : BehaviorBase<Grid>
-    {
-        public static readonly DependencyProperty MouseWheelProperty = DependencyProperty.Register(
-            "MouseWheel", typeof(int), typeof(GridBehavior), new UIPropertyMetadata(0));
-        public int MouseWheel { get => (int)GetValue(MouseWheelProperty); set => SetValue(MouseWheelProperty, value); }
-
-        protected override void OnSetup()
-        {
-            base.OnSetup();
-            this.AssociatedObject.Loaded += AssociatedObject_Loaded;
-            this.AssociatedObject.MouseWheel += AssociatedObject_MouseWheel;
-        }
-        protected override void OnCleanup()
-        {
-            this.AssociatedObject.Loaded -= AssociatedObject_Loaded;
-            this.AssociatedObject.MouseWheel -= AssociatedObject_MouseWheel;
-            base.OnCleanup();
-        }
-
-        private void AssociatedObject_Loaded(object sender, RoutedEventArgs e)
-        {
-
-        }
-        private void AssociatedObject_MouseWheel(object sender, MouseWheelEventArgs e)
-        {
-            MouseWheel += e.Delta / 120;
-            e.Handled = true;
-        }
-    }
-
     public class CanvasBehavior : BehaviorBase<Canvas>
     {
-        public ICommand ShortcutCommand{ get => (ICommand)GetValue(ShortcutCommandProperty); set => SetValue(ShortcutCommandProperty, value);}
-        public static readonly DependencyProperty ShortcutCommandProperty = DependencyProperty.Register(
-                "ShortcutCommand", typeof(ICommand), typeof(CanvasBehavior), new PropertyMetadata(null));
-
         public static readonly DependencyProperty MouseMoveProperty = DependencyProperty.Register(
             "MouseMove", typeof(Point), typeof(CanvasBehavior), new UIPropertyMetadata(null));
         public Point MouseMove{ get => (Point)GetValue(MouseMoveProperty); set => SetValue(MouseMoveProperty, value); }
@@ -92,15 +58,20 @@ namespace LlamV.Behavior
             base.OnSetup();
             this.AssociatedObject.Loaded += AssociatedObject_Loaded;
             this.AssociatedObject.MouseMove += AssociatedObject_MouseMove;
-            this.AssociatedObject.MouseDown += AssociatedObject_MouseDown;
             this.AssociatedObject.KeyDown += AssociatedObject_KeyDown;
+            this.AssociatedObject.PreviewKeyDown += AssociatedObject_PreviewKeyDown;
             this.AssociatedObject.SizeChanged += AssociatedObject_LayoutUpdated;
         }
+
+        private void AssociatedObject_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+
+        }
+
         protected override void OnCleanup()
         {
             this.AssociatedObject.Loaded -= AssociatedObject_Loaded;
             this.AssociatedObject.MouseMove -= AssociatedObject_MouseMove;
-            this.AssociatedObject.MouseDown -= AssociatedObject_MouseDown;
             this.AssociatedObject.SizeChanged -= AssociatedObject_LayoutUpdated;
             //cnv = null;
             base.OnCleanup();
@@ -115,17 +86,6 @@ namespace LlamV.Behavior
         private void AssociatedObject_KeyDown(object sender, KeyEventArgs e)
         {
 
-        }
-        private void AssociatedObject_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if(e.XButton1 == MouseButtonState.Pressed)
-            {
-                ShortcutCommand.Execute("XButton1");
-            }
-            if (e.XButton2 == MouseButtonState.Pressed)
-            {
-
-            }
         }
 
         private void AssociatedObject_MouseMove(object sender, MouseEventArgs e)
