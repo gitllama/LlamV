@@ -187,10 +187,10 @@ namespace Pixels.Extend
             src.AddResult(key, value);
         }
 
-        public static ChipStatusMediator Filter(this ChipStatusMediator src, Action<Pixel<float>> action)
+        public static ChipStatusMediator Filter(this ChipStatusMediator src, Func<Pixel<float>, Pixel<float>> action)
         {
             if (src.pixel == null) return src;
-            action(src.pixel);
+            src.pixel = action(src.pixel);
 
             return src;
         }
@@ -202,126 +202,100 @@ namespace Pixels.Extend
             return src;
         }
 
-        public static ChipStatusMediator Signal(this ChipStatusMediator src)
+        public static ChipStatusMediator VFPN(this ChipStatusMediator src)
+        {
+            if (src.pixel == null)
+            {
+                foreach (var n in new int[] { 0, 1, 2, 3 })
+                {
+                    var key = $"{nameof(VFPN)}_Max{n}";
+                    src.Output(key, "null");
+                    key = $"{nameof(VFPN)}_Min{n}";
+                    src.Output(key, "null");
+                    key = $"{nameof(VFPN)}_Delta{n}";
+                    src.Output(key, "null");
+                }
+                return src;
+            }
+            for(int y=0;y<2;y++)
+                for(int x=0;x<2;x++)
+                {
+                    var i = src.pixel.AverageV(x,y,2,2);
+                    var Max = i.Max();
+                    var Min = i.Min();
+
+                    var Delta = 0.0;
+                    int count = 0;
+                    for (int n = 0; n < i.Length - 5; n++)
+                    {
+                        var buf = new double[5];
+                        buf[0] = i[n];
+                        buf[1] = i[n+1];
+                        buf[2] = i[n+2];
+                        buf[3] = i[n+3];
+                        buf[4] = i[n+4];
+
+                        Array.Sort(buf);
+                        if (Delta < System.Math.Abs(i[n + 2] - buf[2]))
+                        {
+                            Delta = System.Math.Abs(i[n + 2] - buf[2]);
+                            count = n;
+                        }
+                    }
+
+                    var key = $"{nameof(VFPN)}_Max{x+y*2}";
+                    src.Output(key, Max.ToString());
+                    key = $"{nameof(VFPN)}_Min{x + y * 2}";
+                    src.Output(key, Min.ToString());
+                    key = $"{nameof(VFPN)}_Delta{x + y * 2}";
+                    src.Output(key, Delta.ToString()+$",{count}");
+                }
+
+            return src;
+        }
+        public static ChipStatusMediator HFPN(this ChipStatusMediator src)
         {
             if (src.pixel == null) return src;
 
-            var p = src.pixel;
-
-            double[] ave = new double[p.BayerSizeX * p.BayerSizeY];
-            double[] dev = new double[p.BayerSizeX * p.BayerSizeY];
-
-            //Ave
-            for (int by = 0; by < p.BayerSizeY; by++)
-                for (int bx = 0; bx < p.BayerSizeX; bx++)
-                {
-                    p.BayerX = bx;
-                    p.BayerY = by;
-                    ref double buf = ref ave[bx + by * p.BayerSizeX];
-                    int c = 0;
-                    for (int y = 0; y < p.BayerHeight; y ++)
-                        for (int x = 0; x < p.BayerWidth; x ++)
-                        {
-                            buf += p.Bayer(x, y);
-                            c++;
-                        }
-                    buf /= c;
-                }
-            //dev
-            for (int by = 0; by < p.BayerSizeY; by++)
-                for (int bx = 0; bx < p.BayerSizeX; bx++)
-                {
-                    p.BayerX = bx;
-                    p.BayerY = by;
-                    ref double buf = ref dev[bx + by * p.BayerSizeX];
-                    ref double buf_ave = ref ave[bx + by * p.BayerSizeX];
-                    int c = 0;
-                    for (int y = 0; y < p.BayerHeight; y++)
-                        for (int x = 0; x < p.BayerWidth; x++)
-                        {
-                            buf += System.Math.Pow(p.Bayer(x, y) - buf_ave, 2);
-                            c++;
-                        }
-                    buf = System.Math.Sqrt(buf / c);
-
-                }
-
-            foreach (var n in ave.Select((v,i)=>(v,i)))
-            {
-                var key   = $"{nameof(Signal)}_Averaging{n.Item2}";
-                var value = n.Item1;
-                src.Output(key, value.ToString());
-            }
-            foreach (var n in dev.Select((v, i) => (v, i)))
-            {
-                var key = $"{nameof(Signal)}_Deviation{n.Item2}";
-                var value = n.Item1;
-                src.Output(key, value.ToString());
-            }
-
             return src;
         }
 
-        public static ChipStatusMediator Signal2(this ChipStatusMediator src)
+        public static ChipStatusMediator Signal(this ChipStatusMediator src)
         {
-            if (src.pixelfilter == null) return src;
+            if (src.pixel == null) return src;
+            var p = src.pixel;
+            /*
+            var m = p.Signal();
+            var c = p.SignalBayer();
 
-            var p = src.pixelfilter;
+            string key;
+            double value;
 
-            double[] ave = new double[p.BayerSizeX * p.BayerSizeY];
-            double[] dev = new double[p.BayerSizeX * p.BayerSizeY];
+            key = $"{nameof(Signal)}_Averaging";
+            value = m.Average;
+            src.Output(key, value.ToString());
 
-            //Ave
-            for (int by = 0; by < p.BayerSizeY; by++)
-                for (int bx = 0; bx < p.BayerSizeX; bx++)
-                {
-                    p.BayerX = bx;
-                    p.BayerY = by;
-                    ref double buf = ref ave[bx + by * p.BayerSizeX];
-                    int c = 0;
-                    for (int y = 0; y < p.BayerHeight; y++)
-                        for (int x = 0; x < p.BayerWidth; x++)
-                        {
-                            buf += p.Bayer(x, y);
-                            c++;
-                        }
-                    buf /= c;
-                }
-            //dev
-            for (int by = 0; by < p.BayerSizeY; by++)
-                for (int bx = 0; bx < p.BayerSizeX; bx++)
-                {
-                    p.BayerX = bx;
-                    p.BayerY = by;
-                    ref double buf = ref dev[bx + by * p.BayerSizeX];
-                    ref double buf_ave = ref ave[bx + by * p.BayerSizeX];
-                    int c = 0;
-                    for (int y = 0; y < p.BayerHeight; y++)
-                        for (int x = 0; x < p.BayerWidth; x++)
-                        {
-                            buf += System.Math.Pow(p.Bayer(x, y) - buf_ave, 2);
-                            c++;
-                        }
-                    buf = System.Math.Sqrt(buf / c);
-
-                }
-
-            foreach (var n in ave.Select((v, i) => (v, i)))
+            foreach (var n in c.Average.Select((v, i) => (v, i)))
             {
-                var key = $"{nameof(Signal2)}_Averaging{n.Item2}";
-                var value = n.Item1;
-                src.Output(key, value.ToString());
-            }
-            foreach (var n in dev.Select((v, i) => (v, i)))
-            {
-                var key = $"{nameof(Signal2)}_Deviation{n.Item2}";
-                var value = n.Item1;
+                key = $"{nameof(Signal)}_Averaging{n.Item2}";
+                value = n.Item1;
                 src.Output(key, value.ToString());
             }
 
+
+            key = $"{nameof(Signal)}_Deviation";
+            value = m.Deviation;
+            src.Output(key, value.ToString());
+
+            foreach (var n in c.Deviation.Select((v, i) => (v, i)))
+            {
+                key = $"{nameof(Signal)}_Deviation{n.Item2}";
+                value = n.Item1;
+                src.Output(key, value.ToString());
+            }
+            */
             return src;
         }
-
 
         public static ChipStatusMediator Defect(this ChipStatusMediator src, params int[] thr)
         {
@@ -332,34 +306,35 @@ namespace Pixels.Extend
             var p1 = src.pixel;
             var p2 = src.pixelfilter;
 
-            int[,] count = new int[p1.BayerSizeX * p1.BayerSizeY, thr.Length];
+            //int[,] count = new int[p1.BayerSizeX * p1.BayerSizeY, thr.Length];
 
 
-            for (int by = 0; by < p1.BayerSizeY; by++)
-                for (int bx = 0; bx < p1.BayerSizeX; bx++)
-                {
-                    p1.BayerX = bx;
-                    p1.BayerY = by;
-                    //ref int[] buf = ref count[bx + by * p1.BayerSizeX];
-                    for (int y = 0; y < p1.BayerHeight; y++)
-                        for (int x = 0; x < p1.BayerWidth; x++)
-                        {
-                            var hoge = p1.Bayer(x, y) - p2.Bayer(x, y);
-                            for(int i =0;i<thr.Length;i++)
-                            {
-                                count[bx + by * p1.BayerSizeX,i] += hoge > thr[i] ? 1 : 0;
-                            }
-                        }
-                }
-            //foreach ((int[] thrs, int index) n in count.Select((v, i) => (v, i)))
-                //foreach ((int value, int index) k in n.thrs.Select((v, i) => (v, i)))
-            for(int y=0;y< count.GetLength(0);y++)
-                for (int x = 0; x < count.GetLength(1); x++)
-                {
-                    var key = $"{nameof(Defect)}_{thr[x]}_{y}";
-                    var value = count[y,x];
-                    src.Output(key, value.ToString());
-                }
+            //for (int by = 0; by < p1.BayerSizeY; by++)
+            //    for (int bx = 0; bx < p1.BayerSizeX; bx++)
+            //    {
+            //        p1.BayerX = bx;
+            //        p1.BayerY = by;
+            //        //ref int[] buf = ref count[bx + by * p1.BayerSizeX];
+            //        for (int y = 0; y < p1.BayerHeight; y++)
+            //            for (int x = 0; x < p1.BayerWidth; x++)
+            //            {
+            //                var hoge = p1.Bayer(x, y) - p2.Bayer(x, y);
+            //                for(int i =0;i<thr.Length;i++)
+            //                {
+            //                    count[bx + by * p1.BayerSizeX,i] += hoge > thr[i] ? 1 : 0;
+            //                }
+            //            }
+            //    }
+
+            ////foreach ((int[] thrs, int index) n in count.Select((v, i) => (v, i)))
+            //    //foreach ((int value, int index) k in n.thrs.Select((v, i) => (v, i)))
+            //for(int y=0;y< count.GetLength(0);y++)
+            //    for (int x = 0; x < count.GetLength(1); x++)
+            //    {
+            //        var key = $"{nameof(Defect)}_{thr[x]}_{y}";
+            //        var value = count[y,x];
+            //        src.Output(key, value.ToString());
+            //    }
             return src;
         }
 
@@ -390,18 +365,7 @@ namespace Pixels.Extend
             return src;
         }
 
-        public static ChipStatusMediator VFPN(this ChipStatusMediator src)
-        {
-            if (src.pixel == null) return src;
 
-            return src;
-        }
-        public static ChipStatusMediator HFPN(this ChipStatusMediator src)
-        {
-            if (src.pixel == null) return src;
-
-            return src;
-        }
 
         public static ChipStatusMediator ClusterDefect(this ChipStatusMediator src)
         {
