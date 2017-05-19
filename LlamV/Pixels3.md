@@ -92,15 +92,15 @@ Selfがついているものは破壊的変更
 | Name | Option | Map | Clone | Description |
 |:---|:---|:---|:---|:---|
 | Cut          | -       | 反映 | Create(w,h,d) | 切り出し |
+| Cut          | color   | 反映 | Create(w,h,d) | 切り出し |
 | Cut          | x,y,w,h | Full | Create(w,h,d) |  |
-| Stagger      |  | reflect | 引数(mapあわさないと死にます) | 右正, 奇数行対象 |
-| StaggerL     |  | ↑ | Clone | ↑ |
-| StaggerR     |  | ↑ | Clone | ↑ |
-| StaggerLSelf |  | ↑ | - | ↑ |
-| StaggerRSelf |  | ↑ | - | ↑ |
+| Stagger      |         | reflect | 引数(mapあわさないと死にます) | 右正, 奇数行対象 |
+| StaggerL     |         | ↑ | Clone | ↑ |
+| StaggerR     |         | ↑ | Clone | ↑ |
+| StaggerLSelf |         | ↑ | - | ↑ |
+| StaggerRSelf |         | ↑ | - | ↑ |
 | FilterAverageV     |  | ↑ | Clone | AverageV使用して引き伸ばし |
 | FilterAverageH     |  | ↑ | Clone | AverageH使用して引き伸ばし |
 | FilterAverageVSelf |  | ↑ | Self |  |
 | FilterAverageHSelf |  | ↑ | Self |  |
-| StaggerRSelf |  | ↑ | - | ↑ |
 | FiletrMedian |  | ↑ | - | ↑ |
