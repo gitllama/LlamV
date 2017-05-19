@@ -49,9 +49,35 @@ namespace Pixels.Math
 <# } #>
 <# } #>
 
-<# foreach (var T in Type){ #>
 
+		
+
+<# foreach (var F in new List<string>()
+{
+	"Add",
+	"Sub",
+	"Mul",
+	"Div",
+	"ShiftLeft",
+	"ShiftRight",
+}){ #>
+		//別にdynamicでもよくないか？
+		public static Pixel<T> <#= F #><T>(this Pixel<T> src, Pixel<T> dst, T value) where T : struct, IComparable
+        {
+			if(false)
+			{
+			}<# foreach (var T in Type){ #>
+			else if(typeof(T) == typeof(<#= T #>))
+			{
+				return Add(src, dst, value);
+			}<# } #>
+			else
+			{
+				return null;
+			}
+		}
 <# } #>
+
 
 <# foreach (var F in new Dictionary<string,string>()
 {

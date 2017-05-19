@@ -112,6 +112,7 @@ namespace Pixels.Math
 			}
 			return -1;
         }
+		/*
 		public static int[] CountBayer(Pixel<<#= T #>> src1, <#= T #> thr, INEQUALITY ine = INEQUALITY.GreaterThan)
         {
 			List<int> dst = new List<int>();
@@ -128,6 +129,7 @@ namespace Pixels.Math
 					dst.Add(Count(src1,src2,thr,ine,x,y,src1.BayerSizeX,src1.BayerSizeY));
 			return dst.ToArray();
         }
+		*/
 <# } #>
 
 
@@ -165,7 +167,7 @@ namespace Pixels.Math
 
             return (ave, dev);
         }
-
+		/*
 		public static double[] AverageBayer(this Pixel<<#= T #>> src)
         {
 			List<double> dst = new List<double>();
@@ -191,6 +193,7 @@ namespace Pixels.Math
 
             return (ave, dev);
         }
+		*/
 <# } #>
 
 
@@ -230,7 +233,6 @@ namespace Pixels.Math
 			}
             return dst.ToArray();
         }
-
 <# } #>
     }
 }

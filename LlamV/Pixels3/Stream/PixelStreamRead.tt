@@ -79,6 +79,23 @@ namespace Pixels.Stream
 		}
 <# } #>
 
-
+        private static void _ReadBMP<T>(byte[] src, T[] dst, int color) where T : struct, IComparable
+        {
+			int c = color;
+			switch((object)dst)
+			{
+<# foreach (var T in Type){ #>
+				case <#= T #>[] n:
+					for (int i= 0; i< dst.Length; i++)
+					{
+						n[i] = (<#= T #>)src[c];
+						c+=4;
+					}
+					break;
+<# } #>
+				default:
+					break;
+            }
+		}
     }
 }

@@ -1,4 +1,11 @@
-﻿using System;
+﻿
+
+
+
+
+
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,43 +29,55 @@ namespace Pixels.Stream
         {
 			switch((object)dst)
 			{
+
 				case Byte[] n:
 					_Read(src, n, offset, type);
 					break;
+
 				case UInt16[] n:
 					_Read(src, n, offset, type);
 					break;
+
 				case UInt32[] n:
 					_Read(src, n, offset, type);
 					break;
+
 				case UInt64[] n:
 					_Read(src, n, offset, type);
 					break;
+
 				case Int16[] n:
 					_Read(src, n, offset, type);
 					break;
+
 				case Int32[] n:
 					_Read(src, n, offset, type);
 					break;
+
 				case Int64[] n:
 					_Read(src, n, offset, type);
 					break;
+
 				case Single[] n:
 					_Read(src, n, offset, type);
 					break;
+
 				case Double[] n:
 					_Read(src, n, offset, type);
 					break;
+
 				default:
 					break;
             }
 		}
+
 
         private static void _Read(byte[] src, Byte[] dst, int offset, string type)
         {
 			int count_byte = offset;
 			switch(type)
 			{
+
 				case "UInt16":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -66,6 +85,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(UInt16);
 					}
 					break;
+
 				case "UInt32":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -73,6 +93,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(UInt32);
 					}
 					break;
+
 				case "UInt64":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -80,6 +101,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(UInt64);
 					}
 					break;
+
 				case "Int16":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -87,6 +109,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Int16);
 					}
 					break;
+
 				case "Int32":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -94,6 +117,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Int32);
 					}
 					break;
+
 				case "Int64":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -101,6 +125,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Int64);
 					}
 					break;
+
 				case "Single":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -108,6 +133,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Single);
 					}
 					break;
+
 				case "Double":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -115,6 +141,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Double);
 					}
 					break;
+
                 case "Byte":
                     for (int i= 0; i< dst.Length; i++)
                         dst[i] = (Byte)src[count_byte++];
@@ -125,11 +152,13 @@ namespace Pixels.Stream
 					break;
 			}
 		}
+
         private static void _Read(byte[] src, UInt16[] dst, int offset, string type)
         {
 			int count_byte = offset;
 			switch(type)
 			{
+
 				case "UInt16":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -137,6 +166,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(UInt16);
 					}
 					break;
+
 				case "UInt32":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -144,6 +174,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(UInt32);
 					}
 					break;
+
 				case "UInt64":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -151,6 +182,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(UInt64);
 					}
 					break;
+
 				case "Int16":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -158,6 +190,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Int16);
 					}
 					break;
+
 				case "Int32":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -165,6 +198,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Int32);
 					}
 					break;
+
 				case "Int64":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -172,6 +206,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Int64);
 					}
 					break;
+
 				case "Single":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -179,6 +214,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Single);
 					}
 					break;
+
 				case "Double":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -186,6 +222,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Double);
 					}
 					break;
+
                 case "Byte":
                     for (int i= 0; i< dst.Length; i++)
                         dst[i] = (UInt16)src[count_byte++];
@@ -196,11 +233,13 @@ namespace Pixels.Stream
 					break;
 			}
 		}
+
         private static void _Read(byte[] src, UInt32[] dst, int offset, string type)
         {
 			int count_byte = offset;
 			switch(type)
 			{
+
 				case "UInt16":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -208,6 +247,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(UInt16);
 					}
 					break;
+
 				case "UInt32":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -215,6 +255,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(UInt32);
 					}
 					break;
+
 				case "UInt64":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -222,6 +263,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(UInt64);
 					}
 					break;
+
 				case "Int16":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -229,6 +271,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Int16);
 					}
 					break;
+
 				case "Int32":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -236,6 +279,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Int32);
 					}
 					break;
+
 				case "Int64":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -243,6 +287,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Int64);
 					}
 					break;
+
 				case "Single":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -250,6 +295,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Single);
 					}
 					break;
+
 				case "Double":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -257,6 +303,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Double);
 					}
 					break;
+
                 case "Byte":
                     for (int i= 0; i< dst.Length; i++)
                         dst[i] = (UInt32)src[count_byte++];
@@ -267,11 +314,13 @@ namespace Pixels.Stream
 					break;
 			}
 		}
+
         private static void _Read(byte[] src, UInt64[] dst, int offset, string type)
         {
 			int count_byte = offset;
 			switch(type)
 			{
+
 				case "UInt16":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -279,6 +328,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(UInt16);
 					}
 					break;
+
 				case "UInt32":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -286,6 +336,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(UInt32);
 					}
 					break;
+
 				case "UInt64":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -293,6 +344,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(UInt64);
 					}
 					break;
+
 				case "Int16":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -300,6 +352,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Int16);
 					}
 					break;
+
 				case "Int32":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -307,6 +360,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Int32);
 					}
 					break;
+
 				case "Int64":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -314,6 +368,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Int64);
 					}
 					break;
+
 				case "Single":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -321,6 +376,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Single);
 					}
 					break;
+
 				case "Double":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -328,6 +384,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Double);
 					}
 					break;
+
                 case "Byte":
                     for (int i= 0; i< dst.Length; i++)
                         dst[i] = (UInt64)src[count_byte++];
@@ -338,11 +395,13 @@ namespace Pixels.Stream
 					break;
 			}
 		}
+
         private static void _Read(byte[] src, Int16[] dst, int offset, string type)
         {
 			int count_byte = offset;
 			switch(type)
 			{
+
 				case "UInt16":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -350,6 +409,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(UInt16);
 					}
 					break;
+
 				case "UInt32":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -357,6 +417,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(UInt32);
 					}
 					break;
+
 				case "UInt64":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -364,6 +425,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(UInt64);
 					}
 					break;
+
 				case "Int16":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -371,6 +433,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Int16);
 					}
 					break;
+
 				case "Int32":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -378,6 +441,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Int32);
 					}
 					break;
+
 				case "Int64":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -385,6 +449,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Int64);
 					}
 					break;
+
 				case "Single":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -392,6 +457,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Single);
 					}
 					break;
+
 				case "Double":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -399,6 +465,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Double);
 					}
 					break;
+
                 case "Byte":
                     for (int i= 0; i< dst.Length; i++)
                         dst[i] = (Int16)src[count_byte++];
@@ -409,11 +476,13 @@ namespace Pixels.Stream
 					break;
 			}
 		}
+
         private static void _Read(byte[] src, Int32[] dst, int offset, string type)
         {
 			int count_byte = offset;
 			switch(type)
 			{
+
 				case "UInt16":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -421,6 +490,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(UInt16);
 					}
 					break;
+
 				case "UInt32":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -428,6 +498,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(UInt32);
 					}
 					break;
+
 				case "UInt64":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -435,6 +506,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(UInt64);
 					}
 					break;
+
 				case "Int16":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -442,6 +514,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Int16);
 					}
 					break;
+
 				case "Int32":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -449,6 +522,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Int32);
 					}
 					break;
+
 				case "Int64":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -456,6 +530,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Int64);
 					}
 					break;
+
 				case "Single":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -463,6 +538,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Single);
 					}
 					break;
+
 				case "Double":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -470,6 +546,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Double);
 					}
 					break;
+
                 case "Byte":
                     for (int i= 0; i< dst.Length; i++)
                         dst[i] = (Int32)src[count_byte++];
@@ -480,11 +557,13 @@ namespace Pixels.Stream
 					break;
 			}
 		}
+
         private static void _Read(byte[] src, Int64[] dst, int offset, string type)
         {
 			int count_byte = offset;
 			switch(type)
 			{
+
 				case "UInt16":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -492,6 +571,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(UInt16);
 					}
 					break;
+
 				case "UInt32":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -499,6 +579,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(UInt32);
 					}
 					break;
+
 				case "UInt64":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -506,6 +587,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(UInt64);
 					}
 					break;
+
 				case "Int16":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -513,6 +595,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Int16);
 					}
 					break;
+
 				case "Int32":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -520,6 +603,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Int32);
 					}
 					break;
+
 				case "Int64":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -527,6 +611,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Int64);
 					}
 					break;
+
 				case "Single":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -534,6 +619,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Single);
 					}
 					break;
+
 				case "Double":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -541,6 +627,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Double);
 					}
 					break;
+
                 case "Byte":
                     for (int i= 0; i< dst.Length; i++)
                         dst[i] = (Int64)src[count_byte++];
@@ -551,11 +638,13 @@ namespace Pixels.Stream
 					break;
 			}
 		}
+
         private static void _Read(byte[] src, Single[] dst, int offset, string type)
         {
 			int count_byte = offset;
 			switch(type)
 			{
+
 				case "UInt16":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -563,6 +652,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(UInt16);
 					}
 					break;
+
 				case "UInt32":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -570,6 +660,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(UInt32);
 					}
 					break;
+
 				case "UInt64":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -577,6 +668,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(UInt64);
 					}
 					break;
+
 				case "Int16":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -584,6 +676,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Int16);
 					}
 					break;
+
 				case "Int32":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -591,6 +684,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Int32);
 					}
 					break;
+
 				case "Int64":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -598,6 +692,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Int64);
 					}
 					break;
+
 				case "Single":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -605,6 +700,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Single);
 					}
 					break;
+
 				case "Double":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -612,6 +708,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Double);
 					}
 					break;
+
                 case "Byte":
                     for (int i= 0; i< dst.Length; i++)
                         dst[i] = (Single)src[count_byte++];
@@ -622,11 +719,13 @@ namespace Pixels.Stream
 					break;
 			}
 		}
+
         private static void _Read(byte[] src, Double[] dst, int offset, string type)
         {
 			int count_byte = offset;
 			switch(type)
 			{
+
 				case "UInt16":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -634,6 +733,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(UInt16);
 					}
 					break;
+
 				case "UInt32":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -641,6 +741,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(UInt32);
 					}
 					break;
+
 				case "UInt64":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -648,6 +749,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(UInt64);
 					}
 					break;
+
 				case "Int16":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -655,6 +757,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Int16);
 					}
 					break;
+
 				case "Int32":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -662,6 +765,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Int32);
 					}
 					break;
+
 				case "Int64":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -669,6 +773,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Int64);
 					}
 					break;
+
 				case "Single":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -676,6 +781,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Single);
 					}
 					break;
+
 				case "Double":
 					for (int i= 0; i< dst.Length; i++)
 					{
@@ -683,6 +789,7 @@ namespace Pixels.Stream
 						count_byte += sizeof(Double);
 					}
 					break;
+
                 case "Byte":
                     for (int i= 0; i< dst.Length; i++)
                         dst[i] = (Double)src[count_byte++];
@@ -695,5 +802,87 @@ namespace Pixels.Stream
 		}
 
 
+        private static void _ReadBMP<T>(byte[] src, T[] dst, int color) where T : struct, IComparable
+        {
+			int c = color;
+			switch((object)dst)
+			{
+
+				case Byte[] n:
+					for (int i= 0; i< dst.Length; i++)
+					{
+						n[i] = (Byte)src[c];
+						c+=4;
+					}
+					break;
+
+				case UInt16[] n:
+					for (int i= 0; i< dst.Length; i++)
+					{
+						n[i] = (UInt16)src[c];
+						c+=4;
+					}
+					break;
+
+				case UInt32[] n:
+					for (int i= 0; i< dst.Length; i++)
+					{
+						n[i] = (UInt32)src[c];
+						c+=4;
+					}
+					break;
+
+				case UInt64[] n:
+					for (int i= 0; i< dst.Length; i++)
+					{
+						n[i] = (UInt64)src[c];
+						c+=4;
+					}
+					break;
+
+				case Int16[] n:
+					for (int i= 0; i< dst.Length; i++)
+					{
+						n[i] = (Int16)src[c];
+						c+=4;
+					}
+					break;
+
+				case Int32[] n:
+					for (int i= 0; i< dst.Length; i++)
+					{
+						n[i] = (Int32)src[c];
+						c+=4;
+					}
+					break;
+
+				case Int64[] n:
+					for (int i= 0; i< dst.Length; i++)
+					{
+						n[i] = (Int64)src[c];
+						c+=4;
+					}
+					break;
+
+				case Single[] n:
+					for (int i= 0; i< dst.Length; i++)
+					{
+						n[i] = (Single)src[c];
+						c+=4;
+					}
+					break;
+
+				case Double[] n:
+					for (int i= 0; i< dst.Length; i++)
+					{
+						n[i] = (Double)src[c];
+						c+=4;
+					}
+					break;
+
+				default:
+					break;
+            }
+		}
     }
 }

@@ -71,25 +71,16 @@ namespace Pixels
         public int Width { get; set; } = 0;
         public int Height { get; set; } = 0;
     }
-
+    public class PixelColor
+    {
+        public int x { get; set; } = 0;
+        public int y { get; set; } = 0;
+        public int step_x { get; set; } = 0;
+        public int step_y { get; set; } = 0;
+    }
     public partial class  Pixel<T> where T : struct, IComparable
     {
         public T[] pixel;
-        public int Left { get; set; } = 0;
-        public int Top { get; set; } = 0;
-        public int Width { get; set; } = 1;
-        public int Height { get; set; } = 1;
-
-        public int Stride { get; set; } = 1;
-
-        public int BayerWidth { get => Width / BayerSizeX; }
-        public int BayerHeight { get => Height / BayerSizeY; }
-        public int BayerSizeX { get; set;} = 2;
-        public int BayerSizeY { get; set; } = 2;
-        public int BayerX { get; set; } = 0;
-        public int BayerY { get; set; } = 0;
-
-        
 
         public Type _type;
         public string Type { get => _type?.Name; set => _type = System.Type.GetType($"System.{value}"); }
@@ -97,14 +88,40 @@ namespace Pixels
         public CancellationTokenSource token;
 
         public Dictionary<string, PixelMap> Maps { get; set; }
+        public int Stride { get; set; } = 1;
 
+        public int Left { get; set; } = 0;
+        public int Top { get; set; } = 0;
+        public int Width { get; set; } = 1;
+        public int Height { get; set; } = 1;
 
         public ref T this[int value] { get => ref pixel[value]; }
-        public ref T this[int x, int y] { get => ref pixel[(x + Left) + (y + Top) * Stride]; }
-        public ref T Bayer(int x,int y) => ref pixel[((x * BayerSizeX + BayerX) + Left) + ((y * BayerSizeY + BayerY) + Top) * Stride];
 
-        public int ConvMapPoison(int x,int y) => (x + Left) + (y + Top) * Stride;
-        public int ConvBayerPoison(int x, int y) => ((x * BayerSizeX + BayerX) + Left) + ((y * BayerSizeY + BayerY) + Top) * Stride;
+        public ref T this[int x, int y] { get => ref pixel[ConvPoisonMap(x, y)]; }
+        public int ConvPoisonMap(int x,int y) => (x + Left) + (y + Top) * Stride;
+
+        public List<PixelColor> Colors { get; set; }
+        public int WidthColor(int color) => (Width - Colors[color].x) / Colors[color].step_x;
+        public int HeightColor(int color) => (Height - Colors[color].y) / Colors[color].step_y;
+        public int BayerX { get; set; } = 0;
+        public int BayerY { get; set; } = 0;
+
+        /// <summary>
+        /// Mapsによってズレマスよ
+        /// </summary>
+        /// <param name="color"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        public ref T this[int color, int x, int y] { get => ref pixel[ConvPoisonColor(color, x, y)]; }
+        public int ConvPoisonColor(int color, int x, int y)
+        {
+            var c = Colors[color];
+            return
+                ((x * c.step_x + c.x) + Left) +
+                ((y * c.step_y + c.y) + Top) * Stride;
+        }
+
 
         public string Map { get; private set; } = "Full";
         public Pixel<T> this[string map] => SetMap(map);
@@ -168,6 +185,7 @@ namespace Pixels
 
             //マップ合わせ
             i.SetMap(Map);
+            i.Colors = this.Colors;
 
             return i;
         }

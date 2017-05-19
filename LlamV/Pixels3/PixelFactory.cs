@@ -21,6 +21,7 @@ namespace Pixels
         public string Type { get; set; }
         public string Note { get; set; }
         public Dictionary<string, PixelMap> Maps { get; set; }
+        public List<PixelColor> Colors { get; set; }
     }
 
     public static class PixelFactory
@@ -81,12 +82,18 @@ namespace Pixels
             {
                 if (Check(i))
                 {
-                    //ファイルの読み込み
-                    return PixelStream.Read((dynamic)Make<T>(i), filename, i.Offset, i.Type);
+                    switch(i.Type)
+                    {
+                        case "Bmp":
+                            return PixelStream.ReadBMP<T>(filename);
+                        default:
+                            return PixelStream.Read(Make<T>(i), filename, i.Offset, i.Type);
+                    }
                 }
             }
-            throw new KeyNotFoundException("一致するファイル形式がありません");
+            throw new KeyNotFoundException("Mismatched file format");
 
+            /***********/
             bool Check(PixelFormat hoge)
             {
                 foreach (var j in hoge.FileName)
@@ -100,14 +107,14 @@ namespace Pixels
 
             Pixel<TT> Make<TT>(PixelFormat hoge) where TT : struct, IComparable
             {
-                if (hoge.Maps != null)
-                {
-                    return Create<TT>(hoge.Maps);
-                }
-                else
-                {
-                    return Create<TT>(hoge.Width, hoge.Height);
-                }
+                var dst = hoge.Maps != null ?  
+                    Create<TT>(hoge.Maps) :
+                    Create<TT>(hoge.Width, hoge.Height);
+
+                if (hoge.Colors != null)
+                    dst.Colors = hoge.Colors;
+
+                return dst;
             }
         }
     }

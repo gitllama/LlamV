@@ -20,11 +20,26 @@ namespace Pixels.Math
 
         public static Pixel<T> Cut<T>(this Pixel<T> src) where T : struct, IComparable
         {
-            var dst = new T[src.Width * src.Height];
+            int w = src.Width;
+            int h = src.Height;
+            var dst = new T[w * h];
+
             int i = 0;
-            for (int y = 0; y < src.Height; y++)
-                for (int x = 0; x < src.Width; x++)
-                    dst[i++] = src[x,y];
+            for (int y = 0; y < h; y++)
+                for (int x = 0; x < w; x++)
+                    dst[i++] = src[x, y];
+            return PixelFactory.Create(src.Width, src.Height, dst);
+        }
+        public static Pixel<T> Cut<T>(this Pixel<T> src,int color) where T : struct, IComparable
+        {
+            int w = src.WidthColor(color);
+            int h = src.HeightColor(color);
+            var dst = new T[w * h];
+
+            int i = 0;
+            for (int y = 0; y < h; y++)
+                for (int x = 0; x < w; x++)
+                    dst[i++] = src[x, y];
             return PixelFactory.Create(src.Width, src.Height, dst);
         }
         public static Pixel<T> Cut<T>(this Pixel<T> src, int x, int y,int width, int height) where T : struct, IComparable
@@ -60,13 +75,13 @@ namespace Pixels.Math
         }
 
         public static Pixel<T> StaggerRSelf<T>(this Pixel<T> src) where T : struct, IComparable
-            => Stagger(src, src, 1);
-        public static Pixel<T> StaggerLSelf<T>(this Pixel<T> src) where T : struct, IComparable
             => Stagger(src, src, -1);
+        public static Pixel<T> StaggerLSelf<T>(this Pixel<T> src) where T : struct, IComparable
+            => Stagger(src, src, +1);
         public static Pixel<T> StaggerR<T>(this Pixel<T> src) where T : struct, IComparable
-            => Stagger(src, src.Clone(), 1);
-        public static Pixel<T> StaggerL<T>(this Pixel<T> src) where T : struct, IComparable
             => Stagger(src, src.Clone(), -1);
+        public static Pixel<T> StaggerL<T>(this Pixel<T> src) where T : struct, IComparable
+            => Stagger(src, src.Clone(), +1);
 
 
         public static Pixel<float> FilterAverageV(this Pixel<float> src, Pixel<float> dst = null)
@@ -109,9 +124,9 @@ namespace Pixels.Math
                     buf = 0;
                     for (int i = 0; i < matrix.Length; i++)
                     {
-                        buf += src.pixel[src.ConvMapPoison(x, y) + matrix[i]];
+                        buf += src.pixel[src.ConvPoisonMap(x, y) + matrix[i]];
                     }
-                    dst.pixel[dst.ConvMapPoison(x, y)] = (float)(buf / matrix.Length);
+                    dst.pixel[dst.ConvPoisonMap(x, y)] = (float)(buf / matrix.Length);
                 }
         }
         //public static Pixel<T> FilterAverage<T>(this Pixel<T> src, Pixel<T> dst, int WindowX = 5, int WindowY = 5) where T : struct, IComparable
@@ -165,10 +180,10 @@ namespace Pixels.Math
                 {
                     for (int i = 0; i < matrix.Length; i++)
                     {
-                        box[i] = src.pixel[src.ConvMapPoison(x, y) + matrix[i]];
+                        box[i] = src.pixel[src.ConvPoisonMap(x, y) + matrix[i]];
                     }
                     Array.Sort(box);
-                    dst.pixel[dst.ConvMapPoison(x, y)] = box[rank];
+                    dst.pixel[dst.ConvPoisonMap(x, y)] = box[rank];
                 }
         }
 
@@ -215,7 +230,19 @@ namespace Pixels.Math
             return dst;
         }
 
+        private static Pixel<float> FilterHOB(this Pixel<float> src)
+        {
+            var hob = src["HOB-Lx"].AverageH();
+            src = src["Active"];
+            var dst = src.Clone();
 
+            for (int y = 0; y < src.Height; y++)
+                for (int x = 0; x < src.Width; x++)
+                {
+                    dst[x,y] = (float)(src[x,y] - hob[y]);
+                }
+            return dst;
+        }
 
 
         public static Pixel<T> FilterMedianBayer<T>(this Pixel<T> src, int WindowX = 5, int WindowY = 5, int rank = 12) where T : struct, IComparable
@@ -226,23 +253,23 @@ namespace Pixels.Math
         {
             if (dst == null) dst = src.Clone();
 
-            //matrix
-            int[] matrix = new int[WindowX * WindowY];
-            int c = 0;
-            for (int y = 0; y < WindowY; y++)
-                for (int x = 0; x < WindowX; x++)
-                    matrix[c++] = src.ConvBayerPoison(x - (WindowX / 2), y - (WindowY / 2));
+            ////matrix
+            //int[] matrix = new int[WindowX * WindowY];
+            //int c = 0;
+            //for (int y = 0; y < WindowY; y++)
+            //    for (int x = 0; x < WindowX; x++)
+            //        matrix[c++] = src.ConvBayerPoison(x - (WindowX / 2), y - (WindowY / 2));
 
-            //本体
-            _FilterMedian(
-                src, 
-                dst, 
-                rank,
-                matrix,
-                (WindowX / 2) * src.BayerSizeX,
-                (WindowY / 2) * src.BayerSizeY,
-                (WindowX - WindowX / 2) * src.BayerSizeX,
-                (WindowY - WindowY / 2) * src.BayerSizeY);
+            ////本体
+            //_FilterMedian(
+            //    src, 
+            //    dst, 
+            //    rank,
+            //    matrix,
+            //    (WindowX / 2) * src.BayerSizeX,
+            //    (WindowY / 2) * src.BayerSizeY,
+            //    (WindowX - WindowX / 2) * src.BayerSizeX,
+            //    (WindowY - WindowY / 2) * src.BayerSizeY);
 
             
                 return dst;
@@ -252,16 +279,6 @@ namespace Pixels.Math
     }
 }
 
-
-//switch (Type.GetTypeCode(type))
-//{
-//    case TypeCode.Int32:
-//        // It's an int
-//        break;
-
-//    case TypeCode.String:
-//        // It's a string
-//        break;
 
 //public static Pixel<T> BitShift<T>(this Pixel<T> src, int value) where T : struct, IComparable
 //{
