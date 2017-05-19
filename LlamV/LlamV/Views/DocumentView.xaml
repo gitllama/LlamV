@@ -30,10 +30,10 @@
                         <!--<MenuItem Header="Selected-Area to Clipbord" Command="{Binding CaptureCommand}" CommandParameter="SelectedToClipbord"/>-->
                     </MenuItem>
                     <MenuItem Header="Raw">
-                        <MenuItem Header="Full-Area to File" Command="{Binding RawCommand}" CommandParameter="FullToFile"/>
-                        <MenuItem Header="Selected-Area to File" Command="{Binding RawCommand}" CommandParameter="SelectedToFile"/>
-                        <!--<MenuItem Header="Full-Area to Clipbord" Command="{Binding CSVCommand}" CommandParameter="FullToClipbord"/>-->
-                        <!--<MenuItem Header="Selected-Area to Clipbord" Command="{Binding CSVCommand}" CommandParameter="SelectedToClipbord"/>-->
+                        <MenuItem Header="Full-Area to BitmapFile" Command="{Binding RawSaveCommand}" CommandParameter="FullToBitmapFile"/>
+                        <MenuItem Header="Selected-Area to BitmapFile" Command="{Binding RawSaveCommand}" CommandParameter="SelectedToBitmapFile"/>
+                        <MenuItem Header="Full-Area to SingleRawFile" Command="{Binding RawSaveCommand}" CommandParameter="FullToFile"/>
+                        <MenuItem Header="Selected-Area to SingleRawFile" Command="{Binding RawSaveCommand}" CommandParameter="SelectedToFile"/>
                     </MenuItem>
                     <MenuItem Header="CSV">
                         <MenuItem Header="Full-Area to File" Command="{Binding CSVCommand}" CommandParameter="FullToFile"/>
@@ -50,7 +50,7 @@
             </Grid.ContextMenu>
 
             <Canvas x:Name="cnv"
-                    Margin="{Binding Margin}"
+                    Margin="50,50,50,50"
                     Width="{Binding Width.Value}" 
                     Height="{Binding Height.Value}">
 

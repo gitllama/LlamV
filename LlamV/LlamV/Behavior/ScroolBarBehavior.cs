@@ -16,7 +16,6 @@ namespace LlamV.Behavior
             "MouseWheel", typeof(double), typeof(ScroolBarBehavior), new UIPropertyMetadata(1.0));
         public double MouseWheel { get => (double)GetValue(ScaleProperty); set => SetValue(ScaleProperty, value); }
 
-
         public static readonly DependencyProperty ScrollBarPositionProperty = DependencyProperty.Register(
             "ScrollBarPosition", typeof(Point), typeof(ScroolBarBehavior), new UIPropertyMetadata(new Point(0,0), ScrollBarPositionPropertyChanged));
         public Point ScrollBarPosition { get => (Point)GetValue(ScrollBarPositionProperty); set=> SetValue(ScrollBarPositionProperty, value);}
@@ -24,7 +23,6 @@ namespace LlamV.Behavior
         public ICommand ShortcutCommand { get => (ICommand)GetValue(ShortcutCommandProperty); set => SetValue(ShortcutCommandProperty, value); }
         public static readonly DependencyProperty ShortcutCommandProperty = DependencyProperty.Register(
             "ShortcutCommand", typeof(ICommand), typeof(ScroolBarBehavior), new PropertyMetadata(null));
-
 
         private static void ScrollBarPositionPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -46,7 +44,6 @@ namespace LlamV.Behavior
             this.AssociatedObject.PreviewMouseWheel += AssociatedObject_MouseWheel;
             this.AssociatedObject.MouseDown += AssociatedObject_MouseDown;
             this.AssociatedObject.PreviewKeyDown += AssociatedObject_KeyDown;
-
         }
         protected override void OnCleanup()
         {
@@ -55,7 +52,6 @@ namespace LlamV.Behavior
             this.AssociatedObject.PreviewMouseWheel -= AssociatedObject_MouseWheel;
             this.AssociatedObject.MouseDown -= AssociatedObject_MouseDown;
             this.AssociatedObject.PreviewKeyDown -= AssociatedObject_KeyDown;
-
             //sv = null;
             base.OnCleanup();
         }
@@ -111,7 +107,7 @@ namespace LlamV.Behavior
             var i = e.GetPosition(sender as ScrollViewer);
             MouseWheel *= a;
 
-            if(a>1)
+            if (a > 1)
             {
                 x = (sv.HorizontalOffset * 2) + i.X;
                 y = (sv.VerticalOffset * 2) + i.Y;
@@ -125,10 +121,9 @@ namespace LlamV.Behavior
             sv.ScrollToVerticalOffset(y);
             e.Handled = true;
         }
-
         private void AssociatedObject_KeyDown(object sender, KeyEventArgs e)
         {
-            switch(e.Key)
+            switch (e.Key)
             {
                 case Key.Up:
                     sv.ScrollToVerticalOffset(sv.VerticalOffset - 10);
@@ -155,6 +150,7 @@ namespace LlamV.Behavior
         {
             if (e.XButton1 == MouseButtonState.Pressed) ShortcutCommand.Execute("XButton1");
             if (e.XButton2 == MouseButtonState.Pressed) ShortcutCommand.Execute("XButton2");
+            if (e.MiddleButton == MouseButtonState.Pressed) ShortcutCommand.Execute("MiddleButton");
         }
     }
 

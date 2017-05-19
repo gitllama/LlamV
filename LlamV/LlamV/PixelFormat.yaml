@@ -1,4 +1,11 @@
-﻿- Model : BT200C_Average
+﻿- Model : BMP
+  FileName :
+  - "\\.bmp$"
+  - "\\.jpg$"
+  - "\\.png$"
+  Type   : Bmp
+  Note : 暫定
+- Model : Average
   FileName :
   - "ave\\.bin$"
   - "dev\\.bin$"
@@ -89,7 +96,7 @@
       Top    : 1168
       Width  : 128
       Height : 5
-- Model : BT200C_Single
+- Model : Single
   FileName :
   - "\\d{1,12}\\.bin$"
   - "sgl\\.bin$"
@@ -98,6 +105,23 @@
   Height : 1178
   Type   : Int32
   Note : 暫定
+  Colors :
+    - x      : 0
+      y      : 0
+      step_x : 2
+      step_y : 2
+    - x      : 1
+      y      : 0
+      step_x : 2
+      step_y : 2
+    - x      : 0
+      y      : 1
+      step_x : 2
+      step_y : 2
+    - x      : 1
+      y      : 1
+      step_x : 2
+      step_y : 2
   Maps :
     Full : 
       Left   : 0 
@@ -110,17 +134,12 @@
       Width  : 1956
       Height : 1116
     Effective : 
-      Left   : 153 
+      Left   : 154
       Top    : 43
       Width  : 1948
       Height : 1108
     Active : 
       Left   : 160 
-      Top    : 49
-      Width  : 1936
-      Height : 1096
-    ActiveStaggerL : 
-      Left   : 159 
       Top    : 49
       Width  : 1936
       Height : 1096
@@ -179,3 +198,16 @@
       Top    : 1168
       Width  : 128
       Height : 5
+- Model : NSingle
+  FileName :
+  - "\\d{1,12}\\.btn$"
+  Width  : 7872
+  Height : 4348
+  Type   : UInt16
+  Note : 暫定
+  Maps :
+    Full : 
+      Left   : 0 
+      Top    : 0
+      Width  : 7872
+      Height : 4348

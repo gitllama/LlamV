@@ -70,7 +70,7 @@ namespace LlamV.ViewModels
             DocumentOpenCommand.Subscribe(_ =>
             {
                 var i = new Document();
-                model.Add(i);
+                //model.Add(i); 勝手にAddされるので削除
             });
             DocumentClosedCommand = new ReactiveCommand<string>();
             DocumentClosedCommand.Subscribe(x => model.Remove(x as string));
@@ -102,6 +102,8 @@ namespace LlamV.ViewModels
             var p3 = new OutputTool();
             model.Tools.Add(p3);
             Output = p3.ToReactivePropertyAsSynchronized(x => x.IsVisible);
+
+            model.Documents.Clear();
 
             var d = new Document();
             d.model.ReadFile(App.Args.Length > 0 ? App.Args[0] : null, d.ContentId);

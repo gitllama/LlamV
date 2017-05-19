@@ -1,28 +1,42 @@
 ﻿
 //前処理, Color処理はRG
 raw = PrePro(raw);
-
+raw = ColorTest(raw);
 //スペックの表示
-var r = Spec(raw);
+//var r = Spec(raw);
+//raw = raw.FilterHOB();
 
-//選択範囲の確認
-var x = raw["Trim"].Left;
-var y = raw["Trim"].Top;
-var w = raw["Trim"].Width;
-var h = raw["Trim"].Height;
-
-//選択範囲のフィルター
-raw = raw["Trim"].FilterAverageV();
-
-
-
-//var buf = raw.ToPixelInt32();
-//var i = buf[0];
-//var line = String.Join("\r\n", raw["Active"].AverageV());
-
-//関数
-
-public Pixel<float> PrePro(Pixel<float> src) => raw["Normal"].StaggerLSelf();
+/*********** Method **********/
+public Pixel<float> ColorTest(Pixel<float> src)
+{
+    raw = raw["Active"];
+    //前処理, Color処理はRG
+    for (int c = 0; c < 4; c++)
+        for (int y = 0; y < raw.HeightColor(c); y++)
+        {
+            for (int x = 0; x < raw.WidthColor(c); x++)
+            {
+                raw[c, x, y] = c * 35;
+            }
+        }
+}
+public Pixel<float> PrePro(Pixel<float> src)
+{
+    //Color = RG
+    return raw["Normal"].StaggerRSelf();
+}
+public void CF(Pixel<float> src)
+{
+    src = src["Active"]
+        .Cut()
+        .CutBayer(0, 0);
+    src.CumulativeFrequency(
+        Enumerable
+            .Range(0, 256)
+            .Select(x => (double)(x - 10) * 32)
+            .ToArray()
+          ).ToClip();
+}
 public string Spec(Pixel<float> src)
 {
     string result = "";
@@ -54,3 +68,28 @@ public double Average(Pixel<float> src)
 {
     return src.Cut().Average();
 }
+public void Fil(Pixel<float> src)
+{
+    //選択範囲の確認
+    var x = src["Trim"].Left;
+    var y = src["Trim"].Top;
+    var w = src["Trim"].Width;
+    var h = src["Trim"].Height;
+
+    //選択範囲のフィルター
+    src = src["Trim"].FilterAverageV();
+}
+
+
+public string b2spec(Pixel<float> src)
+{
+    string result = "";
+
+    result += $"{raw["Active"].Signal()}\r\n";
+    result += $"{raw["Active"].Signal()}\r\n";
+}
+
+
+//var buf = raw.ToPixelInt32();
+//var i = buf[0];
+//var line = String.Join("\r\n", raw["Active"].AverageV());

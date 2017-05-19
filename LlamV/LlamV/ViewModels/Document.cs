@@ -22,6 +22,7 @@ using System.Reactive.Disposables;
 using System.ComponentModel;
 using LlamV.Behavior;
 using YamlDotNet.Serialization;
+using Pixels.Stream;
 
 namespace LlamV.ViewModels
 {
@@ -61,6 +62,7 @@ namespace LlamV.ViewModels
         public ReactiveProperty<bool> isLinkage { get; private set; }
 
         public ReactiveProperty<double> MouseWheel { get; private set; }
+        public ReactiveProperty<int> MouseWheelShift { get; private set; }
 
         public ReactiveProperty<List<Shape>> Shapes { get; private set; }
         [Browsable(false)]
@@ -95,7 +97,7 @@ namespace LlamV.ViewModels
             #region MyRegion
             //タイトル
             FileName = model
-                .ObserveProperty(x => x.DocumentDatas)
+                .ObserveProperty(x => x.ContentData)
                 .Select(x => x.ContainsKey(this.ContentId) ? x[this.ContentId].FileNames : null)
                 .ToReactiveProperty().AddTo(this.Disposable);
             FileName.Subscribe(x =>
@@ -125,7 +127,7 @@ namespace LlamV.ViewModels
             Scale = model.ObserveProperty(x => x.Scale).Where(_ => isLinkage.Value == true).ToReactiveProperty().AddTo(this.Disposable);
 
 
-            img = model.ObserveProperty(x => x.DocumentDatas)
+            img = model.ObserveProperty(x => x.ContentData)
                 .Select(x => x.ContainsKey(this.ContentId)? x[this.ContentId].Images : null)
                 .ToReactiveProperty().AddTo(this.Disposable);
 
@@ -186,13 +188,13 @@ namespace LlamV.ViewModels
                 switch(x)
                 {
                     case "FullToFile":
-                        model.DocumentDatas[this.ContentId].Images.Save(DateTime.Now.ToString("yyyyMMddHHmmss") + ".png");
+                        model.ContentData[this.ContentId].Images.Save(DateTime.Now.ToString("yyyyMMddHHmmss") + ".png");
                         break;
                     //case "SelectedToFile":
                     //    model.DocumentDatas[this.ContentId]["Trim"].Images.Save(DateTime.Now.ToString("yyyyMMddHHmmss") + ".png");
                     //    break;
                     case "FullToClipbord":
-                        model.DocumentDatas[this.ContentId].Images.ToClipboard();
+                        model.ContentData[this.ContentId].Images.ToClipboard();
                         break;
                     //case "SelectedToClipbord":
                     //    model.DocumentDatas[this.ContentId].Images.ToClipboard();
@@ -206,18 +208,18 @@ namespace LlamV.ViewModels
             {
                 switch (x)
                 {
+                    case "FullToBitmapFile":
+                        model.RawSave(this.ContentId, false, false);
+                        break;
+                    case "SelectedToBitmapFile":
+                        model.RawSave(this.ContentId, false, true);
+                        break;
                     case "FullToFile":
-                        model.DocumentDatas[this.ContentId].Images.Save(DateTime.Now.ToString("yyyyMMddHHmmss") + ".png");
+                        model.RawSave(this.ContentId, true, false);
                         break;
                     case "SelectedToFile":
-                        //model.DocumentDatas[this.ContentId]["Trim"].Images.Save(DateTime.Now.ToString("yyyyMMddHHmmss") + ".png");
+                        model.RawSave(this.ContentId, true, true);
                         break;
-                    //case "FullToClipbord":
-                    //    model.DocumentDatas[this.ContentId].Images.ToClipboard();
-                    //    break;
-                    //case "SelectedToClipbord":
-                    //    model.DocumentDatas[this.ContentId].Images.ToClipboard();
-                    //    break;
                     default:
                         break;
                 }
@@ -257,9 +259,9 @@ namespace LlamV.ViewModels
             f.A = 30;
 
             //値は取得できたら
-            if (!model.DocumentDatas.ContainsKey(this.ContentId)) return;
-            if (model.DocumentDatas[this.ContentId].raws == null) return;
-            var buf = model.DocumentDatas[this.ContentId].raws;
+            if (!model.ContentData.ContainsKey(this.ContentId)) return;
+            if (model.ContentData[this.ContentId].Raw == null) return;
+            var buf = model.ContentData[this.ContentId].Raw;
 
 
             if (!buf.Maps.ContainsKey("Full")) return;
@@ -323,7 +325,6 @@ namespace LlamV.ViewModels
             this.Disposable.Dispose();
         }
     }
-
 }
 
 

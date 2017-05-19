@@ -12,9 +12,7 @@ using System.Collections.ObjectModel;
 using Prism.Commands;
 using System.ComponentModel;
 using System.IO;
-using Microsoft.CodeAnalysis.Scripting;
 using System.Reflection;
-using Microsoft.CodeAnalysis.CSharp.Scripting;
 using System.Windows;
 using YamlDotNet.Serialization;
 
@@ -80,10 +78,10 @@ namespace LlamV.Models
         public class DocumentData
         {
             public string FileNames;
-            public Pixel<float> raws;
+            public Pixel<float> Raw;
             public WriteableBitmap Images;
         }
-        public Dictionary<string, DocumentData> DocumentDatas = new Dictionary<string, DocumentData>();
+        public Dictionary<string, DocumentData> ContentData = new Dictionary<string, DocumentData>();
 
         public bool _isLinkage = true;
         public bool isLinkage { get => _isLinkage; set => SetProperty(ref _isLinkage, value); }
@@ -154,7 +152,6 @@ namespace LlamV.Models
         [Category("Canvas"), Description("")]
         public Color Background { get => _Background; set => SetProperty(ref _Background, value); }
 
-
         //pixeloffsetmode
         //結果
 
@@ -171,10 +168,10 @@ namespace LlamV.Models
         {
             var i = base.Add(content);
             var src = PixelFactory.Create<float>(1, 1);
-            DocumentDatas.Add(i, new DocumentData()
+            ContentData.Add(i, new DocumentData()
             {
                 FileNames = "null",
-                raws = src,
+                Raw = src,
                 Images = src.ToMono()
             });
             return i;
@@ -186,7 +183,7 @@ namespace LlamV.Models
             //raws.Remove(id);
             //Images.Remove(id);
 
-            DocumentDatas.Remove(contentId);
+            ContentData.Remove(contentId);
 
             base.Remove(contentId);
         }
@@ -196,65 +193,46 @@ namespace LlamV.Models
             //int , floatの場合分け
 
             Output($"ReadFile : {filename} to {contentId}");
-            DocumentDatas[contentId].FileNames= filename;
+            ContentData[contentId].FileNames= filename;
 
             if(!System.IO.File.Exists(filename))
             {
                 //ファイルが存在しないとき
-                DocumentDatas[contentId].raws = PixelFactory.Create<float>(2, 2);
+                ContentData[contentId].Raw = PixelFactory.Create<float>(2, 2);
             }
             else if (Auto)
             {
                 var dic = (new Deserializer()).Deserialize<List<Pixels.PixelFormat>>(File.ReadAllText("PixelFormat.yaml"));
-                DocumentDatas[contentId].raws = PixelFactory.Create<float>(dic, filename);
+                ContentData[contentId].Raw = PixelFactory.Create<float>(dic, filename);
             }
             else
             {
-                DocumentDatas[contentId].raws = ((dynamic)PixelFactory.Create<float>(ManualReader.Width, ManualReader.Height))
+                ContentData[contentId].Raw = ((dynamic)PixelFactory.Create<float>(ManualReader.Width, ManualReader.Height))
                     .Read(filename, ManualReader.Offset, ManualReader.Type);
             }
             Developing(contentId);
             //RaisePropertyChanged(nameof(DocumentDatas));
         }
 
-        public void ScriptRun(string contentId) => RunAsync(contentId, Script);
+        public void ScriptRun(string contentId) => ScriptRunAsync(contentId, Script);
 
-        public async void RunAsync(string id,string command)
+        public async void ScriptRunAsync(string id,string command)
         {
             try
             {
                 Output("-----Script Run-----");
-                DocumentDatas[id].raws.AddMap("Trim", (int)Rect.Left, (int)Rect.Top, (int)Rect.Width, (int)Rect.Height);
-                var globals = new Globals() { raw = DocumentDatas[id].raws };
+                ContentData[id].Raw.AddMap("Trim", (int)Rect.Left, (int)Rect.Top, (int)Rect.Width, (int)Rect.Height);
+                var globals = new Globals() { raw = ContentData[id].Raw };
 
-                var ssr = ScriptSourceResolver.Default.WithBaseDirectory(Environment.CurrentDirectory);
-                var smr = ScriptMetadataResolver.Default.WithBaseDirectory(Environment.CurrentDirectory);
-                var state = await CSharpScript.RunAsync(
-                    command,
-                    ScriptOptions.Default
-                    .WithSourceResolver(ssr)
-                    .WithMetadataResolver(smr)
-                    .WithReferences(Assembly.GetEntryAssembly())
-                    .WithImports(new string[]
-                    {
-                        "System",
-                        "System.Collections.Generic",
-                        "System.Linq",
-                        "System.Math",
-                        "System.IO",
-                        "Pixels",
-                        "Pixels.Math",
-                        "Pixels.Stream",
-                        "Pixels.Extend",
-                    }),
-                   globals: globals);
-
-                
+                PixelScripting a = new PixelScripting();
+                var state = await a.RunAsync(command, globals);
                 foreach (var variable in state.Variables)
                     Output($"  Result : {variable.Name} = {variable.Value} of type {variable.Type}");
 
                 //再代入した場合参照先が変わるので書き戻しが必要
-                DocumentDatas[id].raws = globals.raw;
+                ContentData[id].Raw = globals.raw;
+                //書き戻したら再描画必要
+                Developing(id);
             }
             catch (Exception e)
             {
@@ -264,23 +242,31 @@ namespace LlamV.Models
 
         public void ReLoad(string contentId, bool autorun = false)
         {
-            if (!DocumentDatas.ContainsKey(contentId)) return;
-            if (!File.Exists(DocumentDatas[contentId].FileNames)) return;
+            if (!ContentData.ContainsKey(contentId)) return;
+            if (!File.Exists(ContentData[contentId].FileNames)) return;
 
-            ReadFile(DocumentDatas[contentId].FileNames, contentId);
+            ReadFile(ContentData[contentId].FileNames, contentId);
             if(autorun) ScriptRun(contentId);
-            Developing(contentId);
         }
 
         public void Shortcut(string contentId, string x)
         {
             if (x == "XButton1") ReLoad(contentId);
             if (x == "XButton2") ScriptRun(contentId);
+
+            if (x == "MiddleButton")
+            {
+                rectselect += 1;
+                rectselect = rectselect % ContentData[contentId].Raw.Maps.Count;
+                var i = ContentData[contentId].Raw.Maps.Skip(rectselect).First().Value;
+                Rect = new Rect(i.Left, i.Top, i.Width, i.Height);
+            }
         }
+        int rectselect = 0;
 
         public void DevelopingAll()
         {
-            foreach(var i in DocumentDatas.Keys)
+            foreach(var i in ContentData.Keys)
             {
                 Developing(i);
             }
@@ -297,11 +283,11 @@ namespace LlamV.Models
         {
             Output($"Developing {id}");
 
-            var buf = DocumentDatas[id].raws.Clone();
+            var buf = ContentData[id].Raw.Clone();
 
             buf["Full"].SubSelf(Offset).MulSelf((float)(255.0/Depth));
             //buf.SubSelf(Offset).MulSelf(255.0).DivSelf(Depth);
-            DocumentDatas[id].Images =
+            ContentData[id].Images =
                 Color == ColorType.Raw ? buf.ToMono() :
                 Color == ColorType.GR ? buf.ToColorGR(ColorSetting.GetMatrix()) :
                 Color == ColorType.RG ? buf.ToColorRG(ColorSetting.GetMatrix()) :
@@ -309,24 +295,56 @@ namespace LlamV.Models
                 Color == ColorType.BG ? buf.ToColorBG(ColorSetting.GetMatrix()) : 
                 buf.ToMono();
             
-            RaisePropertyChanged(nameof(DocumentDatas));
+            RaisePropertyChanged(nameof(ContentData));
         }
 
-        public void ClipText(string contentId,bool selected)
+        public void ClipText(string contentId, bool selected)
         {
             Output("-----ClipText-----");
             if(selected)
             {
-                DocumentDatas[contentId].raws.AddMap("Trim", (int)Rect.Left, (int)Rect.Top, (int)Rect.Width, (int)Rect.Height);
+                ContentData[contentId].Raw.AddMap("Trim", (int)Rect.Left, (int)Rect.Top, (int)Rect.Width, (int)Rect.Height);
                 Clipboard.SetDataObject(
-                    DocumentDatas[contentId].raws["Trim"].ToText(),
+                    ContentData[contentId].Raw["Trim"].ToText(),
                     false);
             }
             else
             {
                 Clipboard.SetDataObject(
-                    DocumentDatas[contentId].raws["Full"].ToText(),
+                    ContentData[contentId].Raw["Full"].ToText(),
                     false);
+            }
+        }
+        public void RawSave(string contentId, bool raw, bool selected)
+        {
+            Output("-----RawSave-----");
+            if(raw)
+            {
+                var i = DateTime.Now.ToString("yyyyMMddHHmmss") + ".bin";
+                Output(" -> i");
+                if (selected)
+                {
+                    ContentData[contentId].Raw.AddMap("Trim", (int)Rect.Left, (int)Rect.Top, (int)Rect.Width, (int)Rect.Height);
+                    ContentData[contentId].Raw["Trim"].Write(i, true);
+                }
+                else
+                {
+                    ContentData[contentId].Raw["Full"].Write(i);
+                }
+            }
+            else
+            {
+                var i = DateTime.Now.ToString("yyyyMMddHHmmss") + ".png";
+                Output(" -> i");
+                if (selected)
+                {
+                    ContentData[contentId].Raw.AddMap("Trim", (int)Rect.Left, (int)Rect.Top, (int)Rect.Width, (int)Rect.Height);
+                    ContentData[contentId].Raw["Trim"].Cut().AddSelf(Offset).MulSelf(255).DivSelf(Depth).TrimSelf(255,0).ToPixelByte().WriteBitmap(i);
+                }
+                else
+                {
+                    ContentData[contentId].Raw["Full"].Cut().AddSelf(Offset).MulSelf(255).DivSelf(Depth).TrimSelf(255, 0).ToPixelByte().WriteBitmap(i);
+                }
             }
         }
     }
