@@ -8,13 +8,13 @@ using System.Threading.Tasks;
 
 namespace Pixels.Math
 {
+
     public enum BMPColor
     {
         R, G, B, A
     }
 
-
-    public static class PixelFilter
+    public static partial class PixelFilter
     {
         //切り出し
 
@@ -30,7 +30,7 @@ namespace Pixels.Math
                     dst[i++] = src[x, y];
             return PixelFactory.Create(src.Width, src.Height, dst);
         }
-        public static Pixel<T> Cut<T>(this Pixel<T> src,int color) where T : struct, IComparable
+        public static Pixel<T> Cut<T>(this Pixel<T> src, string color) where T : struct, IComparable
         {
             int w = src.WidthColor(color);
             int h = src.HeightColor(color);
@@ -39,10 +39,10 @@ namespace Pixels.Math
             int i = 0;
             for (int y = 0; y < h; y++)
                 for (int x = 0; x < w; x++)
-                    dst[i++] = src[x, y];
-            return PixelFactory.Create(src.Width, src.Height, dst);
+                    dst[i++] = src[color, x, y];
+            return PixelFactory.Create(w, h, dst);
         }
-        public static Pixel<T> Cut<T>(this Pixel<T> src, int x, int y,int width, int height) where T : struct, IComparable
+        public static Pixel<T> Cut<T>(this Pixel<T> src, int x, int y, int width, int height) where T : struct, IComparable
         {
             src.SetMap("Full");
             var dst = new T[width * height];
@@ -84,6 +84,8 @@ namespace Pixels.Math
             => Stagger(src, src.Clone(), +1);
 
 
+        //アベレージフィルタ
+
         public static Pixel<float> FilterAverageV(this Pixel<float> src, Pixel<float> dst = null)
         {
             dst = dst ?? src.Clone();
@@ -100,6 +102,23 @@ namespace Pixels.Math
             }
             return dst;
         }
+        public static Pixel<float> FilterAverageV(this Pixel<float> src, string color, Pixel<float> dst = null)
+        {
+            dst = dst ?? src.Clone();
+            var i = src.AverageV();
+
+            int w = src.WidthColor(color);
+            int h = src.HeightColor(color);
+
+            int c = 0;
+            for (int x = 0; x < w; x++)
+            {
+                for (int y = 0; y < h; y++) dst[x, y] = (float)i[x];
+                c++;
+            }
+            return dst;
+        }
+
         public static Pixel<float> FilterAverageH(this Pixel<float> src, Pixel<float> dst = null)
         {
             dst = dst ?? src.Clone();
@@ -278,17 +297,3 @@ namespace Pixels.Math
 
     }
 }
-
-
-//public static Pixel<T> BitShift<T>(this Pixel<T> src, int value) where T : struct, IComparable
-//{
-//    switch ((object)src)
-//    {
-//        case Pixel<int> p:
-//            for (int y = 0; y < p.Height; y++)
-//                for (int x = 0; x < p.Width; x++)
-//                    p[x, y].BitShiftR(value);
-//            break;
-//    }
-//    return src;
-//}

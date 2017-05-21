@@ -2,7 +2,7 @@
 
 ## 構造
 
-ジェネリックにしてるけど、いろいろ制約強くて  
+ジェネリックにしてるけど、制約強くて  
 結局T4べた書きしている件
 
 そんなこんなで書き直す可能性大
@@ -23,13 +23,19 @@
 ### Pixel
 
 | Key | Description |
-|:---|:---|
-| this[x] |
-| this[x,y] |
-| this[string map] |
-| Map(string map) |
-| Clone() |
-| AddMap | Mapを追加します（viewerでのtrim用)
+|:----|:------------|
+| this[x]           | 生配列の参照 |
+| this[x,y]         | 設定Mapエリアでの画素参照 |
+| this[string map]  | Map（処理エリア）の設定
+| Map(string map)   | ↑
+| Width             | 設定Mapの幅
+| Height            | 設定Mapの高
+| this[c,x,y]       | 設定Mapエリア内指定ベイヤ別参照 |
+| WidthColor(c) | 設定Mapエリア内指定ベイヤ幅 |
+| HeightColor(c)| 設定Mapエリア内指定ベイヤ高 |
+
+| Clone()           |
+| AddMap            | Mapを追加します（viewerでのtrim用)
 
 ### PixelStream
 

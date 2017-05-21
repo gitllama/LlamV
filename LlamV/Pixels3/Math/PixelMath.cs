@@ -76,10 +76,15 @@ namespace Pixels.Math
             return dst;
         }
 
+
+    }
+
+    public static class StatMAth
+    {
         //累積度数
+
         public static Dictionary<double,int> CumulativeFrequency<T>(this Pixel<T> src, double[] thr) where T : struct, IComparable
         {
-            //
             var dst = new Dictionary<double, int>();
 
             foreach (var i in thr)
@@ -92,12 +97,93 @@ namespace Pixels.Math
                     //ref var buf = ref src[x, y];
                     foreach (var i in thr)
                     {
-                        if (buf.CompareTo(i) > 0) dst[i]++;
+                        if (buf> i) dst[i]++;
                         else break;
                     }
                 }
             return dst;
         }
 
+        //カウント
+
+        public static int Count<T>(Pixel<T> src1, int thr, INEQUALITY ine = INEQUALITY.GreaterThan, string color = null)
+            where T : struct, IComparable
+        {
+            int count = 0;
+            switch (ine)
+            {
+                case INEQUALITY.GreaterThan:
+                    for (int y = 0; y < src1.Height; y++)
+                        for (int x = 0; x < src1.Width; x++)
+                            if ((dynamic)src1[x, y] > thr) count++;
+                    return count;
+                case INEQUALITY.GreaterThanOrEqual:
+                    for (int y = 0; y < src1.Height; y++)
+                        for (int x = 0; x < src1.Width; x++)
+                            if ((dynamic)src1[x, y] > thr) count++;
+                    return count;
+                case INEQUALITY.LessThan:
+                    for (int y = 0; y < src1.Height; y++)
+                        for (int x = 0; x < src1.Width; x++)
+                            if ((dynamic)src1[x, y] > thr) count++;
+                    return count;
+                case INEQUALITY.LessThanOrEqual:
+                    for (int y = 0; y < src1.Height; y++)
+                        for (int x = 0; x < src1.Width; x++)
+                            if ((dynamic)src1[x, y] > thr) count++;
+                    return count;
+                case INEQUALITY.Equal:
+                    for (int y = 0; y < src1.Height; y++)
+                        for (int x = 0; x < src1.Width; x++)
+                            if ((dynamic)src1[x, y] > thr) count++;
+                    return count;
+                case INEQUALITY.NotEqual:
+                    for (int y = 0; y < src1.Height; y++)
+                        for (int x = 0; x < src1.Width; x++)
+                            if ((dynamic)src1[x, y] > thr) count++;
+                    return count;
+            }
+            return -1;
+        }
+
+        public static int Count<T, U>(Pixel<T> src1, Pixel<U> src2, int thr, INEQUALITY ine = INEQUALITY.GreaterThan, string color = null)
+            where T : struct, IComparable where U : struct, IComparable
+        {
+            int count = 0;
+            switch (ine)
+            {
+                case INEQUALITY.GreaterThan:
+                    for (int y = 0; y < src1.Height; y++)
+                        for (int x = 0; x < src1.Width; x++)
+                            if (((dynamic)src1[x, y] - (dynamic)src2[x, y]) > thr) count++;
+                    return count;
+                case INEQUALITY.GreaterThanOrEqual:
+                    for (int y = 0; y < src1.Height; y++)
+                        for (int x = 0; x < src1.Width; x++)
+                            if (((dynamic)src1[x, y] - (dynamic)src2[x, y]) > thr) count++;
+                    return count;
+                case INEQUALITY.LessThan:
+                    for (int y = 0; y < src1.Height; y++)
+                        for (int x = 0; x < src1.Width; x++)
+                            if (((dynamic)src1[x, y] - (dynamic)src2[x, y]) > thr) count++;
+                    return count;
+                case INEQUALITY.LessThanOrEqual:
+                    for (int y = 0; y < src1.Height; y++)
+                        for (int x = 0; x < src1.Width; x++)
+                            if (((dynamic)src1[x, y] - (dynamic)src2[x, y]) > thr) count++;
+                    return count;
+                case INEQUALITY.Equal:
+                    for (int y = 0; y < src1.Height; y++)
+                        for (int x = 0; x < src1.Width; x++)
+                            if (((dynamic)src1[x, y] - (dynamic)src2[x, y]) > thr) count++;
+                    return count;
+                case INEQUALITY.NotEqual:
+                    for (int y = 0; y < src1.Height; y++)
+                        for (int x = 0; x < src1.Width; x++)
+                            if (((dynamic)src1[x, y] - (dynamic)src2[x, y]) > thr) count++;
+                    return count;
+            }
+            return -1;
+        }
     }
 }

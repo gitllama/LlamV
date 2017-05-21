@@ -285,7 +285,7 @@ namespace LlamV.Models
 
             var buf = ContentData[id].Raw.Clone();
 
-            buf["Full"].SubSelf(Offset).MulSelf((float)(255.0/Depth));
+            buf["Full"].AddSelf(Offset).MulSelf((float)(255.0/Depth));
             //buf.SubSelf(Offset).MulSelf(255.0).DivSelf(Depth);
             ContentData[id].Images =
                 Color == ColorType.Raw ? buf.ToMono() :

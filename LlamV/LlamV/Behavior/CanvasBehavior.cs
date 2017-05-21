@@ -69,6 +69,7 @@ namespace LlamV.Behavior
             this.AssociatedObject.Loaded -= AssociatedObject_Loaded;
             this.AssociatedObject.MouseMove -= AssociatedObject_MouseMove;
             this.AssociatedObject.MouseDown -= AssociatedObject_MouseDown;
+            this.AssociatedObject.KeyDown -= AssociatedObject_KeyDown;
             this.AssociatedObject.SizeChanged -= AssociatedObject_LayoutUpdated;
             //cnv = null;
             base.OnCleanup();

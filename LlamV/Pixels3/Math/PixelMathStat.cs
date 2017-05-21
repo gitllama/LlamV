@@ -1,11 +1,4 @@
-﻿
-
-
-
-
-
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,7 +12,6 @@ namespace Pixels.Math
 {
     public static partial class PixelMath
     {
-
 
 
         public static int Count(Pixel<Byte> src1, Byte thr, INEQUALITY ine = INEQUALITY.GreaterThan,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
@@ -116,7 +108,6 @@ namespace Pixels.Math
 			return dst.ToArray();
         }
 		*/
-
         public static int Count(Pixel<UInt16> src1, UInt16 thr, INEQUALITY ine = INEQUALITY.GreaterThan,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
         {
 			int count = 0;
@@ -211,7 +202,6 @@ namespace Pixels.Math
 			return dst.ToArray();
         }
 		*/
-
         public static int Count(Pixel<UInt32> src1, UInt32 thr, INEQUALITY ine = INEQUALITY.GreaterThan,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
         {
 			int count = 0;
@@ -306,7 +296,6 @@ namespace Pixels.Math
 			return dst.ToArray();
         }
 		*/
-
         public static int Count(Pixel<UInt64> src1, UInt64 thr, INEQUALITY ine = INEQUALITY.GreaterThan,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
         {
 			int count = 0;
@@ -401,7 +390,6 @@ namespace Pixels.Math
 			return dst.ToArray();
         }
 		*/
-
         public static int Count(Pixel<Int16> src1, Int16 thr, INEQUALITY ine = INEQUALITY.GreaterThan,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
         {
 			int count = 0;
@@ -496,7 +484,6 @@ namespace Pixels.Math
 			return dst.ToArray();
         }
 		*/
-
         public static int Count(Pixel<Int32> src1, Int32 thr, INEQUALITY ine = INEQUALITY.GreaterThan,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
         {
 			int count = 0;
@@ -591,7 +578,6 @@ namespace Pixels.Math
 			return dst.ToArray();
         }
 		*/
-
         public static int Count(Pixel<Int64> src1, Int64 thr, INEQUALITY ine = INEQUALITY.GreaterThan,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
         {
 			int count = 0;
@@ -686,7 +672,6 @@ namespace Pixels.Math
 			return dst.ToArray();
         }
 		*/
-
         public static int Count(Pixel<Single> src1, Single thr, INEQUALITY ine = INEQUALITY.GreaterThan,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
         {
 			int count = 0;
@@ -781,7 +766,6 @@ namespace Pixels.Math
 			return dst.ToArray();
         }
 		*/
-
         public static int Count(Pixel<Double> src1, Double thr, INEQUALITY ine = INEQUALITY.GreaterThan,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
         {
 			int count = 0;
@@ -879,8 +863,6 @@ namespace Pixels.Math
 
 
 
-
-
         public static double Average(this Pixel<Byte> src,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
         {
 			double dst = 0;
@@ -940,7 +922,6 @@ namespace Pixels.Math
             return (ave, dev);
         }
 		*/
-
 
         public static double Average(this Pixel<UInt16> src,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
         {
@@ -1002,7 +983,6 @@ namespace Pixels.Math
         }
 		*/
 
-
         public static double Average(this Pixel<UInt32> src,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
         {
 			double dst = 0;
@@ -1062,7 +1042,6 @@ namespace Pixels.Math
             return (ave, dev);
         }
 		*/
-
 
         public static double Average(this Pixel<UInt64> src,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
         {
@@ -1124,7 +1103,6 @@ namespace Pixels.Math
         }
 		*/
 
-
         public static double Average(this Pixel<Int16> src,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
         {
 			double dst = 0;
@@ -1184,7 +1162,6 @@ namespace Pixels.Math
             return (ave, dev);
         }
 		*/
-
 
         public static double Average(this Pixel<Int32> src,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
         {
@@ -1246,7 +1223,6 @@ namespace Pixels.Math
         }
 		*/
 
-
         public static double Average(this Pixel<Int64> src,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
         {
 			double dst = 0;
@@ -1307,7 +1283,6 @@ namespace Pixels.Math
         }
 		*/
 
-
         public static double Average(this Pixel<Single> src,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
         {
 			double dst = 0;
@@ -1367,7 +1342,6 @@ namespace Pixels.Math
             return (ave, dev);
         }
 		*/
-
 
         public static double Average(this Pixel<Double> src,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
         {
@@ -1430,8 +1404,6 @@ namespace Pixels.Math
 		*/
 
 
-
-
 		public static double[] AverageH(this Pixel<Byte> src,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
         {
 			List<double> dst = new List<double>();
@@ -1449,15 +1421,133 @@ namespace Pixels.Math
 			}
             return dst.ToArray();
         }
-        public static double[] AverageV(this Pixel<Byte> src,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
+		public static double[] AverageH(this Pixel<UInt16> src,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
         {
 			List<double> dst = new List<double>();
-
-            for (int x = start_x; x < src.Width; x+=step_x)
+            for (int y = start_y; y < src.Height; y+=step_y)
 			{
 				int c=0;
 				double hoge = 0;
-				for (int y = start_y; y < src.Height; y+=step_y)
+				for (int x = start_x; x < src.Width; x+=step_x)
+				{
+					hoge+=src[x,y];
+					c++;				
+				}
+				hoge /= c;
+				dst.Add(hoge);
+			}
+            return dst.ToArray();
+        }
+		public static double[] AverageH(this Pixel<UInt32> src,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
+        {
+			List<double> dst = new List<double>();
+            for (int y = start_y; y < src.Height; y+=step_y)
+			{
+				int c=0;
+				double hoge = 0;
+				for (int x = start_x; x < src.Width; x+=step_x)
+				{
+					hoge+=src[x,y];
+					c++;				
+				}
+				hoge /= c;
+				dst.Add(hoge);
+			}
+            return dst.ToArray();
+        }
+		public static double[] AverageH(this Pixel<UInt64> src,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
+        {
+			List<double> dst = new List<double>();
+            for (int y = start_y; y < src.Height; y+=step_y)
+			{
+				int c=0;
+				double hoge = 0;
+				for (int x = start_x; x < src.Width; x+=step_x)
+				{
+					hoge+=src[x,y];
+					c++;				
+				}
+				hoge /= c;
+				dst.Add(hoge);
+			}
+            return dst.ToArray();
+        }
+		public static double[] AverageH(this Pixel<Int16> src,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
+        {
+			List<double> dst = new List<double>();
+            for (int y = start_y; y < src.Height; y+=step_y)
+			{
+				int c=0;
+				double hoge = 0;
+				for (int x = start_x; x < src.Width; x+=step_x)
+				{
+					hoge+=src[x,y];
+					c++;				
+				}
+				hoge /= c;
+				dst.Add(hoge);
+			}
+            return dst.ToArray();
+        }
+		public static double[] AverageH(this Pixel<Int32> src,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
+        {
+			List<double> dst = new List<double>();
+            for (int y = start_y; y < src.Height; y+=step_y)
+			{
+				int c=0;
+				double hoge = 0;
+				for (int x = start_x; x < src.Width; x+=step_x)
+				{
+					hoge+=src[x,y];
+					c++;				
+				}
+				hoge /= c;
+				dst.Add(hoge);
+			}
+            return dst.ToArray();
+        }
+		public static double[] AverageH(this Pixel<Int64> src,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
+        {
+			List<double> dst = new List<double>();
+            for (int y = start_y; y < src.Height; y+=step_y)
+			{
+				int c=0;
+				double hoge = 0;
+				for (int x = start_x; x < src.Width; x+=step_x)
+				{
+					hoge+=src[x,y];
+					c++;				
+				}
+				hoge /= c;
+				dst.Add(hoge);
+			}
+            return dst.ToArray();
+        }
+		public static double[] AverageH(this Pixel<Single> src,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
+        {
+			List<double> dst = new List<double>();
+            for (int y = start_y; y < src.Height; y+=step_y)
+			{
+				int c=0;
+				double hoge = 0;
+				for (int x = start_x; x < src.Width; x+=step_x)
+				{
+					hoge+=src[x,y];
+					c++;				
+				}
+				hoge /= c;
+				dst.Add(hoge);
+			}
+            return dst.ToArray();
+        }
+		public static double[] AverageH(this Pixel<Double> src,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
+        {
+			List<double> dst = new List<double>();
+            for (int y = start_y; y < src.Height; y+=step_y)
+			{
+				int c=0;
+				double hoge = 0;
+				for (int x = start_x; x < src.Width; x+=step_x)
 				{
 					hoge+=src[x,y];
 					c++;				
@@ -1468,14 +1558,16 @@ namespace Pixels.Math
             return dst.ToArray();
         }
 
-		public static double[] AverageH(this Pixel<UInt16> src,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
+
+        public static double[] AverageV(this Pixel<Byte> src,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
         {
 			List<double> dst = new List<double>();
-            for (int y = start_y; y < src.Height; y+=step_y)
+
+            for (int x = start_x; x < src.Width; x+=step_x)
 			{
 				int c=0;
 				double hoge = 0;
-				for (int x = start_x; x < src.Width; x+=step_x)
+				for (int y = start_y; y < src.Height; y+=step_y)
 				{
 					hoge+=src[x,y];
 					c++;				
@@ -1503,24 +1595,6 @@ namespace Pixels.Math
 			}
             return dst.ToArray();
         }
-
-		public static double[] AverageH(this Pixel<UInt32> src,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
-        {
-			List<double> dst = new List<double>();
-            for (int y = start_y; y < src.Height; y+=step_y)
-			{
-				int c=0;
-				double hoge = 0;
-				for (int x = start_x; x < src.Width; x+=step_x)
-				{
-					hoge+=src[x,y];
-					c++;				
-				}
-				hoge /= c;
-				dst.Add(hoge);
-			}
-            return dst.ToArray();
-        }
         public static double[] AverageV(this Pixel<UInt32> src,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
         {
 			List<double> dst = new List<double>();
@@ -1530,24 +1604,6 @@ namespace Pixels.Math
 				int c=0;
 				double hoge = 0;
 				for (int y = start_y; y < src.Height; y+=step_y)
-				{
-					hoge+=src[x,y];
-					c++;				
-				}
-				hoge /= c;
-				dst.Add(hoge);
-			}
-            return dst.ToArray();
-        }
-
-		public static double[] AverageH(this Pixel<UInt64> src,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
-        {
-			List<double> dst = new List<double>();
-            for (int y = start_y; y < src.Height; y+=step_y)
-			{
-				int c=0;
-				double hoge = 0;
-				for (int x = start_x; x < src.Width; x+=step_x)
 				{
 					hoge+=src[x,y];
 					c++;				
@@ -1575,24 +1631,6 @@ namespace Pixels.Math
 			}
             return dst.ToArray();
         }
-
-		public static double[] AverageH(this Pixel<Int16> src,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
-        {
-			List<double> dst = new List<double>();
-            for (int y = start_y; y < src.Height; y+=step_y)
-			{
-				int c=0;
-				double hoge = 0;
-				for (int x = start_x; x < src.Width; x+=step_x)
-				{
-					hoge+=src[x,y];
-					c++;				
-				}
-				hoge /= c;
-				dst.Add(hoge);
-			}
-            return dst.ToArray();
-        }
         public static double[] AverageV(this Pixel<Int16> src,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
         {
 			List<double> dst = new List<double>();
@@ -1602,24 +1640,6 @@ namespace Pixels.Math
 				int c=0;
 				double hoge = 0;
 				for (int y = start_y; y < src.Height; y+=step_y)
-				{
-					hoge+=src[x,y];
-					c++;				
-				}
-				hoge /= c;
-				dst.Add(hoge);
-			}
-            return dst.ToArray();
-        }
-
-		public static double[] AverageH(this Pixel<Int32> src,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
-        {
-			List<double> dst = new List<double>();
-            for (int y = start_y; y < src.Height; y+=step_y)
-			{
-				int c=0;
-				double hoge = 0;
-				for (int x = start_x; x < src.Width; x+=step_x)
 				{
 					hoge+=src[x,y];
 					c++;				
@@ -1647,24 +1667,6 @@ namespace Pixels.Math
 			}
             return dst.ToArray();
         }
-
-		public static double[] AverageH(this Pixel<Int64> src,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
-        {
-			List<double> dst = new List<double>();
-            for (int y = start_y; y < src.Height; y+=step_y)
-			{
-				int c=0;
-				double hoge = 0;
-				for (int x = start_x; x < src.Width; x+=step_x)
-				{
-					hoge+=src[x,y];
-					c++;				
-				}
-				hoge /= c;
-				dst.Add(hoge);
-			}
-            return dst.ToArray();
-        }
         public static double[] AverageV(this Pixel<Int64> src,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
         {
 			List<double> dst = new List<double>();
@@ -1674,24 +1676,6 @@ namespace Pixels.Math
 				int c=0;
 				double hoge = 0;
 				for (int y = start_y; y < src.Height; y+=step_y)
-				{
-					hoge+=src[x,y];
-					c++;				
-				}
-				hoge /= c;
-				dst.Add(hoge);
-			}
-            return dst.ToArray();
-        }
-
-		public static double[] AverageH(this Pixel<Single> src,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
-        {
-			List<double> dst = new List<double>();
-            for (int y = start_y; y < src.Height; y+=step_y)
-			{
-				int c=0;
-				double hoge = 0;
-				for (int x = start_x; x < src.Width; x+=step_x)
 				{
 					hoge+=src[x,y];
 					c++;				
@@ -1719,24 +1703,6 @@ namespace Pixels.Math
 			}
             return dst.ToArray();
         }
-
-		public static double[] AverageH(this Pixel<Double> src,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
-        {
-			List<double> dst = new List<double>();
-            for (int y = start_y; y < src.Height; y+=step_y)
-			{
-				int c=0;
-				double hoge = 0;
-				for (int x = start_x; x < src.Width; x+=step_x)
-				{
-					hoge+=src[x,y];
-					c++;				
-				}
-				hoge /= c;
-				dst.Add(hoge);
-			}
-            return dst.ToArray();
-        }
         public static double[] AverageV(this Pixel<Double> src,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
         {
 			List<double> dst = new List<double>();
@@ -1755,6 +1721,5 @@ namespace Pixels.Math
 			}
             return dst.ToArray();
         }
-
     }
 }

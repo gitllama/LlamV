@@ -38,6 +38,7 @@ namespace LlamV.ViewModels
         }
         protected override void OnCleanup()
         {
+            this.AssociatedObject.TextChanged -= AssociatedObject_TextChanged;
             base.OnCleanup();
         }
 

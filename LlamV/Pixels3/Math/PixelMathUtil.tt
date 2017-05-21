@@ -42,7 +42,8 @@ namespace Pixels.Math
                     for (int y = 0; y < h.Height; y++)
                         for (int x = 0; x < h.Width; x++)
                         {
-                            var hoge = h[x, y].ConvertToByte();
+                            ref var value = ref h[x, y];
+							var hoge = (byte)(value > 255 ? 255 : value < 0 ? 0 : value);
                             dst[c++] = hoge;
                             dst[c++] = hoge;
                             dst[c++] = hoge;
@@ -63,7 +64,8 @@ namespace Pixels.Math
                     for (int y = 0; y < h.Height; y++)
                         for (int x = 0; x < h.Width; x++)
                         {
-                            var hoge = h[x, y].ConvertToByte();
+							ref var value = ref h[x, y];
+							var hoge = (byte)(value > 255 ? 255 : value < 0 ? 0 : value);
                             dst[c++] = hoge;
                         }
                     break;
@@ -73,8 +75,5 @@ namespace Pixels.Math
             }
         }
 
-<# foreach (var T in Type){ #>
-        public static byte ConvertToByte(this <#= T #> value) => (byte)(value > 255 ? 255 : value < 0 ? 0 : value);
-<# } #>
     }
 }

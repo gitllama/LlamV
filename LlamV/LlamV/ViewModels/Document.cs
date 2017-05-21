@@ -21,8 +21,6 @@ using System.Windows;
 using System.Reactive.Disposables;
 using System.ComponentModel;
 using LlamV.Behavior;
-using YamlDotNet.Serialization;
-using Pixels.Stream;
 
 namespace LlamV.ViewModels
 {

@@ -71,6 +71,7 @@ namespace Pixels
         public int Width { get; set; } = 0;
         public int Height { get; set; } = 0;
     }
+
     public class PixelColor
     {
         public int x { get; set; } = 0;
@@ -78,7 +79,8 @@ namespace Pixels
         public int step_x { get; set; } = 0;
         public int step_y { get; set; } = 0;
     }
-    public partial class  Pixel<T> where T : struct, IComparable
+
+    public partial class Pixel<T> where T : struct, IComparable
     {
         public T[] pixel;
 
@@ -88,23 +90,23 @@ namespace Pixels
         public CancellationTokenSource token;
 
         public Dictionary<string, PixelMap> Maps { get; set; }
-        public int Stride { get; set; } = 1;
+        public int Stride { get; private set; } = 1;
 
-        public int Left { get; set; } = 0;
-        public int Top { get; set; } = 0;
-        public int Width { get; set; } = 1;
-        public int Height { get; set; } = 1;
+        public int Left { get; private set; } = 0;
+        public int Top { get; private set; } = 0;
+        public int Width { get; private set; } = 1;
+        public int Height { get; private set; } = 1;
 
         public ref T this[int value] { get => ref pixel[value]; }
 
         public ref T this[int x, int y] { get => ref pixel[ConvPoisonMap(x, y)]; }
         public int ConvPoisonMap(int x,int y) => (x + Left) + (y + Top) * Stride;
 
-        public List<PixelColor> Colors { get; set; }
-        public int WidthColor(int color) => (Width - Colors[color].x) / Colors[color].step_x;
-        public int HeightColor(int color) => (Height - Colors[color].y) / Colors[color].step_y;
-        public int BayerX { get; set; } = 0;
-        public int BayerY { get; set; } = 0;
+        public Dictionary<string, PixelColor> Colors { get; set; }
+        //public int WidthColor(int color) => (Width - Colors[color].x) / Colors[color].step_x;
+        //public int HeightColor(int color) => (Height - Colors[color].y) / Colors[color].step_y;
+        public int WidthColor(string color) => (Width - Colors[color].x) / Colors[color].step_x;
+        public int HeightColor(string color) => (Height - Colors[color].y) / Colors[color].step_y;
 
         /// <summary>
         /// Mapsによってズレマスよ
@@ -113,8 +115,8 @@ namespace Pixels
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <returns></returns>
-        public ref T this[int color, int x, int y] { get => ref pixel[ConvPoisonColor(color, x, y)]; }
-        public int ConvPoisonColor(int color, int x, int y)
+        public ref T this[string color, int x, int y] { get => ref pixel[ConvPoisonColor(color, x, y)]; }
+        public int ConvPoisonColor(string color, int x, int y)
         {
             var c = Colors[color];
             return
@@ -147,7 +149,8 @@ namespace Pixels
                 Height = height
             };
         }
-        public (int Left,int Top,int Width,int Height) GetMap(string key)
+
+        public (int Left,int Top,int Width,int Height) GetMap(string key = null)
         {
             var i = key ?? Map;
 
@@ -158,18 +161,86 @@ namespace Pixels
 
             return
             (
-                Left = Maps[i].Left,
-                Top = Maps[i].Top,
-                Width = Maps[i].Width,
-                Height = Maps[i].Height
+                Maps[i].Left,
+                Maps[i].Top,
+                Maps[i].Width,
+                Maps[i].Height
             );
         }
+
+        public (int Left, int Top, int Width, int Height,int StepX, int StepY) GetColor(string key = null)
+        {
+            return
+            (
+                Left + Colors[key].x,
+                Top + Colors[key].y,
+                Width + Left,
+                Height + Top,
+                Colors[key].step_x,
+                Colors[key].step_y
+            );
+        }
+
         public Pixel(){  }
+        public Pixel(int width, int height)
+        {
+            Maps = new Dictionary<string, PixelMap>()
+            {
+                ["Full"] = new PixelMap()
+                {
+                    Left = 0,
+                    Top = 0,
+                    Width = width,
+                    Height = height
+                }
+            };
+            this.Stride = Maps["Full"].Width;
+        }
+
+
+        public IEnumerable<int> GetIndex()
+        {
+            int c = Left + Top * Stride;
+            int inc = Stride - Width;
+            for (int y = 0; y < Height; y++)
+            {
+                for (int x = 0; x < Width; x++)
+                {
+                    yield return c;
+                    c++;
+                }
+                c += inc;
+            }
+        }
+        public IEnumerable<int> GetIndex(string color)
+        {
+            int l = Left + Colors[color].step_x - 1 - (Left + Colors[color].step_x - Colors[color].x - 1) % Colors[color].step_x;
+            int t = Top + Colors[color].step_y - 1 - (Top + Colors[color].step_y - Colors[color].y - 1) % Colors[color].step_y;
+            int c = l + t * Stride;
+
+            int w =
+                (Width + Left - Colors[color].x) / Colors[color].step_x - (Left - Colors[color].x) / Colors[color].step_x;
 
 
 
 
+            int h =
+                (Height + Top - Colors[color].y) / Colors[color].step_y - (Top - Colors[color].y) / Colors[color].step_y;
 
+            int inc = 
+                Stride - w * Colors[color].step_x 
+                + Stride * (Colors[color].step_y - 1);
+
+            for (int y = 0; y < h; y++)
+            {
+                for (int x = 0; x < w; x++)
+                {
+                    yield return c;
+                    c += Colors[color].step_x;
+                }
+                c += inc;
+            }
+        }
         public Pixel<T> Cancellation(CancellationTokenSource token)
         {
             this.token = token;
@@ -179,17 +250,33 @@ namespace Pixels
         //deepcopyに書き換え
         public Pixel<T> Clone()
         {
-            var i = PixelFactory.Create(Maps["Full"].Width, Maps["Full"].Height, (T[])pixel.Clone());
-            i.Maps = Maps;
-            i.Type = Type;
-
-            //マップ合わせ
-            i.SetMap(Map);
-            i.Colors = this.Colors;
-
+            var i = CloneWithoutPixel();
+            i.pixel = (T[])pixel.Clone();
             return i;
         }
+        public Pixel<T> CloneWithoutPixel()
+        {
+            var i = new Pixel<T>();
+            i.Maps = Maps;
+            i.Colors = this.Colors;
+            i.Type = Type;
+            i.Stride = Stride;
 
+            //マップ合わせ
+            return i[Map];
+        }
+
+        /// <summary>
+        /// 配列の定義し直し
+        /// </summary>
+        /// <returns></returns>
+        public Pixel<T> Clear()
+        {
+            this.Stride = Maps["Full"].Width;
+            this.pixel = new T[Maps["Full"].Width * Maps["Full"].Height];
+
+            return this["Full"];
+        }
 
 
         #region Operator
@@ -285,6 +372,8 @@ namespace Pixels
 
             return false;
         }
+
+
         #endregion
 
     }

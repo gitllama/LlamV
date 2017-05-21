@@ -21,7 +21,8 @@ namespace Pixels.Math
                     for (int y = 0; y < h.Height; y++)
                         for (int x = 0; x < h.Width; x++)
                         {
-                            var hoge = h[x, y].ConvertToByte();
+                            ref var value = ref h[x, y];
+							var hoge = (byte)(value > 255 ? 255 : value < 0 ? 0 : value);
                             dst[c++] = hoge;
                             dst[c++] = hoge;
                             dst[c++] = hoge;
@@ -31,7 +32,8 @@ namespace Pixels.Math
                     for (int y = 0; y < h.Height; y++)
                         for (int x = 0; x < h.Width; x++)
                         {
-                            var hoge = h[x, y].ConvertToByte();
+                            ref var value = ref h[x, y];
+							var hoge = (byte)(value > 255 ? 255 : value < 0 ? 0 : value);
                             dst[c++] = hoge;
                             dst[c++] = hoge;
                             dst[c++] = hoge;
@@ -41,7 +43,8 @@ namespace Pixels.Math
                     for (int y = 0; y < h.Height; y++)
                         for (int x = 0; x < h.Width; x++)
                         {
-                            var hoge = h[x, y].ConvertToByte();
+                            ref var value = ref h[x, y];
+							var hoge = (byte)(value > 255 ? 255 : value < 0 ? 0 : value);
                             dst[c++] = hoge;
                             dst[c++] = hoge;
                             dst[c++] = hoge;
@@ -51,7 +54,8 @@ namespace Pixels.Math
                     for (int y = 0; y < h.Height; y++)
                         for (int x = 0; x < h.Width; x++)
                         {
-                            var hoge = h[x, y].ConvertToByte();
+                            ref var value = ref h[x, y];
+							var hoge = (byte)(value > 255 ? 255 : value < 0 ? 0 : value);
                             dst[c++] = hoge;
                             dst[c++] = hoge;
                             dst[c++] = hoge;
@@ -61,7 +65,8 @@ namespace Pixels.Math
                     for (int y = 0; y < h.Height; y++)
                         for (int x = 0; x < h.Width; x++)
                         {
-                            var hoge = h[x, y].ConvertToByte();
+                            ref var value = ref h[x, y];
+							var hoge = (byte)(value > 255 ? 255 : value < 0 ? 0 : value);
                             dst[c++] = hoge;
                             dst[c++] = hoge;
                             dst[c++] = hoge;
@@ -71,7 +76,8 @@ namespace Pixels.Math
                     for (int y = 0; y < h.Height; y++)
                         for (int x = 0; x < h.Width; x++)
                         {
-                            var hoge = h[x, y].ConvertToByte();
+                            ref var value = ref h[x, y];
+							var hoge = (byte)(value > 255 ? 255 : value < 0 ? 0 : value);
                             dst[c++] = hoge;
                             dst[c++] = hoge;
                             dst[c++] = hoge;
@@ -81,7 +87,8 @@ namespace Pixels.Math
                     for (int y = 0; y < h.Height; y++)
                         for (int x = 0; x < h.Width; x++)
                         {
-                            var hoge = h[x, y].ConvertToByte();
+                            ref var value = ref h[x, y];
+							var hoge = (byte)(value > 255 ? 255 : value < 0 ? 0 : value);
                             dst[c++] = hoge;
                             dst[c++] = hoge;
                             dst[c++] = hoge;
@@ -91,7 +98,8 @@ namespace Pixels.Math
                     for (int y = 0; y < h.Height; y++)
                         for (int x = 0; x < h.Width; x++)
                         {
-                            var hoge = h[x, y].ConvertToByte();
+                            ref var value = ref h[x, y];
+							var hoge = (byte)(value > 255 ? 255 : value < 0 ? 0 : value);
                             dst[c++] = hoge;
                             dst[c++] = hoge;
                             dst[c++] = hoge;
@@ -101,7 +109,8 @@ namespace Pixels.Math
                     for (int y = 0; y < h.Height; y++)
                         for (int x = 0; x < h.Width; x++)
                         {
-                            var hoge = h[x, y].ConvertToByte();
+                            ref var value = ref h[x, y];
+							var hoge = (byte)(value > 255 ? 255 : value < 0 ? 0 : value);
                             dst[c++] = hoge;
                             dst[c++] = hoge;
                             dst[c++] = hoge;
@@ -120,7 +129,8 @@ namespace Pixels.Math
                     for (int y = 0; y < h.Height; y++)
                         for (int x = 0; x < h.Width; x++)
                         {
-                            var hoge = h[x, y].ConvertToByte();
+							ref var value = ref h[x, y];
+							var hoge = (byte)(value > 255 ? 255 : value < 0 ? 0 : value);
                             dst[c++] = hoge;
                         }
                     break;
@@ -128,7 +138,8 @@ namespace Pixels.Math
                     for (int y = 0; y < h.Height; y++)
                         for (int x = 0; x < h.Width; x++)
                         {
-                            var hoge = h[x, y].ConvertToByte();
+							ref var value = ref h[x, y];
+							var hoge = (byte)(value > 255 ? 255 : value < 0 ? 0 : value);
                             dst[c++] = hoge;
                         }
                     break;
@@ -136,7 +147,8 @@ namespace Pixels.Math
                     for (int y = 0; y < h.Height; y++)
                         for (int x = 0; x < h.Width; x++)
                         {
-                            var hoge = h[x, y].ConvertToByte();
+							ref var value = ref h[x, y];
+							var hoge = (byte)(value > 255 ? 255 : value < 0 ? 0 : value);
                             dst[c++] = hoge;
                         }
                     break;
@@ -144,7 +156,8 @@ namespace Pixels.Math
                     for (int y = 0; y < h.Height; y++)
                         for (int x = 0; x < h.Width; x++)
                         {
-                            var hoge = h[x, y].ConvertToByte();
+							ref var value = ref h[x, y];
+							var hoge = (byte)(value > 255 ? 255 : value < 0 ? 0 : value);
                             dst[c++] = hoge;
                         }
                     break;
@@ -152,7 +165,8 @@ namespace Pixels.Math
                     for (int y = 0; y < h.Height; y++)
                         for (int x = 0; x < h.Width; x++)
                         {
-                            var hoge = h[x, y].ConvertToByte();
+							ref var value = ref h[x, y];
+							var hoge = (byte)(value > 255 ? 255 : value < 0 ? 0 : value);
                             dst[c++] = hoge;
                         }
                     break;
@@ -160,7 +174,8 @@ namespace Pixels.Math
                     for (int y = 0; y < h.Height; y++)
                         for (int x = 0; x < h.Width; x++)
                         {
-                            var hoge = h[x, y].ConvertToByte();
+							ref var value = ref h[x, y];
+							var hoge = (byte)(value > 255 ? 255 : value < 0 ? 0 : value);
                             dst[c++] = hoge;
                         }
                     break;
@@ -168,7 +183,8 @@ namespace Pixels.Math
                     for (int y = 0; y < h.Height; y++)
                         for (int x = 0; x < h.Width; x++)
                         {
-                            var hoge = h[x, y].ConvertToByte();
+							ref var value = ref h[x, y];
+							var hoge = (byte)(value > 255 ? 255 : value < 0 ? 0 : value);
                             dst[c++] = hoge;
                         }
                     break;
@@ -176,7 +192,8 @@ namespace Pixels.Math
                     for (int y = 0; y < h.Height; y++)
                         for (int x = 0; x < h.Width; x++)
                         {
-                            var hoge = h[x, y].ConvertToByte();
+							ref var value = ref h[x, y];
+							var hoge = (byte)(value > 255 ? 255 : value < 0 ? 0 : value);
                             dst[c++] = hoge;
                         }
                     break;
@@ -184,7 +201,8 @@ namespace Pixels.Math
                     for (int y = 0; y < h.Height; y++)
                         for (int x = 0; x < h.Width; x++)
                         {
-                            var hoge = h[x, y].ConvertToByte();
+							ref var value = ref h[x, y];
+							var hoge = (byte)(value > 255 ? 255 : value < 0 ? 0 : value);
                             dst[c++] = hoge;
                         }
                     break;
@@ -193,14 +211,5 @@ namespace Pixels.Math
             }
         }
 
-        public static byte ConvertToByte(this Byte value) => (byte)(value > 255 ? 255 : value < 0 ? 0 : value);
-        public static byte ConvertToByte(this UInt16 value) => (byte)(value > 255 ? 255 : value < 0 ? 0 : value);
-        public static byte ConvertToByte(this UInt32 value) => (byte)(value > 255 ? 255 : value < 0 ? 0 : value);
-        public static byte ConvertToByte(this UInt64 value) => (byte)(value > 255 ? 255 : value < 0 ? 0 : value);
-        public static byte ConvertToByte(this Int16 value) => (byte)(value > 255 ? 255 : value < 0 ? 0 : value);
-        public static byte ConvertToByte(this Int32 value) => (byte)(value > 255 ? 255 : value < 0 ? 0 : value);
-        public static byte ConvertToByte(this Int64 value) => (byte)(value > 255 ? 255 : value < 0 ? 0 : value);
-        public static byte ConvertToByte(this Single value) => (byte)(value > 255 ? 255 : value < 0 ? 0 : value);
-        public static byte ConvertToByte(this Double value) => (byte)(value > 255 ? 255 : value < 0 ? 0 : value);
     }
 }

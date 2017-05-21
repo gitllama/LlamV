@@ -46,6 +46,11 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Math\PixelFilterTT.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>PixelFilterTT.tt</DependentUpon>
+    </Compile>
     <Compile Include="Pixel.cs" />
     <Compile Include="PixelFactory.cs" />
     <Compile Include="Math\PixelFilter.cs" />
@@ -86,12 +91,7 @@
   <ItemGroup>
     <Content Include="Math\PixelFilterTT.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>PixelFilterTT.txt</LastGenOutput>
-    </Content>
-    <Content Include="Math\PixelFilterTT.txt">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>PixelFilterTT.tt</DependentUpon>
+      <LastGenOutput>PixelFilterTT.cs</LastGenOutput>
     </Content>
     <Content Include="Math\PixelMathOp.tt">
       <Generator>TextTemplatingFileGenerator</Generator>

@@ -215,6 +215,10 @@ namespace Pixels.Math
 			}
             return dst.ToArray();
         }
+<# } #>
+
+
+<# foreach (var T in Type){ #>
         public static double[] AverageV(this Pixel<<#= T #>> src,int start_x = 0,int start_y = 0,int step_x=1, int step_y = 1)
         {
 			List<double> dst = new List<double>();

@@ -1,29 +1,36 @@
-﻿
-//前処理, Color処理はRG
-raw = PrePro(raw);
-raw = ColorTest(raw);
+﻿//前処理, Color処理はRG
+//raw = raw["Normal"].StaggerRSelf();
+//raw = ColorTest(raw);
+
+foreach (var i in raw.GetIndex("Gr"))
+{
+    raw[i] = 255;
+}
+
+//raw = raw["Full"].Cut("R");
+
 //スペックの表示
 //var r = Spec(raw);
 //raw = raw.FilterHOB();
 
 /*********** Method **********/
+/*
 public Pixel<float> ColorTest(Pixel<float> src)
 {
-    raw = raw["Active"];
-    //前処理, Color処理はRG
-    for (int c = 0; c < 4; c++)
-        for (int y = 0; y < raw.HeightColor(c); y++)
-        {
-            for (int x = 0; x < raw.WidthColor(c); x++)
+    src = src["Active"];
+
+    foreach (var c in new string[] { "R", "B" })
+        for (int y = 0; y < src.HeightColor(c); y++)
+            for (int x = 0; x < src.WidthColor(c); x++)
             {
-                raw[c, x, y] = c * 35;
+                src[c, x, y] = 255000;
             }
-        }
+    return src;
 }
 public Pixel<float> PrePro(Pixel<float> src)
 {
     //Color = RG
-    return raw["Normal"].StaggerRSelf();
+    return src["Normal"].StaggerRSelf().DivSelf(255);
 }
 public void CF(Pixel<float> src)
 {
@@ -87,9 +94,11 @@ public string b2spec(Pixel<float> src)
 
     result += $"{raw["Active"].Signal()}\r\n";
     result += $"{raw["Active"].Signal()}\r\n";
+
+    return result;
 }
 
-
+    */
 //var buf = raw.ToPixelInt32();
 //var i = buf[0];
 //var line = String.Join("\r\n", raw["Active"].AverageV());

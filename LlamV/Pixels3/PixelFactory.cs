@@ -21,24 +21,32 @@ namespace Pixels
         public string Type { get; set; }
         public string Note { get; set; }
         public Dictionary<string, PixelMap> Maps { get; set; }
-        public List<PixelColor> Colors { get; set; }
+        public Dictionary<string, PixelColor> Colors { get; set; }
+
+        public string Script { get; set; }
     }
 
     public static class PixelFactory
     {
-        public static Pixel<T> Create<T>(this Pixel<T> src) where T : struct, IComparable
+        public static Pixel<T> Create<T>(int width, int height) where T : struct, IComparable
         {
-            src = src["Full"];
-            src.Stride = src.Width;
-            src.pixel = new T[src.Width * src.Height];
-            return src;
+            return Create<T>(width, height, new T[width * height]);
         }
+
+        public static Pixel<T> Create<T>(int width, int height, T[] src) where T : struct, IComparable
+        {
+            var dst = new Pixel<T>(width, height);
+            dst.pixel = src;
+            return dst;
+        }
+
+
         public static Pixel<T> Create<T>(Dictionary<string, PixelMap> maps) where T : struct, IComparable
         {
             var i = new Pixel<T>();
             i.Maps = maps;
             i.Type = typeof(T).Name;
-            i.Create();
+            i.Clear();
             return i;
         }
         public static Pixel<T> Create<T>(Dictionary<string, PixelMap> maps, T[] src) where T : struct, IComparable
@@ -49,31 +57,7 @@ namespace Pixels
             i.pixel = src;
             return i;
         }
-        public static Pixel<T> Create<T>(int width, int height) where T : struct, IComparable
-        {
-            return Create<T>(width, height, new T[width * height]);
-        }
 
-        public static Pixel<T> Create<T>(int width, int height, T[] src) where T : struct, IComparable
-        {
-            return (new Pixel<T>()
-            {
-                Width = width,
-                Height = height,
-                Stride = width,
-                Maps = new Dictionary<string, PixelMap>()
-                {
-                    ["Full"] = new PixelMap()
-                    {
-                        Left = 0,
-                        Top = 0,
-                        Width = width,
-                        Height = height
-                    }
-                },
-                pixel = src
-            });
-        }
 
         public static Pixel<T> Create<T>(List<PixelFormat> formats, string filename) where T : struct, IComparable
         {
@@ -116,6 +100,9 @@ namespace Pixels
 
                 return dst;
             }
+
+
         }
+
     }
 }
