@@ -1,11 +1,24 @@
-﻿//前処理, Color処理はRG
-//raw = raw["Normal"].StaggerRSelf();
-//raw = ColorTest(raw);
+﻿
 
-foreach (var i in raw.GetIndex("Gr"))
-{
-    raw[i] = 255;
-}
+string result = "-----result-----\r\n";
+
+raw = raw["Normal"].StaggerRSelf();
+
+raw["Active"].Signal("Gr").ToText(ref result, (x) => $"Ave{x.Item1}\r\nDev{x.Item2}\r\n");
+
+raw["HOB-L"].Signal("Gr").ToText(ref result, (x) => "Ave:{x.Average}\r\nDev:{x.Devition}\r\n");
+
+
+
+
+//raw["Active"].Signal("R").ToText(result);
+//raw["Active"].Signal("B").ToText(result);
+//raw["Active"].Signal("Gb").ToText(result);
+
+//foreach (var i in raw.GetIndex("Gr"))
+//{
+//    raw[i] = 255;
+//}
 
 //raw = raw["Full"].Cut("R");
 

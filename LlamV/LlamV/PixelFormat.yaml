@@ -56,26 +56,91 @@
   Type   : Int32
   Note : 暫定
   Colors :
-    Gr :
+    M :
+      x      : 0
+      y      : 0
+      step_x : 1
+      step_y : 1
+    M1 :
+      x      : 0
+      y      : 0
+      step_x : 1
+      step_y : 4
+    M2 :
+      x      : 0
+      y      : 1
+      step_x : 1
+      step_y : 4
+    M3 :
+      x      : 0
+      y      : 2
+      step_x : 1
+      step_y : 1
+    M4 :
+      x      : 0
+      y      : 3
+      step_x : 1
+      step_y : 4
+    B :
       x      : 0
       y      : 0
       step_x : 2
       step_y : 2
-    R  :
+    Gb  :
       x      : 1
       y      : 0
       step_x : 2
       step_y : 2
-    B  :
+    Gr  :
       x      : 0
       y      : 1
       step_x : 2
       step_y : 2
-    Gb :
+    R :
       x      : 1
       y      : 1
       step_x : 2
       step_y : 2
+    B1 :
+      x      : 0
+      y      : 0
+      step_x : 2
+      step_y : 4
+    Gb1  :
+      x      : 1
+      y      : 0
+      step_x : 2
+      step_y : 4
+    Gr1  :
+      x      : 0
+      y      : 1
+      step_x : 2
+      step_y : 4
+    R1 :
+      x      : 1
+      y      : 1
+      step_x : 2
+      step_y : 4
+    B2 :
+      x      : 0
+      y      : 2
+      step_x : 2
+      step_y : 4
+    Gb2  :
+      x      : 1
+      y      : 2
+      step_x : 2
+      step_y : 4
+    Gr2  :
+      x      : 0
+      y      : 3
+      step_x : 2
+      step_y : 4
+    R2 :
+      x      : 1
+      y      : 3
+      step_x : 2
+      step_y : 4
   Maps :
     Full : 
       Left   : 0 
