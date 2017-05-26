@@ -20,27 +20,23 @@ namespace Pixels.Math
 
         public static Pixel<T> Cut<T>(this Pixel<T> src) where T : struct, IComparable
         {
-            int w = src.Width;
-            int h = src.Height;
-            var dst = new T[w * h];
-
-            int i = 0;
-            for (int y = 0; y < h; y++)
-                for (int x = 0; x < w; x++)
-                    dst[i++] = src[x, y];
+            var dst = new T[src.GetCount()];
+            int c = 0;
+            foreach (var i in src.GetIndex())
+            {
+                dst[c++] = src[i];
+            }
             return PixelFactory.Create(src.Width, src.Height, dst);
         }
         public static Pixel<T> Cut<T>(this Pixel<T> src, string color) where T : struct, IComparable
         {
-            int w = src.WidthColor(color);
-            int h = src.HeightColor(color);
-            var dst = new T[w * h];
-
-            int i = 0;
-            for (int y = 0; y < h; y++)
-                for (int x = 0; x < w; x++)
-                    dst[i++] = src[color, x, y];
-            return PixelFactory.Create(w, h, dst);
+            var dst = new T[src.GetCount(color)];
+            int c = 0;
+            foreach (var i in src.GetIndex(color))
+            {
+                dst[c++] = src[i];
+            }
+            return PixelFactory.Create(src.GetWidth(color), src.GetHeight(color), dst);
         }
         public static Pixel<T> Cut<T>(this Pixel<T> src, int x, int y, int width, int height) where T : struct, IComparable
         {
@@ -107,15 +103,15 @@ namespace Pixels.Math
             dst = dst ?? src.Clone();
             var i = src.AverageV();
 
-            int w = src.WidthColor(color);
-            int h = src.HeightColor(color);
+            //int w = src.WidthColor(color);
+            //int h = src.GEtHeightColor(color);
 
-            int c = 0;
-            for (int x = 0; x < w; x++)
-            {
-                for (int y = 0; y < h; y++) dst[x, y] = (float)i[x];
-                c++;
-            }
+            //int c = 0;
+            //for (int x = 0; x < w; x++)
+            //{
+            //    for (int y = 0; y < h; y++) dst[x, y] = (float)i[x];
+            //    c++;
+            //}
             return dst;
         }
 

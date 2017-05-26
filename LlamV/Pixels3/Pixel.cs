@@ -103,10 +103,6 @@ namespace Pixels
         public int ConvPoisonMap(int x,int y) => (x + Left) + (y + Top) * Stride;
 
         public Dictionary<string, PixelColor> Colors { get; set; }
-        //public int WidthColor(int color) => (Width - Colors[color].x) / Colors[color].step_x;
-        //public int HeightColor(int color) => (Height - Colors[color].y) / Colors[color].step_y;
-        public int WidthColor(string color) => (Width - Colors[color].x) / Colors[color].step_x;
-        public int HeightColor(string color) => (Height - Colors[color].y) / Colors[color].step_y;
 
         /// <summary>
         /// Mapsによってズレマスよ
@@ -119,9 +115,7 @@ namespace Pixels
         public int ConvPoisonColor(string color, int x, int y)
         {
             var c = Colors[color];
-            return
-                ((x * c.step_x + c.x) + Left) +
-                ((y * c.step_y + c.y) + Top) * Stride;
+            return GetLeft(color) + x * c.step_x + (GetTop(color) + y * Colors[color].step_y) * Stride;
         }
 
 
@@ -168,18 +162,18 @@ namespace Pixels
             );
         }
 
-        public (int Left, int Top, int Width, int Height,int StepX, int StepY) GetColor(string key = null)
-        {
-            return
-            (
-                Left + Colors[key].x,
-                Top + Colors[key].y,
-                Width + Left,
-                Height + Top,
-                Colors[key].step_x,
-                Colors[key].step_y
-            );
-        }
+        //public (int Left, int Top, int Width, int Height,int StepX, int StepY) GetColor(string key = null)
+        //{
+        //    return
+        //    (
+        //        Left + Colors[key].x,
+        //        Top + Colors[key].y,
+        //        Width + Left,
+        //        Height + Top,
+        //        Colors[key].step_x,
+        //        Colors[key].step_y
+        //    );
+        //}
 
         public Pixel(){  }
         public Pixel(int width, int height)
@@ -214,20 +208,15 @@ namespace Pixels
         }
         public IEnumerable<int> GetIndex(string color)
         {
-            int l = Left + Colors[color].step_x - 1 - (Left + Colors[color].step_x - Colors[color].x - 1) % Colors[color].step_x;
-            int t = Top + Colors[color].step_y - 1 - (Top + Colors[color].step_y - Colors[color].y - 1) % Colors[color].step_y;
+            int l = GetLeft(color);
+            int t = GetTop(color);
             int c = l + t * Stride;
 
-            int w =
-                (Width + Left - Colors[color].x) / Colors[color].step_x - (Left - Colors[color].x) / Colors[color].step_x;
+            int w = GetWidth(color);
+            int h = GetHeight(color);
 
-
-
-
-            int h =
-                (Height + Top - Colors[color].y) / Colors[color].step_y - (Top - Colors[color].y) / Colors[color].step_y;
-
-            int inc = 
+            int inc_col = Colors[color].step_x;
+            int inc_line = 
                 Stride - w * Colors[color].step_x 
                 + Stride * (Colors[color].step_y - 1);
 
@@ -236,11 +225,27 @@ namespace Pixels
                 for (int x = 0; x < w; x++)
                 {
                     yield return c;
-                    c += Colors[color].step_x;
+                    c += inc_col;
                 }
-                c += inc;
+                c += inc_line;
             }
         }
+
+        public int GetCount() => Width * Height;
+        public int GetCount(string color) => color == null ? GetCount() : GetWidth(color) * GetHeight(color);
+
+        public int GetLeft(string color) => Left + Colors[color].step_x - 1 - (Left + Colors[color].step_x - Colors[color].x - 1) % Colors[color].step_x;
+        public int GetTop(string color) => Top + Colors[color].step_y - 1 - (Top + Colors[color].step_y - Colors[color].y - 1) % Colors[color].step_y;
+        public int GetWidth(string color) 
+            => (Left + Width + (Colors[color].step_x - Colors[color].x - 1)) / Colors[color].step_x
+             - (Left + (Colors[color].step_x - Colors[color].x - 1)) / Colors[color].step_x;
+        public int GetHeight(string color) 
+            => (Top + Height + (Colors[color].step_y - Colors[color].y - 1)) / Colors[color].step_y
+             - (Top + (Colors[color].step_y - Colors[color].y - 1)) / Colors[color].step_y;
+
+
+
+
         public Pixel<T> Cancellation(CancellationTokenSource token)
         {
             this.token = token;
@@ -264,7 +269,21 @@ namespace Pixels
 
             //マップ合わせ
             return i[Map];
+
+            /*
+            using (var memoryStream = new System.IO.MemoryStream())
+            {
+                var binaryFormatter 
+                    = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+
+                binaryFormatter.Serialize(memoryStream, this); // シリアライズ
+                memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
+                return (Pixel<T>)binaryFormatter.Deserialize(memoryStream); // デシリアライ
+            }
+            */
         }
+
+
 
         /// <summary>
         /// 配列の定義し直し
