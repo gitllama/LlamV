@@ -34,10 +34,29 @@ namespace PixelsFT
                 Chip = ChipStatusMediator.Create(_Chip);
 
                 Chip["Dark", "Ave"]
-                    .Filter(x => x["Normal"].StaggerRSelf()["Full"].FilterMedianBayer(1, 5, 2))
-                    ["Effective"]
-                    .VFPN();
-
+                    .Filter(x => x["Normal"].StaggerRSelf())
+                    ["Active"]
+                    .Signal("Gr1", "R1", "Gb1", "B1", "Gr2", "R2", "Gb2", "B2");
+                Chip["L10", "Ave"]
+                    .Filter(x => x["Normal"].StaggerRSelf())
+                    ["Active"]
+                    .Signal("Gr1","R1","Gb1","B1", "Gr2", "R2", "Gb2", "B2");
+                Chip["L50", "Ave"]
+                    .Filter(x => x["Normal"].StaggerRSelf())
+                    ["Active"]
+                    .Signal("Gr1", "R1", "Gb1", "B1", "Gr2", "R2", "Gb2", "B2");
+                Chip["L90", "Ave"]
+                    .Filter(x => x["Normal"].StaggerRSelf())
+                    ["Active"]
+                    .Signal("Gr1", "R1", "Gb1", "B1", "Gr2", "R2", "Gb2", "B2");
+                Chip["L300", "Ave"]
+                    .Filter(x => x["Normal"].StaggerRSelf())
+                    ["Active"]
+                    .Signal("Gr1", "R1", "Gb1", "B1", "Gr2", "R2", "Gb2", "B2");
+                //Chip["Dark", "Ave"]
+                //.Filter(x => x["Normal"].StaggerRSelf()["Full"].FilterMedianBayer(1, 5, 2))
+                //["Effective"]
+                //VFPN
                 //Chip["Dark", "Ave-hob"]
                 //    .Filter(x => x["Normal"].StaggerR())
                 //    ["Active"]
