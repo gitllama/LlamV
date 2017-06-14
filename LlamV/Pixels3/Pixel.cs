@@ -252,6 +252,26 @@ namespace Pixels
             return this;
         }
 
+        public IEnumerable<T> GetPixel(string Map, string color)
+        {
+            int[] cord;
+
+
+
+            int c = Left + Top * Stride;
+            int inc = Stride - Width;
+
+            for (int y = 0; y < Height; y++)
+            {
+                for (int x = 0; x < Width; x++)
+                {
+                    yield return (T)(object)c;
+                    c++;
+                }
+                c += inc;
+            }
+        }
+
         //deepcopyに書き換え
         public Pixel<T> Clone()
         {
