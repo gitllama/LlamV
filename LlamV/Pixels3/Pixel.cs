@@ -13,56 +13,22 @@ using System.Text.RegularExpressions;
 
 namespace Pixels
 {
-    #region Operator
-
-    using Binary = Func<ParameterExpression, ParameterExpression, BinaryExpression>;
-    using Unary = Func<ParameterExpression, UnaryExpression>;
-
-    internal static class Operator<T>
+    public interface IBinaryOperator<T1, TResult>
     {
-        static readonly ParameterExpression x = Expression.Parameter(typeof(T), "x");
-        static readonly ParameterExpression y = Expression.Parameter(typeof(T), "y");
-        static readonly ParameterExpression z = Expression.Parameter(typeof(T), "z");
-        static readonly ParameterExpression w = Expression.Parameter(typeof(T), "w");
-        static readonly ParameterExpression i = Expression.Parameter(typeof(int), "i");
-
-        //public static readonly Func<T, U> Cast<U> = LambdaCast<U>(Expression.Convert);
-
-        public static readonly Func<T, T> Plus = Lambda(Expression.UnaryPlus);
-        public static readonly Func<T, T> Negate = Lambda(Expression.Negate);
-
-        public static readonly Func<T, T, T> Add = Lambda(Expression.Add);
-        public static readonly Func<T, T, T> Subtract = Lambda(Expression.Subtract);
-        public static readonly Func<T, T, T> Multiply = Lambda(Expression.Multiply);
-        public static readonly Func<T, T, T> Divide = Lambda(Expression.Divide);
-
-        public static readonly Func<T, int, T> LeftShift = LambdaInt(Expression.LeftShift);
-        public static readonly Func<T, int, T> RightShift = LambdaInt(Expression.RightShift);
-        //public static readonly Func<T, T, T> And = Lambda(Expression.And);
-        //public static readonly Func<T, T, T> Or = Lambda(Expression.Or);
-
-        public static Func<T, U> LambdaCast<U>(Unary op) => Expression.Lambda<Func<T, U>>(op(x), x).Compile();
-        public static Func<T, T> Lambda(Unary op) => Expression.Lambda<Func<T, T>>(op(x), x).Compile();
-        public static Func<T, T, T> Lambda(Binary op) => Expression.Lambda<Func<T, T, T>>(op(x, y), x, y).Compile();
-        public static Func<T, int, T> LambdaInt(Binary op) => Expression.Lambda<Func<T, int, T>>(op(x, i), x, i).Compile();
-
-        public static readonly Func<T, T, T, T, T> ProductSum =
-            Expression.Lambda<Func<T, T, T, T, T>>(
-                Expression.Add(
-                    Expression.Multiply(x, y),
-                    Expression.Multiply(z, w)),
-                x, y, z, w).Compile();
-
-        public static readonly Func<T, T, T, T, T> ProductDifference =
-            Expression.Lambda<Func<T, T, T, T, T>>(
-                Expression.Subtract(
-                    Expression.Multiply(x, y),
-                    Expression.Multiply(z, w)),
-                x, y, z, w).Compile();
-
+        TResult Operate(T1 x);
     }
-
-    #endregion
+    public interface IBinaryOperator<T1, T2, TResult>
+    {
+        TResult Operate(T1 x, T2 y);
+    }
+    public interface IBinaryOperatorRef<T1, T2>
+    {
+        void Operate(ref T1 x, ref T2 y);
+    }
+    public interface IBinaryOperatorRef<T1, T2, T3>
+    {
+        void Operate(ref T1 x, ref T2 y, ref T3 z);
+    }
 
     [Serializable]
     public class PixelMap
@@ -99,18 +65,6 @@ namespace Pixels
         public string Script { get; set; }
     }
 
-    public interface IBinaryOperator<T1, TResult>
-    {
-        TResult Operate(T1 x);
-    }
-    public interface IBinaryOperator<T1, T2, TResult>
-    {
-        TResult Operate(T1 x, T2 y);
-    }
-    public interface IBinaryOperatorRef<T1, T2>
-    {
-        void Operate(ref T1 x, ref T2 y);
-    }
 
     [Serializable]
     public partial class Pixel<T> where T : struct, IComparable
@@ -161,6 +115,11 @@ namespace Pixels
             Height = Maps[value].Height;
 
             return this;
+        }
+
+        public Pixel<T> this[string map, params string[] colors]
+        {
+            get => this;
         }
 
         public void AddMap(string key,int left, int top, int width,int height)
@@ -541,63 +500,6 @@ namespace Pixels
             return this["Full"];
         }
 
-
-        #region Operator
-
-        //ラッパー
-        //static T Cast(T x) { return Operator<T>.Negate(x); }
-
-        static T Add(T x, T y) { return Operator<T>.Add(x, y); }
-        static T Sub(T x, T y) { return Operator<T>.Subtract(x, y); }
-        static T Mul(T x, T y) { return Operator<T>.Multiply(x, y); }
-        static T Div(T x, T y) { return Operator<T>.Divide(x, y); }
-        static T Neg(T x) { return Operator<T>.Negate(x); }
-        //static T Acc(T x, T y, T z, T w) { return Operator<T>.ProductSum(x, y, z, w); }
-        //static T Det(T x, T y, T z, T w) { return Operator<T>.ProductDifference(x, y, z, w); }
-        //static T Norm(T x, T y) { return Operator<T>.ProductSum(x, y, x, y); }
-        static T LeftShift(T x, int y) { return Operator<T>.LeftShift(x, y); }
-        static T RightShift(T x, int y) { return Operator<T>.RightShift(x, y); }
-        //static T And(T x, T y) { return Operator<T>.And(x, y); }
-        //static T Or(T x, T y) { return Operator<T>.Or(x, y); }
-
-        public static Pixel<T> operator +(Pixel<T> x, Pixel<T> y)
-            => PixelFactory.Create<T>(x.Maps, (new T[x.pixel.Length]).Select((v, i) => v = Add(x.pixel[i], y.pixel[i])).ToArray());
-        public static Pixel<T> operator +(T x, Pixel<T> y)
-            => PixelFactory.Create<T>(y.Maps, (new T[y.pixel.Length]).Select((v, i) => v = Add(x, y.pixel[i])).ToArray());
-        public static Pixel<T> operator +(Pixel<T> x, T y)
-            => PixelFactory.Create<T>(x.Maps, (new T[x.pixel.Length]).Select((v, i) => v = Add(x.pixel[i], y)).ToArray());
-
-        public static Pixel<T> operator -(Pixel<T> x)
-            => PixelFactory.Create<T>(x.Maps, (new T[x.pixel.Length]).Select((v, i) => v = Neg(x.pixel[i])).ToArray());
-
-        public static Pixel<T> operator -(Pixel<T> x, Pixel<T> y)
-            => PixelFactory.Create<T>(x.Maps, (new T[x.pixel.Length]).Select((v, i) => v = Sub(x.pixel[i], y.pixel[i])).ToArray());
-        public static Pixel<T> operator -(T x, Pixel<T> y)
-            => PixelFactory.Create<T>(y.Maps, (new T[y.pixel.Length]).Select((v, i) => v = Sub(x, y.pixel[i])).ToArray());
-        public static Pixel<T> operator -(Pixel<T> x, T y)
-            => PixelFactory.Create<T>(x.Maps, (new T[x.pixel.Length]).Select((v, i) => v = Sub(x.pixel[i], y)).ToArray());
-
-        public static Pixel<T> operator *(Pixel<T> x, Pixel<T> y)
-            => PixelFactory.Create<T>(x.Maps, (new T[x.pixel.Length]).Select((v, i) => v = Mul(x.pixel[i], y.pixel[i])).ToArray());
-        public static Pixel<T> operator *(T x, Pixel<T> y)
-            => PixelFactory.Create<T>(y.Maps, (new T[y.pixel.Length]).Select((v, i) => v = Mul(x, y.pixel[i])).ToArray());
-        public static Pixel<T> operator *(Pixel<T> x, T y)
-            => PixelFactory.Create<T>(x.Maps, (new T[x.pixel.Length]).Select((v, i) => v = Mul(x.pixel[i], y)).ToArray());
-
-        public static Pixel<T> operator /(Pixel<T> x, Pixel<T> y)
-            => PixelFactory.Create<T>(x.Maps, (new T[x.pixel.Length]).Select((v, i) => v = Div(x.pixel[i], y.pixel[i])).ToArray());
-        public static Pixel<T> operator /(T x, Pixel<T> y)
-            => PixelFactory.Create<T>(y.Maps, (new T[y.pixel.Length]).Select((v, i) => v = Div(x, y.pixel[i])).ToArray());
-        public static Pixel<T> operator /(Pixel<T> x, T y)
-            => PixelFactory.Create<T>(x.Maps, (new T[x.pixel.Length]).Select((v, i) => v = Div(x.pixel[i], y)).ToArray());
-
-        public static Pixel<T> operator <<(Pixel<T> x, int y)
-            => PixelFactory.Create<T>(x.Maps, (new T[x.pixel.Length]).Select((v, i) => v = LeftShift(x.pixel[i], y)).ToArray());
-        public static Pixel<T> operator >>(Pixel<T> x, int y)
-           => PixelFactory.Create<T>(x.Maps, (new T[x.pixel.Length]).Select((v, i) => v = RightShift(x.pixel[i], y)).ToArray());
-        #endregion
-
-
         #region チェック
 
         protected static void OperatorCheck(Pixel<T> x, Pixel<T> y)
@@ -639,7 +541,24 @@ namespace Pixels
 
         #endregion
 
+
+        public static Pixel<T> operator +(Pixel<T> x, float y)
+        {
+            if (false) throw new Exception();
+            /*T4{[
+                {"Key": ["Byte"], "Value": [["Byte"],["UInt16"],["UInt32"],["UInt64"],["Int16"],["Int32"],["Int64"],["Single"],["Double"]]},
+                {"Key": ["Int32"], "Value": [["Boolean"],["Byte"],["UInt16"],["UInt32"],["UInt64"],["Int16"],["Int32"],["Int64"],["Single"],["Double"]]},
+            ]T4h*/
+            else if (typeof(T) == typeof(float))
+            {
+                return (x as Pixel<float>).Add((float)y) as Pixel<T> ?? throw new FormatException();
+            }/*}T4*/
+            else throw new FormatException();
+        }
+
+
     }
+
 
     public static class PixelFactory
     {

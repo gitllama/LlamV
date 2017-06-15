@@ -15,7 +15,26 @@ namespace PixelsFT
     {
         static void Main(string[] args)
         {
-            Test.Run();
+
+            var i = PixelFactory.Create<float>(2000, 1000);
+
+
+            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+
+            sw.Restart();
+            var a = i.Add(1);
+            sw.Stop();
+            Console.WriteLine(sw.Elapsed);
+            
+
+            sw.Restart();
+            var b = i + (double)1;
+            sw.Stop();
+            Console.WriteLine(sw.Elapsed);
+
+
+            Console.ReadKey();
+            //Test.Run();
 
             return;
         }

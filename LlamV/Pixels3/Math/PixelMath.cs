@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace Pixels.Math/*T4namespace{*/.Base/*}T4namespace*/
 {
     public static partial class PixelMath
@@ -20,7 +21,7 @@ namespace Pixels.Math/*T4namespace{*/.Base/*}T4namespace*/
 
             //if (typeof(T) == typeof(bool)) return (dynamic)Binarization((dynamic)src, null, "M", null);
 
-            if(false) throw new Exception();
+            if (false) throw new Exception();
             /*T4{[
                 {"Key": ["Byte"], "Value": [["Byte"],["UInt16"],["UInt32"],["UInt64"],["Int16"],["Int32"],["Int64"],["Single"],["Double"]]},
                 {"Key": ["Int32"], "Value": [["Boolean"],["Byte"],["UInt16"],["UInt32"],["UInt64"],["Int16"],["Int32"],["Int64"],["Single"],["Double"]]},
@@ -123,6 +124,7 @@ namespace Pixels.Math/*T4namespace{*/.Base/*}T4namespace*/
 
 
         #endregion
+
 
 
         //Statistical
@@ -321,7 +323,6 @@ namespace Pixels.Math/*T4namespace{*/.Base/*}T4namespace*/
 
     }
 
-
     //ラインプロファイルの計算
     public static class LineMath
     {
@@ -381,6 +382,5 @@ namespace Pixels.Math/*T4namespace{*/.Base/*}T4namespace*/
         }
 
     }
-
 
 }
