@@ -51,41 +51,25 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>PixelFilterTT.tt</DependentUpon>
     </Compile>
+    <Compile Include="Math\PixelMathT4.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>PixelMathT4.tt</DependentUpon>
+    </Compile>
     <Compile Include="Pixel.cs" />
-    <Compile Include="PixelFactory.cs" />
     <Compile Include="Math\PixelFilter.cs" />
     <Compile Include="Math\PixelMath.cs" />
-    <Compile Include="Math\PixelMathOp.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>PixelMathOp.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Math\PixelMathStat.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>PixelMathStat.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Math\PixelMathUtil.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>PixelMathUtil.tt</DependentUpon>
-    </Compile>
     <Compile Include="PixelOp.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>PixelOp.tt</DependentUpon>
     </Compile>
     <Compile Include="Stream\PixelStream.cs" />
-    <Compile Include="Stream\PixelStreamRead.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>PixelStreamRead.tt</DependentUpon>
-    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Stream\PixelStreamWriter.cs">
+    <Compile Include="Stream\PixelStreamT4.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>PixelStreamWriter.tt</DependentUpon>
+      <DependentUpon>PixelStreamT4.tt</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -93,30 +77,19 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>PixelFilterTT.cs</LastGenOutput>
     </Content>
-    <Content Include="Math\PixelMathOp.tt">
+    <Content Include="Math\PixelMathT4.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>PixelMathOp.cs</LastGenOutput>
-    </Content>
-    <Content Include="Math\PixelMathStat.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>PixelMathStat.cs</LastGenOutput>
-    </Content>
-    <Content Include="Math\PixelMathUtil.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>PixelMathUtil.cs</LastGenOutput>
+      <LastGenOutput>PixelMathT4.cs</LastGenOutput>
     </Content>
     <Content Include="PixelOp.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>PixelOp.cs</LastGenOutput>
     </Content>
-    <Content Include="Stream\PixelStreamRead.tt">
+    <Content Include="Stream\PixelStreamT4.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>PixelStreamRead.cs</LastGenOutput>
+      <LastGenOutput>PixelStreamT4.cs</LastGenOutput>
     </Content>
-    <Content Include="Stream\PixelStreamWriter.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>PixelStreamWriter.cs</LastGenOutput>
-    </Content>
+    <Content Include="TextFile1.txt" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />

@@ -5,22 +5,17 @@ using System.Text;
 
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Threading;
 
-using System.Reflection;
-using System.Text.RegularExpressions;
-using System.Linq.Expressions;
-
-using System.IO.Compression;
-using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using System.Windows.Media;
 using Pixels.Math;
 
-namespace Pixels.Stream
+namespace Pixels.Stream/*T4namespace{*/.Base/*}T4namespace*/
 {
     public static partial class PixelStream
     {
+
+
         /*** read ***/
 
         public enum ColorChannel
@@ -32,13 +27,44 @@ namespace Pixels.Stream
         {
             //type?.Name
             byte[] data = System.IO.File.ReadAllBytes(filename);
-            _Read(data, src.pixel, offsetbyte, type);
+            switch (type)
+            {
+                /*T4{[
+                    {"Key": ["Int32"], "Value": [["Byte"],["UInt16"],["UInt32"],["UInt64"],["Int16"],["Int32"],["Int64"],["Single"],["Double"]]}
+                ]T4h*/
+                case "Int32": ReadInt32((dynamic)src.pixel, data, offsetbyte); break;/*}T4*/
+                default:
+                    break;
+            }
             return src;
         }
-        public static Pixel<T> Read<T>(this Pixel<T> src, string filename, int offsetbyte = 0, Type type = null) where T : struct, IComparable
+
+        #region Read
+
+        /*T4{[
+            {"Key": ["UInt16"], "Value": [["Byte"],["UInt16"],["UInt32"],["UInt64"],["Int16"],["Int32"],["Int64"],["Single"],["Double"]]}
+        ]T4h*/
+        private static void ReadByte(UInt16[] _src, byte[] _data, int _offsetbyte)
         {
-            return Read(src, filename, offsetbyte, System.Type.GetType($"System.{type}"));
-        }
+            int count_byte = _offsetbyte;
+            for (int i = 0; i < _src.Length; i++)
+                _src[i] = (Byte)_data[count_byte++];
+        }/*}T4*/
+        /*T4{[
+            {"Key": ["Int32"], "Value": [["UInt16"],["UInt32"],["UInt64"],["Int16"],["Int32"],["Int64"],["Single"],["Double"]]},
+            {"Key": ["UInt16"], "Value": [["Byte"],["UInt16"],["UInt32"],["UInt64"],["Int16"],["Int32"],["Int64"],["Single"],["Double"]]}
+        ]T4h*/
+        private static void ReadInt32(UInt16[] _src, byte[] _data, int _offsetbyte)
+        {
+            int count_byte = _offsetbyte;
+            for (int i = 0; i < _src.Length; i++)
+            {
+                _src[i] = (UInt16)BitConverter.ToInt32(_data, count_byte);
+                count_byte += sizeof(Int32);
+            }
+        }/*}T4*/
+
+        #endregion
 
         public static Pixel<T> ReadBMP<T>(string filename, ColorChannel ch = ColorChannel.G) where T : struct, IComparable
         {
@@ -63,24 +89,40 @@ namespace Pixels.Stream
                 byte[] src = new byte[stride * s.PixelWidth];
                 s.CopyPixels(src, stride, 0);
 
-                int e = 1;
-                switch (ch)
-                {
-                    case ColorChannel.R: e = 2; break;
-                    case ColorChannel.B: e = 0; break;
-                    case ColorChannel.A: e = 3; break;
-                    case ColorChannel.G: e = 1; break;
-                    default: e = 1; break;
-                }
-
                 //配列の確保
                 T[] dst = new T[s.PixelWidth * s.PixelHeight];
 
-                _ReadBMP<T>(src, dst, e);
+                int c = 1;
+                switch (ch)
+                {
+                    case ColorChannel.R: c = 2; break;
+                    case ColorChannel.B: c = 0; break;
+                    case ColorChannel.A: c = 3; break;
+                    case ColorChannel.G: c = 1; break;
+                    default: c = 1; break;
+                }
+
+                switch ((object)dst)
+                {
+                    /*T4{[
+                        {"Key": ["Int32"], "Value": [["Byte"],["UInt16"],["UInt32"],["UInt64"],["Int16"],["Int32"],["Int64"],["Single"],["Double"]]}
+                    ]T4h*/
+                    case Int32[] n:
+                        for (int i = 0; i < dst.Length; i++)
+                        {
+                            n[i] = (Int32)src[c];
+                            c += 4;
+                        }
+                        break;/*}T4*/
+                    default:
+                        break;
+                }
 
                 return PixelFactory.Create<T>(s.PixelWidth, s.PixelHeight, dst);
             }
         }
+
+
 
         /*** write ***/
 
@@ -97,7 +139,18 @@ namespace Pixels.Stream
             using (FileStream sw = new FileStream(filename, FileMode.Create, FileAccess.Write))
             {
                 int bytesize = Marshal.SizeOf<T>();
-                WriteArray(src.pixel, sw);
+                switch ((object)src)
+                {
+                    /*T4{[
+                        {"Key": ["Int32"], "Value": [["Byte"],["UInt16"],["UInt32"],["UInt64"],["Int16"],["Int32"],["Int64"],["Single"],["Double"]]}
+                    ]T4h*/
+                    case Int32[] n:
+                        foreach (var i in n)
+                            sw.Write(BitConverter.GetBytes(i), 0, sizeof(Int32));
+                        break;/*}T4*/
+                    default:
+                        break;
+                }
             }
         }
 

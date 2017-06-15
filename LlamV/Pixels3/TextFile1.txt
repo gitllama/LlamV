@@ -1,0 +1,271 @@
+﻿
+/* 一度退避 */
+
+        public static Pixel<T> ToPixel<U, T>(this Pixel<U> src)
+            where T : struct, IComparable
+            where U : struct, IComparable
+        {
+            var dst = src.Clone<T>();
+
+            //if (typeof(T) == typeof(bool)) return (dynamic)Binarization((dynamic)src, null, "M", null);
+
+            if(false) throw new Exception();
+            /*T4{[
+                {"Key": ["Int32"], "Value": [["Byte"],["UInt16"],["UInt32"],["UInt64"],["Int16"],["Int32"],["Int64"],["Single"],["Double"]]}
+            ]T4h*/
+            else if (typeof(U) == typeof(bool) && typeof(T) == typeof(Int32))
+            {
+                int c = 0;
+                var _src = src as Pixel<bool>;
+                var _dst = dst as Pixel<Int32>;
+                foreach (var i in _src.pixel)
+                    _dst.pixel[c++] = i ? Int32.MaxValue : (Int32)0;
+                return dst;
+            }/*}T4*/
+            /*T4{[
+                {"Key": ["Byte"], "Value": [["Byte"],["UInt16"],["UInt32"],["UInt64"],["Int16"],["Int32"],["Int64"],["Single"],["Double"]]},
+                {"Key": ["Int32"], "Value": [["Byte"],["UInt16"],["UInt32"],["UInt64"],["Int16"],["Int32"],["Int64"],["Single"],["Double"]]},
+            ]T4h*/
+            else if (typeof(U) == typeof(Byte) && typeof(T) == typeof(Int32))
+            {
+                int c = 0;
+                var _src = src as Pixel<Byte>;
+                var _dst = dst as Pixel<Int32>;
+                foreach (var i in _src.pixel)
+                    _dst.pixel[c++] = (Int32)i;
+                return dst;
+            }/*}T4*/
+            else throw new FormatException($"{typeof(U)},{typeof(T)}");
+        }
+
+        #region Accumulate
+
+        
+
+        public static Pixel<T> AccSelf<T>(this Pixel<T> src, Func<T, T> func)
+            where T : struct, IComparable
+            => Acc<T, T>(src, func, src);
+        public static Pixel<T> Acc<T, T1>(this Pixel<T1> src, Func<T1, T> func)
+            where T : struct, IComparable
+            where T1 : struct, IComparable
+            => Acc(src, func, src.Clone<T>());
+
+        public static Pixel<T> Acc<T, T1>(this Pixel<T1> src, Func<T1, T> func, Pixel<T> dst) 
+            where T : struct, IComparable 
+            where T1 : struct, IComparable
+        {
+            if (src.Map == "Full")
+            {
+                for (int i = 0; i < src.pixel.Length; i++)
+                    dst.pixel[i] = func(src.pixel[i]);
+            }
+            else
+            {
+                for (int y = 0; y < src.Height; y++)
+                    for (int x = 0; x < src.Width; x++)
+                        dst[x, y] = func(src[x, y]);
+            }
+            return dst;
+        }
+
+        public static Pixel<T> Acc<T, T1, T2>(this Pixel<T1> src1, Pixel<T2> src2, Func<T1, T2, T> func, Pixel<T> dst) 
+            where T : struct, IComparable 
+            where T1 : struct, IComparable 
+            where T2 : struct, IComparable
+        {
+            if (src1.Map == "Full")
+            {
+                for (int i = 0; i < src1.pixel.Length; i++)
+                    dst.pixel[i] = func(src1.pixel[i],src2.pixel[i]);
+            }
+            else
+            {
+                for (int y = 0; y < src1.Height; y++)
+                    for (int x = 0; x < src1.Width; x++)
+                        dst[x, y] = func(src1[x, y], src2[x, y]);
+            }
+            return dst;
+        }
+
+        public static Pixel<T> Accumulate<T, U, TOperator>(Pixel<T> dst, Pixel<T> src, U value, TOperator op)
+            where T : struct, IComparable
+            where U : struct, IComparable
+            where TOperator : struct, IBinaryOperator<T, U>
+        {
+            if (src.Map == "Full")
+            {
+                for (int i = 0; i < src.pixel.Length; i++)
+                    dst.pixel[i] = op.Operate(src.pixel[i], value);
+            }
+            else
+            {
+                for (int y = 0; y < src.Height; y++)
+                    for (int x = 0; x < src.Width; x++)
+                        dst[x, y] = op.Operate(src[x, y], value);
+            }
+            return dst;
+        }
+        public static Pixel<T> Accumulate<T, U, TOperator>(Pixel<T> dst, Pixel<T> src1, Pixel<U> src2, TOperator op)
+            where T : struct, IComparable
+            where U : struct, IComparable
+            where TOperator : struct, IBinaryOperator<T, U>
+        {
+            if (src1.Map == "Full")
+            {
+                for (int i = 0; i < src1.pixel.Length; i++)
+                    dst.pixel[i] = op.Operate(src1.pixel[i], src2.pixel[i]);
+            }
+            else
+            {
+                for (int y = 0; y < src1.Height; y++)
+                    for (int x = 0; x < src1.Width; x++)
+                        dst[x, y] = op.Operate(src1[x, y], src2[x, y]);
+            }
+            return dst;
+        }
+
+        public interface IBinaryOperator<T, U>
+        {
+            T Operate(T x, U y);
+        }
+        public interface IBinaryOperator<T, TT, TTT>
+        {
+            T Operate(T x, TT y, TTT z);
+        }
+        #endregion
+
+
+
+/***********************************************/
+
+<# foreach (var F in new Dictionary<string, string>()
+{
+	["Add"] = "a + b",
+	["Sub"] = "a - b",
+	["Mul"] = "a * b",
+	["Div"] = "a / b",
+}){ #><# foreach (var T in Type){ if(T != "Int32" || F.Key != "Add"){ #><#=
+		template[1]
+		.Replace("Int32", T)
+		.Replace("Add", F.Key) 
+		.Replace("a + b", F.Value)
+		#><# }} #><# } #>
+
+
+        public static Pixel<T> ToPixel<T>(this object src) where T : struct, IComparable
+		{
+			<# foreach (var T in Type){ #>if(typeof(T) == typeof(<#= T #>)) return (dynamic)ToPixel<#= T #>(src);
+			else <# } #> return null;
+		}
+
+
+/*****/
+
+
+namespace Pixels.Math
+{
+    public static partial class PixelMath
+    {
+		#region Cast
+
+		<# foreach (var T in Type){ #>
+
+        private static Pixel<<#= T #>> ToPixel<#= T #>(this object src)
+		{
+			int c = 0;
+			Pixel<<#= T #>> dst = null;
+			switch(src)
+			{
+				case Pixel<bool> p:
+					dst = p.Clone<<#= T #>>();
+					foreach(var i in p.pixel) dst.pixel[c++] = i ? <#= T #>.MaxValue : (<#= T #>)0;
+					break;
+<# foreach (var U in Type){ #>
+				case Pixel<<#= U #>> p:
+					dst = p.Clone<<#= T #>>();
+					foreach(var i in p.pixel) dst.pixel[c++] = (<#= T #>)i;
+					break;<# } #>
+			}
+			return dst;
+		}<# } #>
+        
+		#endregion
+
+		#region 演算
+<#	foreach (dynamic Method in json.Add)
+		foreach (dynamic T in json.Single) 
+		{
+			var text = m
+				.Replace("Add", Method.key)
+				.Replace("Single", T)
+				.Replace("a + b", $"a {Method.val} b");
+			if((string)Method.key == "Add" && (string)T == "Single")
+			{
+				text = $"/*\r\n{text}\r\n*/";
+			}
+#><#= text #><#
+		}
+#>
+        #endregion
+
+
+
+
+
+
+
+
+
+<# foreach (var F in new Dictionary<string,string>()
+{
+	["Mul"] = "* ",
+	["Div"] = "/",
+}){ #>
+<# foreach (var T in Type.Where(x=> x!="Double")){ #>
+		public static Pixel<<#= T #>> <#= F.Key #>Self(this Pixel<<#= T #>> src, double value) => <#= F.Key #>(src, src, value);
+		public static Pixel<<#= T #>> <#= F.Key #>(this Pixel<<#= T #>> src, double value) => <#= F.Key #>(src, src.Clone(), value);
+		public static Pixel<<#= T #>> <#= F.Key #>(this Pixel<<#= T #>> src, Pixel<<#= T #>> dst, double value)
+        {
+			if(src.Map == "Full")
+			{
+				for (int i = 0; i < src.pixel.Length; i++)
+					dst[i] = (<#= T #>)(src[i] <#= F.Value #> value);
+			}
+			else
+			{
+				for (int y = 0; y < src.Height; y++)
+					for (int x = 0; x < src.Width; x++)
+						dst[x, y] = (<#= T #>)(src[x,y] <#= F.Value #> value);
+			}
+			return dst;
+        }<# } #>
+<# } #>
+
+
+
+/******/
+
+		#region Cast
+
+		<# foreach (var T in Type){ #>
+
+        private static Pixel<<#= T #>> ToPixel<#= T #>(this object src)
+		{
+			int c = 0;
+			Pixel<<#= T #>> dst = null;
+			switch(src)
+			{
+				case Pixel<bool> p:
+					dst = p.Clone<<#= T #>>();
+					foreach(var i in p.pixel) dst.pixel[c++] = i ? <#= T #>.MaxValue : (<#= T #>)0;
+					break;
+<# foreach (var U in Type){ #>
+				case Pixel<<#= U #>> p:
+					dst = p.Clone<<#= T #>>();
+					foreach(var i in p.pixel) dst.pixel[c++] = (<#= T #>)i;
+					break;<# } #>
+			}
+			return dst;
+		}<# } #>
+        
+		#endregion

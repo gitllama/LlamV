@@ -64,6 +64,7 @@ namespace Pixels
 
     #endregion
 
+    [Serializable]
     public class PixelMap
     {
         public int Left { get; set; } = 0;
@@ -72,6 +73,7 @@ namespace Pixels
         public int Height { get; set; } = 0;
     }
 
+    [Serializable]
     public class PixelColor
     {
         public int x { get; set; } = 0;
@@ -80,37 +82,62 @@ namespace Pixels
         public int step_y { get; set; } = 0;
     }
 
+    public class PixelFormat
+    {
+        public string Model { get; set; } = "unknown";
+        public List<string> FileName { get; set; }
+        public int Width { get; set; }
+        public int Height { get; set; }
+        public int Offset { get; set; } = 0;
+        //public Type _type;
+        //public string Type { get => _type?.Name; set => _type = System.Type.GetType($"System.{value}"); }
+        public string Type { get; set; }
+        public string Note { get; set; }
+        public Dictionary<string, PixelMap> Maps { get; set; }
+        public Dictionary<string, PixelColor> Colors { get; set; }
+
+        public string Script { get; set; }
+    }
+
+    public interface IBinaryOperator<T1, TResult>
+    {
+        TResult Operate(T1 x);
+    }
+    public interface IBinaryOperator<T1, T2, TResult>
+    {
+        TResult Operate(T1 x, T2 y);
+    }
+
+    [Serializable]
     public partial class Pixel<T> where T : struct, IComparable
     {
+        [NonSerialized]
         public T[] pixel;
 
         public Type _type;
         public string Type { get => _type?.Name; set => _type = System.Type.GetType($"System.{value}"); }
 
+        [NonSerialized]
         public CancellationTokenSource token;
 
         public Dictionary<string, PixelMap> Maps { get; set; }
-        public int Stride { get; private set; } = 1;
+        public int Stride { get; protected set; } = 1;
 
-        public int Left { get; private set; } = 0;
-        public int Top { get; private set; } = 0;
-        public int Width { get; private set; } = 1;
-        public int Height { get; private set; } = 1;
+        public int Left { get; protected set; } = 0;
+        public int Top { get; protected set; } = 0;
+        public int Width { get; protected set; } = 1;
+        public int Height { get; protected set; } = 1;
+
+        public int Size { get => Width * Height; }
 
         public ref T this[int value] { get => ref pixel[value]; }
 
         public ref T this[int x, int y] { get => ref pixel[ConvPoisonMap(x, y)]; }
-        public int ConvPoisonMap(int x,int y) => (x + Left) + (y + Top) * Stride;
+        public int ConvPoisonMap(int x, int y) => (x + Left) + (y + Top) * Stride;
+        public (int x, int y) ConvPoisonMap(int index) => ((index % Stride) - Left, (index / Stride) - Top);
 
         public Dictionary<string, PixelColor> Colors { get; set; }
 
-        /// <summary>
-        /// Mapsによってズレマスよ
-        /// </summary>
-        /// <param name="color"></param>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <returns></returns>
         public ref T this[string color, int x, int y] { get => ref pixel[ConvPoisonColor(color, x, y)]; }
         public int ConvPoisonColor(string color, int x, int y)
         {
@@ -119,7 +146,7 @@ namespace Pixels
         }
 
 
-        public string Map { get; private set; } = "Full";
+        public string Map { get; protected set; } = "Full";
         public Pixel<T> this[string map] => SetMap(map);
         public Pixel<T> SetMap(string value)
         {
@@ -162,6 +189,8 @@ namespace Pixels
             );
         }
 
+
+
         //public (int Left, int Top, int Width, int Height,int StepX, int StepY) GetColor(string key = null)
         //{
         //    return
@@ -191,22 +220,183 @@ namespace Pixels
             this.Stride = Maps["Full"].Width;
         }
 
+        public Pixel<T> Cancellation(CancellationTokenSource token)
+        {
+            this.token = token;
+            return this;
+        }
+
+        //deepcopy
+        public Pixel<T> Clone(bool alldata = true)
+        {
+            using (var memoryStream = new System.IO.MemoryStream())
+            {
+                var formatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+                formatter.Serialize(memoryStream, this); // シリアライズ
+                memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
+                var dst = (Pixel<T>)formatter.Deserialize(memoryStream); // デシリアライ
+
+                if(alldata && this.pixel != null)
+                {
+                    var i = new T[this.pixel.Length];
+                    ((T[])pixel).CopyTo(i,0);
+                    dst.pixel = i;
+                }
+
+                return dst;
+            }
+        }
+        public Pixel<U> Clone<U>() where U : struct, IComparable
+        {
+            var w = this.Maps["Full"].Width;
+            var h = this.Maps["Full"].Height;
+            var dst = PixelFactory.Create<U>(w, h, new U[w * h]);
+
+            dst.Maps = this.Maps;
+            dst.Colors = this.Colors;
+
+            return dst[Map];
+        }
+
+
+
+        /******/
+
+        #region Accumulate
+
+        //メソッドチェーン3つ以降は、デリゲートのオーバヘッドよりFuncでまとめたほうが速い
+
+        public Pixel<T> AccSelf(Func<T, T> func) => Acc(func, this);
+        public Pixel<TResult> Acc<TResult>(Func<T, TResult> func)
+            where TResult : struct, IComparable
+            => Acc(func, this.Clone<TResult>());
+
+        public Pixel<TResult> Acc<TResult>(Func<T, TResult> func, Pixel<TResult> dst)
+            where TResult : struct, IComparable
+        {
+            if (this.Map == "Full")
+            {
+                for (int i = 0; i < this.pixel.Length; i++)
+                    dst.pixel[i] = func(this.pixel[i]);
+            }
+            else
+            {
+                for (int y = 0; y < this.Height; y++)
+                    for (int x = 0; x < this.Width; x++)
+                        dst[x, y] = func(this[x, y]);
+            }
+            return dst;
+        }
+
+        public Pixel<TResult> Acc<T1, TResult>(Pixel<T1> src, Func<T, T1, TResult> func, Pixel<TResult> dst)
+            where T1 : struct, IComparable
+            where TResult : struct, IComparable
+        {
+            if (this.Map == "Full")
+            {
+                for (int i = 0; i < this.pixel.Length; i++)
+                    dst.pixel[i] = func(this.pixel[i], src.pixel[i]);
+            }
+            else
+            {
+                for (int y = 0; y < this.Height; y++)
+                    for (int x = 0; x < this.Width; x++)
+                        dst[x, y] = func(this[x, y], src[x, y]);
+            }
+            return dst;
+        }
+
+        public Pixel<TResult> Accumulate<TResult, TOperator>(Pixel<TResult> dst, TOperator op)
+            where TResult : struct, IComparable
+            where TOperator : struct, IBinaryOperator<T, TResult>
+        {
+            if (this.Map == "Full")
+            {
+                for (int i = 0; i < this.pixel.Length; i++)
+                    dst.pixel[i] = op.Operate(this.pixel[i]);
+            }
+            else
+            {
+                for (int y = 0; y < this.Height; y++)
+                    for (int x = 0; x < this.Width; x++)
+                        dst[x, y] = op.Operate(this[x, y]);
+            }
+            return dst;
+        }
+        public Pixel<TResult> Accumulate<T1, TResult, TOperator>(Pixel<TResult> dst, T1 value, TOperator op)
+            where TResult : struct, IComparable
+            where T1 : struct, IComparable
+            where TOperator : struct, IBinaryOperator<T, T1, TResult>
+        {
+            if (this.Map == "Full")
+            {
+                for (int i = 0; i < this.pixel.Length; i++)
+                    dst.pixel[i] = op.Operate(this.pixel[i], value);
+            }
+            else
+            {
+                for (int y = 0; y < this.Height; y++)
+                    for (int x = 0; x < this.Width; x++)
+                        dst[x, y] = op.Operate(this[x, y], value);
+            }
+            return dst;
+        }
+        public Pixel<TResult> Accumulate<T1, TResult, TOperator>(Pixel<TResult> dst, Pixel<T1> src2, TOperator op)
+            where TResult : struct, IComparable
+            where T1 : struct, IComparable
+            where TOperator : struct, IBinaryOperator<T, T1, TResult>
+        {
+            if (this.Map == "Full")
+            {
+                for (int i = 0; i < this.pixel.Length; i++)
+                    dst.pixel[i] = op.Operate(this.pixel[i], src2.pixel[i]);
+            }
+            else
+            {
+                for (int y = 0; y < this.Height; y++)
+                    for (int x = 0; x < this.Width; x++)
+                        dst[x, y] = op.Operate(this[x, y], src2[x, y]);
+            }
+            return dst;
+        }
+
+        #endregion
+
+        /*****/
+
+
 
         public IEnumerable<int> GetIndex()
         {
-            int c = Left + Top * Stride;
-            int inc = Stride - Width;
-            for (int y = 0; y < Height; y++)
+            //MoveNext() や Current などのメソッド呼び出しのオーバーヘッドがかかる
+            //のでデリゲートの方が実行効率が上がる
+
+            //ループは少ない方が早い
+
+            if (Map != "Full")
             {
-                for (int x = 0; x < Width; x++)
+                var e = pixel.Length;
+                for (int i = 0; i < e; i++)
                 {
-                    yield return c;
-                    c++;
+                    yield return i;
                 }
-                c += inc;
+            }
+            else
+            {
+                int c = Left + Top * Stride;
+                int inc = Stride - Width;
+                for (int y = 0; y < Height; y++)
+                {
+                    for (int x = 0; x < Width; x++)
+                    {
+                        yield return c;
+                        c++;
+                    }
+                    c += inc;
+                }
             }
         }
-        public IEnumerable<int> GetIndex(string color)
+        public IEnumerable<int> GetIndex(string color) //, int dimension
         {
             int l = GetLeft(color);
             int t = GetTop(color);
@@ -231,6 +421,73 @@ namespace Pixels
             }
         }
 
+        public IEnumerable<int> GetIndexX(string color)
+        {
+            int l = GetLeft(color);
+            int w = GetWidth(color);
+
+            int inc_col = Colors[color].step_x;
+            int c = l;
+            for (int x = 0; x < w; x++)
+            {
+                yield return c;
+                c += inc_col;
+            }
+        }
+        public IEnumerable<int> GetIndexY(string color)
+        {
+            int t = GetTop(color);
+            int h = GetHeight(color);
+
+            int inc_line = Stride * (Colors[color].step_y);
+
+            int c = t * Stride;
+            for (int y = 0; y < h; y++)
+            {
+                yield return c;
+                c += inc_line;
+            }
+        }
+
+        public IEnumerable<(int center, int left,int right, int top, int bottom, int lefttop, int righttop, int leftbottom, int rightbottom)>
+            GetIndexPlus(string color)
+        {
+            int l = GetLeft(color);
+            int t = GetTop(color);
+            int c = l + t * Stride;
+
+            int w = GetWidth(color);
+            int h = GetHeight(color);
+
+            int inc_col = Colors[color].step_x;
+            int inc_line =
+                Stride - w * Colors[color].step_x
+                + Stride * (Colors[color].step_y - 1);
+
+            int line = Stride * Colors[color].step_y;
+            for (int y = 0; y < h; y++)
+            {
+                for (int x = 0; x < w; x++)
+                {
+                    yield return
+                    (
+                        c,
+                        c - inc_col,
+                        c + inc_col,
+                        c - line,
+                        c + line,
+                        c - inc_col - line,
+                        c + inc_col - line,
+                        c - inc_col + line,
+                        c + inc_col + line
+                    );
+                    c += inc_col;
+                }
+                c += inc_line;
+            }
+        }
+
+
         public int GetCount() => Width * Height;
         public int GetCount(string color) => color == null ? GetCount() : GetWidth(color) * GetHeight(color);
 
@@ -243,65 +500,11 @@ namespace Pixels
             => (Top + Height + (Colors[color].step_y - Colors[color].y - 1)) / Colors[color].step_y
              - (Top + (Colors[color].step_y - Colors[color].y - 1)) / Colors[color].step_y;
 
-
-
-
-        public Pixel<T> Cancellation(CancellationTokenSource token)
+        public int GetSize(string color)
         {
-            this.token = token;
-            return this;
+            return GetWidth(color) * GetHeight(color);
         }
 
-        public IEnumerable<T> GetPixel(string Map, string color)
-        {
-            int[] cord;
-
-
-
-            int c = Left + Top * Stride;
-            int inc = Stride - Width;
-
-            for (int y = 0; y < Height; y++)
-            {
-                for (int x = 0; x < Width; x++)
-                {
-                    yield return (T)(object)c;
-                    c++;
-                }
-                c += inc;
-            }
-        }
-
-        //deepcopyに書き換え
-        public Pixel<T> Clone()
-        {
-            var i = CloneWithoutPixel();
-            i.pixel = (T[])pixel.Clone();
-            return i;
-        }
-        public Pixel<T> CloneWithoutPixel()
-        {
-            var i = new Pixel<T>();
-            i.Maps = Maps;
-            i.Colors = this.Colors;
-            i.Type = Type;
-            i.Stride = Stride;
-
-            //マップ合わせ
-            return i[Map];
-
-            /*
-            using (var memoryStream = new System.IO.MemoryStream())
-            {
-                var binaryFormatter 
-                    = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
-
-                binaryFormatter.Serialize(memoryStream, this); // シリアライズ
-                memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
-                return (Pixel<T>)binaryFormatter.Deserialize(memoryStream); // デシリアライ
-            }
-            */
-        }
 
 
 
@@ -336,8 +539,8 @@ namespace Pixels
         //static T And(T x, T y) { return Operator<T>.And(x, y); }
         //static T Or(T x, T y) { return Operator<T>.Or(x, y); }
 
-        public static Pixel<T> operator +(Pixel<T> x, Pixel<T> y) 
-            => PixelFactory.Create<T>(x.Maps, (new T[x.pixel.Length]).Select((v, i) => v = Add(x.pixel[i],y.pixel[i])).ToArray());
+        public static Pixel<T> operator +(Pixel<T> x, Pixel<T> y)
+            => PixelFactory.Create<T>(x.Maps, (new T[x.pixel.Length]).Select((v, i) => v = Add(x.pixel[i], y.pixel[i])).ToArray());
         public static Pixel<T> operator +(T x, Pixel<T> y)
             => PixelFactory.Create<T>(y.Maps, (new T[y.pixel.Length]).Select((v, i) => v = Add(x, y.pixel[i])).ToArray());
         public static Pixel<T> operator +(Pixel<T> x, T y)
@@ -414,6 +617,86 @@ namespace Pixels
 
 
         #endregion
+
+    }
+
+    public static class PixelFactory
+    {
+        public static Pixel<T> Create<T>(int width, int height) where T : struct, IComparable
+        {
+            return Create<T>(width, height, new T[width * height]);
+        }
+
+        public static Pixel<T> Create<T>(int width, int height, T[] src) where T : struct, IComparable
+        {
+            var dst = new Pixel<T>(width, height);
+            dst.pixel = src;
+            return dst;
+        }
+
+
+        public static Pixel<T> Create<T>(Dictionary<string, PixelMap> maps) where T : struct, IComparable
+        {
+            var i = new Pixel<T>();
+            i.Maps = maps;
+            i.Type = typeof(T).Name;
+            i.Clear();
+            return i;
+        }
+        public static Pixel<T> Create<T>(Dictionary<string, PixelMap> maps, T[] src) where T : struct, IComparable
+        {
+            var i = new Pixel<T>();
+            i.Maps = maps;
+            i.Type = typeof(T).Name;
+            i.pixel = src;
+            return i;
+        }
+
+
+        public static Pixel<T> Create<T>(List<PixelFormat> formats, string filename) where T : struct, IComparable
+        {
+            //ファイルの一致
+            foreach (var i in formats)
+            {
+                if (Check(i))
+                {
+                    switch (i.Type)
+                    {
+                        case "Bmp":
+                            return PixelStream.ReadBMP<T>(filename);
+                        default:
+                            return PixelStream.Read(Make<T>(i), filename, i.Offset, i.Type);
+                    }
+                }
+            }
+            throw new KeyNotFoundException("Mismatched file format");
+
+            /***********/
+            bool Check(PixelFormat hoge)
+            {
+                foreach (var j in hoge.FileName)
+                {
+                    Regex r = new Regex(j, RegexOptions.IgnoreCase);
+                    Match m = r.Match(filename);
+                    if (m.Success) return true;
+                }
+                return false;
+            }
+
+            Pixel<TT> Make<TT>(PixelFormat hoge) where TT : struct, IComparable
+            {
+                var dst = hoge.Maps != null ?
+                    Create<TT>(hoge.Maps) :
+                    Create<TT>(hoge.Width, hoge.Height);
+
+                if (hoge.Colors != null)
+                    dst.Colors = hoge.Colors;
+
+                return dst;
+            }
+
+
+        }
 
     }
 
