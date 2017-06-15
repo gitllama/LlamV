@@ -152,7 +152,6 @@ namespace LlamV.Behavior
             {
                 UIElement element = null;
 
-
                 switch (i.Key)
                 {
                     case "Circle":
@@ -201,6 +200,7 @@ namespace LlamV.Behavior
                     default:
                         break;
                 }
+
                 if(element != null) cnv.Children.Add(element);
             }
         }

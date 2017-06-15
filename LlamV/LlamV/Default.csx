@@ -1,117 +1,203 @@
-﻿
+﻿Console.WriteLine("Script Start");
 
-string result = "-----result-----\r\n";
+//スタッガー処理
+var src = raw["Stagger"].StaggerRSelf().Clone();
 
-raw = raw["Normal"].StaggerRSelf();
+//傷カウント用フィルタリング画像作成
+var p = ClusterPixel(src, true);
 
-raw["Active"].Signal("Gr").ToText(ref result, (x) => $"Ave{x.Item1}\r\nDev{x.Item2}\r\n");
+//G matchテスト
+foreach (var i in p["Full"].GetIndex("R")) p[i] = false;
+foreach (var i in p["Full"].GetIndex("B")) p[i] = false;
 
-raw["HOB-L"].Signal("Gr").ToText(ref result, (x) => "Ave:{x.Average}\r\nDev:{x.Devition}\r\n");
-
-
-
-
-//raw["Active"].Signal("R").ToText(result);
-//raw["Active"].Signal("B").ToText(result);
-//raw["Active"].Signal("Gb").ToText(result);
-
-//foreach (var i in raw.GetIndex("Gr"))
-//{
-//    raw[i] = 255;
-//}
-
-//raw = raw["Full"].Cut("R");
-
-//スペックの表示
-//var r = Spec(raw);
-//raw = raw.FilterHOB();
-
-/*********** Method **********/
-/*
-public Pixel<float> ColorTest(Pixel<float> src)
+var instances = new List<Func<bool>>()
 {
-    src = src["Active"];
+    () => Cluster(p, ref raw, true),
+    () => Matching(p, true),
+    () => MatchingG(p, true)
+};
 
-    foreach (var c in new string[] { "R", "B" })
-        for (int y = 0; y < src.HeightColor(c); y++)
-            for (int x = 0; x < src.WidthColor(c); x++)
+foreach (var instance in instances)
+{
+    instance();
+    //if (instance()) return;
+}
+
+
+//raw = Matching(src, med, true);
+
+
+    //raw = ClusterC(src, false);
+
+    //raw = VFPN(src, true);
+    //raw = HFPN(src);
+    //raw = Defect(src, true);
+
+Pixel<bool> ClusterPixel(Pixel<float> src, bool isDark)
+{
+    var med = src
+            ["Normal"].FilterMedian(5, 5, 12, "Gr", "R", "B", "Gb")
+            ["HOB-L+"].FilterMedian(5, 5, 12, "M")
+            ["HOB-R+"].FilterMedian(5, 5, 12, "M")
+            ["Full"];
+    var defect = isDark
+        ? src["Full"].Sub(med["Full"])
+        : src["Full"].Div(med["Full"]);
+
+    var bin = src.Clone<bool>();
+    if (isDark)
+    {
+        defect["Full"].Binarization((x, y) => (x > 127 || x < -127), "M", bin["Full"]);
+        src["Effective"].Binarization((x, y) => y || (x > 255 || x < -255), "M", bin["Effective"]);
+        src["HOB-L"].Binarization((x, y) => y || (x > 255 || x < -255), "M", bin["HOB-L"]);
+        src["HOB-R"].Binarization((x, y) => y || (x > 255 || x < -255), "M", bin["HOB-R"]);
+    }
+    else
+    {
+        defect["Effective"].Binarization((x, y) => x > 1.02 || x < 0.98, "M", bin["Effective"]);
+        src["HOB-L"].Binarization((x, y) => y || x > 4095, "M", bin["HOB-L"]);
+        src["HOB-R"].Binarization((x, y) => y || x > 4095, "M", bin["HOB-R"]);
+    }
+
+    return bin;
+}
+
+bool Cluster(Pixel<bool> src, ref Pixel<float> dst, bool flag = false)
+{
+    int count = 0;
+    foreach (var c in new string[] { "M", "Gr", "R", "B", "Gb", "Gr1", "R1", "B1", "Gb1", "Gr2", "R2", "B2", "Gb2" })
+    {
+
+        var l = c == "M"
+            ? src["Full"].Labling(x => x.Area >= 5, true)
+            : src["Effective"].Cut(c).Labling(x => x.Area >= 5, true);
+
+        Console.Write($"Cluster_{c} Count {l.Count}");
+        if (l.Count >= 1)
+        {
+            if (count < l.Count) count = l.Count;
+
+            bool flag_death = false;
+            bool flag_HFPN = false;
+            bool flag_VFPN = false;
+            bool flag_Cluster = false;
+            foreach (var i in l.Take(64))
             {
-                src[c, x, y] = 255000;
+                if (i.Width > 64 && i.Height > 64) flag_death = true;
+                else if (i.Width > 64) flag_HFPN = true;
+                else if (i.Height > 64) flag_VFPN = true;
+                else flag_Cluster = true;
+
+                //Console.WriteLine($" {i.Width} {i.Height} {i.Area} {r}");
             }
-    return src;
+            var hoge = "";
+            hoge += flag_death ? " Death" : "";
+            hoge += flag_HFPN ? " HFPN" : "";
+            hoge += flag_VFPN ? " VFPN" : "";
+            hoge += flag_Cluster ? " Cluster" : "";
+            Console.Write($"{hoge}");
+        }
+        Console.WriteLine("");
+    }
+
+    if (flag) dst = src.ToPixel<Single>();
+
+    return count > 0;
 }
-public Pixel<float> PrePro(Pixel<float> src)
+
+
+//med = med.FilterAverageH("HOB-R", "HOB-Rs", null, "M");
+
+
+bool Matching(Pixel<bool> src, bool flag = false)
 {
-    //Color = RG
-    return src["Normal"].StaggerRSelf().DivSelf(255);
+    var l = src["Effective"].Matching("M");
+
+    // Console.WriteLine($"No Cluster");
+    Console.WriteLine($"ClusterMatching Count {l.Count}");
+    if (l.Count > 0)
+    {
+        foreach (var i in l.Take(3))
+            Console.WriteLine($" {i}");
+    }
+
+    return false;
 }
-public void CF(Pixel<float> src)
+bool MatchingG(Pixel<bool> src, bool flag = false)
 {
-    src = src["Active"]
-        .Cut()
-        .CutBayer(0, 0);
-    src.CumulativeFrequency(
-        Enumerable
-            .Range(0, 256)
-            .Select(x => (double)(x - 10) * 32)
-            .ToArray()
-          ).ToClip();
+    var l = src["Effective"].MatchingG();
+
+    Console.WriteLine($"ClusterMatching Count {l.Count}");
+    if (l.Count > 0)
+    {
+        foreach (var i in l.Take(3))
+            Console.WriteLine($" {i}");
+    }
+
+    return false;
 }
-public string Spec(Pixel<float> src)
+
+/*
+Pixel<float> VFPN(Pixel<float> src, bool flag = false)
 {
-    string result = "";
-    //基本スペック
-    result += $"{raw["Active"].Signal()}\r\n";
-    result += $"{raw["Active"].Signal()}\r\n";
+    //縦ActiveでCutするなら7大丈夫
+    //大傷に引っ張られる
+    var medV = src["Normal"].FilterMedian(1, 7, 4, "Gr1", "R1", "B1", "Gb1", "Gr2", "R2", "B2", "Gb2");
 
-    var signal2 = raw["Active"].SignalBayer();
+    foreach (var c in new string[] { "Gr1", "R1", "B1", "Gb1", "Gr2", "R2", "B2", "Gb2" })
+    {
+        var buf = medV["Effective-V"].AverageV(c);
+        Console.WriteLine($"VFPN {c} : {buf.Max()}");
+    }
 
-    result += $"Average\r\n";
-    result += $"Gr : {signal2.Average[0]}\r\n";
-    result += $"R  : {signal2.Average[1]}\r\n";
-    result += $"B  : {signal2.Average[2]}\r\n";
-    result += $"Gb : {signal2.Average[3]}\r\n";
-
-    result += $"Dev\r\n";
-    result += $"Gr : {signal2.Deviation[0]}\r\n";
-    result += $"R  : {signal2.Deviation[1]}\r\n";
-    result += $"B  : {signal2.Deviation[2]}\r\n";
-    result += $"Gb : {signal2.Deviation[3]}\r\n";
-
-    result += $"Line\r\n";
-    result += $"H : {raw["Active"].AverageH().LineStatus()}\r\n";
-    result += $"V : {raw["Active"].AverageV().LineStatus()}\r\n";
-
-    return result;
+    return flag
+        ? medV["Effective-V"].FilterAverageV(null, "Gr1", "R1", "B1", "Gb1", "Gr2", "R2", "B2", "Gb2")
+        : src;
 }
-public double Average(Pixel<float> src)
+
+Pixel<float> HFPN(Pixel<float> src, bool flag = false)
 {
-    return src.Cut().Average();
+    var medH = src["Normal"].FilterMedian(7, 1, 4, "Gr1", "R1", "B1", "Gb1", "Gr2", "R2", "B2", "Gb2");
+
+    foreach (var c in new string[] { "Gr1", "R1", "B1", "Gb1", "Gr2", "R2", "B2", "Gb2" })
+    {
+        var buf = medH["Effective"].AverageH(c);
+        Console.WriteLine($"HFPN {c} : {buf.Max()}");
+    }
+
+    return flag
+       ? medH["Effective"].FilterAverageH(null, "Gr1", "R1", "B1", "Gb1", "Gr2", "R2", "B2", "Gb2")
+       : src;
 }
-public void Fil(Pixel<float> src)
+
+
+Pixel<float> Defect(Pixel<float> src, bool flag = false)
 {
-    //選択範囲の確認
-    var x = src["Trim"].Left;
-    var y = src["Trim"].Top;
-    var w = src["Trim"].Width;
-    var h = src["Trim"].Height;
+    var med = src["Effective"].FilterMedian(5, 5, 12, "Gr", "R", "B", "Gb");
+    var defect = src["Full"].Sub(med["Full"]);
 
-    //選択範囲のフィルター
-    src = src["Trim"].FilterAverageV();
+    int thr = 64;
+
+    foreach (var c in new string[] { "Gr", "R", "B", "Gb" })
+    {
+        var buf = defect["Active"].Count(x => x > 64, c);
+        Console.WriteLine($"WD {c} : {buf}");
+    }
+
+    if (flag)
+    {
+        var bin = src.Clone<bool>();
+        defect["Active"].Binarization(x => x > 64 || x < -64, "M", bin["Active"]);
+        return bin.ToPixel<Single>();
+    }
+    else
+    {
+        return src;
+    }
+
 }
 
 
-public string b2spec(Pixel<float> src)
-{
-    string result = "";
-
-    result += $"{raw["Active"].Signal()}\r\n";
-    result += $"{raw["Active"].Signal()}\r\n";
-
-    return result;
-}
 
     */
-//var buf = raw.ToPixelInt32();
-//var i = buf[0];
-//var line = String.Join("\r\n", raw["Active"].AverageV());
+

@@ -252,6 +252,9 @@ namespace LlamV.ViewModels
         //..Take(1)
         public void DrawL(List<Shape> a, Point x)
         {
+            //Shiftだと消す
+            //Ctrlだと明るさ
+
             var c = Colors.Red;
             var f = Colors.Red;
             f.A = 30;

@@ -286,18 +286,37 @@ namespace LlamV.Models
         {
             Console.WriteLine($"Developing {id}");
 
-            //var buf = ContentData[id].Raw["Full"].Func(x => (x - Offset) * 255 / Depth);
-            //intならbitshiftつかえる
+            //intにして計算量削減
+            var buf = ContentData[id].Raw.Clone<int>();
+            buf["Full"].AddSelf(Offset);
 
+            if (Enumerable.Range(1, 64).Select(x => (int)Math.Pow(2, x)).Contains(Depth + 1))
+            {
+                //bufbuf.SubSelf(Offset).MulSelf(255.0).DivSelf(Depth);
+            }
+            else
+            {
+                buf.MulSelf((float)(255.0/Depth));
+            }
+            
+            
+
+
+            //
             ContentData[id].Images =
-                Color == ColorType.Raw ? ContentData[id].Raw["Full"].ToMono(func:x => { var i = (x - Offset) * 255 / Depth; return i > 255 ? (byte)255 : i < 0 ? (byte)0 : (byte)i;}) :
-                Color == ColorType.GR ? ContentData[id].Raw["Full"].ToColorGR(matrix : ColorSetting.GetMatrix(), func : x => { var i = (x - Offset) * 255 / Depth; return i > 255 ? (byte)255 : i < 0 ? (byte)0 : (byte)i; }) :
-                Color == ColorType.RG ? ContentData[id].Raw["Full"].ToColorRG(matrix : ColorSetting.GetMatrix(), func: x => { var i = (x - Offset) * 255 / Depth; return i > 255 ? (byte)255 : i < 0 ? (byte)0 : (byte)i; }) :
-                Color == ColorType.GB ? ContentData[id].Raw["Full"].ToColorGB(matrix : ColorSetting.GetMatrix(), func: x => { var i = (x - Offset) * 255 / Depth; return i > 255 ? (byte)255 : i < 0 ? (byte)0 : (byte)i; }) :
-                Color == ColorType.BG ? ContentData[id].Raw["Full"].ToColorBG(matrix : ColorSetting.GetMatrix(), func: x => { var i = (x - Offset) * 255 / Depth; return i > 255 ? (byte)255 : i < 0 ? (byte)0 : (byte)i; }) :
-                ContentData[id].Raw["Full"].ToMono(func:x => { var i = (x - Offset) * 255 / Depth; return i > 255 ? (byte)255 : i < 0 ? (byte)0 : (byte)i; });
-
+                Color == ColorType.Raw ? buf.ToMono() :
+                Color == ColorType.GR ? buf.ToColorGR(ColorSetting.GetMatrix()) :
+                Color == ColorType.RG ? buf.ToColorRG(ColorSetting.GetMatrix()) :
+                Color == ColorType.GB ? buf.ToColorGB(ColorSetting.GetMatrix()) :
+                Color == ColorType.BG ? buf.ToColorBG(ColorSetting.GetMatrix()) : 
+                buf.ToMono();
+            
             RaisePropertyChanged(nameof(ContentData));
+        }
+
+        private void a()
+        {
+
         }
 
         public void ClipText(string contentId, bool selected)
@@ -338,16 +357,15 @@ namespace LlamV.Models
             {
                 var i = DateTime.Now.ToString("yyyyMMddHHmmss") + ".png";
                 Console.WriteLine(" -> i");
-                string map = "Full";
                 if (selected)
                 {
                     ContentData[contentId].Raw.AddMap("Trim", (int)Rect.Left, (int)Rect.Top, (int)Rect.Width, (int)Rect.Height);
-                    //ContentData[contentId].Raw["Trim"].Cut().AddSelf(Offset).MulSelf(255).DivSelf(Depth).TrimSelf(255,0).ToPixel<byte>().WriteBitmap(i);
-                    map = "Trim";
+                    ContentData[contentId].Raw["Trim"].Cut().AddSelf(Offset).MulSelf(255).DivSelf(Depth).TrimSelf(255,0).ToPixel<byte>().WriteBitmap(i);
                 }
-                ContentData[contentId].Raw[map].Cut()
-                    .Acc(x => { var n = (x - Offset) * 255 / Depth; return n > 255 ? (byte)255 : n < 0 ? (byte)0 : (byte)n; })
-                    .WriteBitmap(i);
+                else
+                {
+                    ContentData[contentId].Raw["Full"].Cut().AddSelf(Offset).MulSelf(255).DivSelf(Depth).TrimSelf(255, 0).ToPixel<byte>().WriteBitmap(i);
+                }
             }
         }
     }

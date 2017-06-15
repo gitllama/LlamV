@@ -101,25 +101,38 @@ namespace LlamV.Behavior
 
         private void AssociatedObject_MouseWheel(object sender, MouseWheelEventArgs e)
         {
-            var a = System.Math.Pow(2, e.Delta / 120);
-            double x = 0;
-            double y = 0;
-            var i = e.GetPosition(sender as ScrollViewer);
-            MouseWheel *= a;
-
-            if (a > 1)
+            if (
+                (Keyboard.GetKeyStates(Key.LeftCtrl) & KeyStates.Down) == KeyStates.Down ||
+                (Keyboard.GetKeyStates(Key.RightCtrl) & KeyStates.Down) == KeyStates.Down
+                )
             {
-                x = (sv.HorizontalOffset * 2) + i.X;
-                y = (sv.VerticalOffset * 2) + i.Y;
+                if (e.Delta / 120 > 0) ShortcutCommand.Execute("MouseWheelCtrl+");
+                if (e.Delta / 120 < 0) ShortcutCommand.Execute("MouseWheelCtrl-");
+                e.Handled = true;
             }
             else
             {
-                x = (sv.HorizontalOffset / 2) - i.X;
-                y = (sv.VerticalOffset / 2) - i.Y;
+                var a = System.Math.Pow(2, e.Delta / 120);
+                MouseWheel *= a;
+                double x = 0;
+                double y = 0;
+                var i = e.GetPosition(sender as ScrollViewer);
+
+                if (a > 1)
+                {
+                    x = (sv.HorizontalOffset * 2) + i.X;
+                    y = (sv.VerticalOffset * 2) + i.Y;
+                }
+                else
+                {
+                    x = (sv.HorizontalOffset / 2) - i.X;
+                    y = (sv.VerticalOffset / 2) - i.Y;
+                }
+                sv.ScrollToHorizontalOffset(x);
+                sv.ScrollToVerticalOffset(y);
+                e.Handled = true;
             }
-            sv.ScrollToHorizontalOffset(x);
-            sv.ScrollToVerticalOffset(y);
-            e.Handled = true;
+
         }
         private void AssociatedObject_KeyDown(object sender, KeyEventArgs e)
         {

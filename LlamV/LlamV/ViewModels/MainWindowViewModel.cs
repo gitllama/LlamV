@@ -51,20 +51,13 @@ namespace LlamV.ViewModels
 
 
             LoadedCommand = new ReactiveCommand();
-            LoadedCommand.Subscribe(_ =>
-            {
-                LoadLayout(null);
-            });
+            LoadedCommand.Subscribe(_ => LoadLayout(null));
+
             UnloadedCommand = new ReactiveCommand<object>();
-            UnloadedCommand.Subscribe(x =>
-            {
-                SaveLayout((DockingManager)x);
-            });
+            UnloadedCommand.Subscribe(x => SaveLayout((DockingManager)x));
+
             DocumentClosingCommand = new ReactiveCommand<object>();
-            DocumentClosingCommand.Subscribe(x =>
-            {
-                SaveLayout((DockingManager)x);
-            });
+            DocumentClosingCommand.Subscribe(x => SaveLayout((DockingManager)x));
 
             DocumentOpenCommand = new ReactiveCommand();
             DocumentOpenCommand.Subscribe(_ =>

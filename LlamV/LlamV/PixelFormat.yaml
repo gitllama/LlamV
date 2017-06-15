@@ -15,27 +15,123 @@
   Height : 1178
   Type   : Single
   Note : 暫定
+  Colors :
+    M :
+      x      : 0
+      y      : 0
+      step_x : 1
+      step_y : 1
+    M1 :
+      x      : 0
+      y      : 0
+      step_x : 1
+      step_y : 4
+    M2 :
+      x      : 0
+      y      : 1
+      step_x : 1
+      step_y : 4
+    M3 :
+      x      : 0
+      y      : 2
+      step_x : 1
+      step_y : 1
+    M4 :
+      x      : 0
+      y      : 3
+      step_x : 1
+      step_y : 4
+    B :
+      x      : 0
+      y      : 0
+      step_x : 2
+      step_y : 2
+    Gb  :
+      x      : 1
+      y      : 0
+      step_x : 2
+      step_y : 2
+    Gr  :
+      x      : 0
+      y      : 1
+      step_x : 2
+      step_y : 2
+    R :
+      x      : 1
+      y      : 1
+      step_x : 2
+      step_y : 2
+    B1 :
+      x      : 0
+      y      : 0
+      step_x : 2
+      step_y : 4
+    Gb1  :
+      x      : 1
+      y      : 0
+      step_x : 2
+      step_y : 4
+    Gr1  :
+      x      : 0
+      y      : 1
+      step_x : 2
+      step_y : 4
+    R1 :
+      x      : 1
+      y      : 1
+      step_x : 2
+      step_y : 4
+    B2 :
+      x      : 0
+      y      : 2
+      step_x : 2
+      step_y : 4
+    Gb2  :
+      x      : 1
+      y      : 2
+      step_x : 2
+      step_y : 4
+    Gr2  :
+      x      : 0
+      y      : 3
+      step_x : 2
+      step_y : 4
+    R2 :
+      x      : 1
+      y      : 3
+      step_x : 2
+      step_y : 4
   Maps :
     Full : 
       Left   : 0 
       Top    : 0
       Width  : 2256
       Height : 1178
-    Normal : 
+    Stagger : 
       Left   : 149 
       Top    : 39
-      Width  : 1956
+      Width  : 1957
       Height : 1116
-    Effective : 
-      Left   : 153 
+    Normal :  
+      Left   : 154
       Top    : 43
       Width  : 1948
       Height : 1108
-    Active : 
+    Effective : 
       Left   : 160 
       Top    : 49
       Width  : 1936
       Height : 1096
+    Effective-V : 
+      Left   : 160 
+      Top    : 57
+      Width  : 1936
+      Height : 1080
+    Active : 
+      Left   : 168 
+      Top    : 57
+      Width  : 1920
+      Height : 1080
     HOB-L : 
       Left   : 12 
       Top    : 49
@@ -46,6 +142,16 @@
       Top    : 49
       Width  : 128
       Height : 1096
+    HOB-L+ : 
+      Left   : 10 
+      Top    : 47
+      Width  : 132
+      Height : 1100
+    HOB-R+ : 
+      Left   : 2114
+      Top    : 47
+      Width  : 132
+      Height : 1100
 - Model : Single
   FileName :
   - "\\d{1,12}\\.bin$"
@@ -147,21 +253,31 @@
       Top    : 0
       Width  : 2256
       Height : 1178
-    Normal : 
+    Stagger : 
       Left   : 149 
       Top    : 39
-      Width  : 1956
+      Width  : 1957
       Height : 1116
-    Effective : 
+    Normal :  
       Left   : 154
       Top    : 43
       Width  : 1948
       Height : 1108
-    Active : 
+    Effective : 
       Left   : 160 
       Top    : 49
       Width  : 1936
       Height : 1096
+    Effective-V : 
+      Left   : 160 
+      Top    : 57
+      Width  : 1936
+      Height : 1080
+    Active : 
+      Left   : 168 
+      Top    : 57
+      Width  : 1920
+      Height : 1080
     HOB-L : 
       Left   : 12 
       Top    : 49
@@ -172,6 +288,16 @@
       Top    : 49
       Width  : 128
       Height : 1096
+    HOB-L+ : 
+      Left   : 10 
+      Top    : 47
+      Width  : 132
+      Height : 1100
+    HOB-R+ : 
+      Left   : 2114
+      Top    : 47
+      Width  : 132
+      Height : 1100
 - Model : NSingle
   FileName :
   - "\\d{1,12}\\.btn$"
