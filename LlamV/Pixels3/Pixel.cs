@@ -107,6 +107,10 @@ namespace Pixels
     {
         TResult Operate(T1 x, T2 y);
     }
+    public interface IBinaryOperatorRef<T1, T2>
+    {
+        void Operate(ref T1 x, ref T2 y);
+    }
 
     [Serializable]
     public partial class Pixel<T> where T : struct, IComparable
@@ -360,6 +364,23 @@ namespace Pixels
             return dst;
         }
 
+        public void Accumulate<T1, TOperator>(ref T1 src1, TOperator op)
+            where T1 : struct, IComparable
+            where TOperator : struct, IBinaryOperatorRef<T, T1>
+        {
+            if (this.Map == "Full")
+            {
+                for (int i = 0; i < this.pixel.Length; i++)
+                    op.Operate(ref this[i], ref src1);
+            }
+            else
+            {
+                //for (int y = 0; y < this.Height; y++)
+                //    for (int x = 0; x < this.Width; x++)
+                //        op.Operate(ref i, ref src1, ref src2);
+            }
+            return;
+        }
         #endregion
 
         /*****/

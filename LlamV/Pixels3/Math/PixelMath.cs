@@ -199,6 +199,19 @@ namespace Pixels.Math/*T4namespace{*/.Base/*}T4namespace*/
         }
         /*}T4*/
 
+        /*T4{[
+            {"Key": ["Int32"], "Value": [["Byte"],["UInt16"],["UInt32"],["UInt64"],["Int16"],["Int32"],["Int64"],["Single"],["Double"]]}
+        ]T4h*/
+        public static double Average2(this Pixel<Int32> src)
+        {
+            double dst = 0;
+            src.Accumulate(ref dst, default(OpAverageInt32));
+            return dst / src.GetCount("M");
+        }
+        private struct OpAverageInt32 : IBinaryOperatorRef<Int32, double> { public void Operate(ref Int32 x, ref double y) => y += x; }/*}T4*/
+
+        //こっちの方が早い（あたりまえ
+
         #endregion
 
 

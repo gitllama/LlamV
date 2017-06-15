@@ -2485,6 +2485,72 @@ namespace Pixels.Math
         }
         
 
+        
+        public static double Average2(this Pixel<Byte> src)
+        {
+            double dst = 0;
+            src.Accumulate(ref dst, default(OpAverageByte));
+            return dst / src.GetCount("M");
+        }
+        private struct OpAverageByte : IBinaryOperatorRef<Byte, double> { public void Operate(ref Byte x, ref double y) => y += x; }
+        public static double Average2(this Pixel<UInt16> src)
+        {
+            double dst = 0;
+            src.Accumulate(ref dst, default(OpAverageUInt16));
+            return dst / src.GetCount("M");
+        }
+        private struct OpAverageUInt16 : IBinaryOperatorRef<UInt16, double> { public void Operate(ref UInt16 x, ref double y) => y += x; }
+        public static double Average2(this Pixel<UInt32> src)
+        {
+            double dst = 0;
+            src.Accumulate(ref dst, default(OpAverageUInt32));
+            return dst / src.GetCount("M");
+        }
+        private struct OpAverageUInt32 : IBinaryOperatorRef<UInt32, double> { public void Operate(ref UInt32 x, ref double y) => y += x; }
+        public static double Average2(this Pixel<UInt64> src)
+        {
+            double dst = 0;
+            src.Accumulate(ref dst, default(OpAverageUInt64));
+            return dst / src.GetCount("M");
+        }
+        private struct OpAverageUInt64 : IBinaryOperatorRef<UInt64, double> { public void Operate(ref UInt64 x, ref double y) => y += x; }
+        public static double Average2(this Pixel<Int16> src)
+        {
+            double dst = 0;
+            src.Accumulate(ref dst, default(OpAverageInt16));
+            return dst / src.GetCount("M");
+        }
+        private struct OpAverageInt16 : IBinaryOperatorRef<Int16, double> { public void Operate(ref Int16 x, ref double y) => y += x; }
+        public static double Average2(this Pixel<Int32> src)
+        {
+            double dst = 0;
+            src.Accumulate(ref dst, default(OpAverageInt32));
+            return dst / src.GetCount("M");
+        }
+        private struct OpAverageInt32 : IBinaryOperatorRef<Int32, double> { public void Operate(ref Int32 x, ref double y) => y += x; }
+        public static double Average2(this Pixel<Int64> src)
+        {
+            double dst = 0;
+            src.Accumulate(ref dst, default(OpAverageInt64));
+            return dst / src.GetCount("M");
+        }
+        private struct OpAverageInt64 : IBinaryOperatorRef<Int64, double> { public void Operate(ref Int64 x, ref double y) => y += x; }
+        public static double Average2(this Pixel<Single> src)
+        {
+            double dst = 0;
+            src.Accumulate(ref dst, default(OpAverageSingle));
+            return dst / src.GetCount("M");
+        }
+        private struct OpAverageSingle : IBinaryOperatorRef<Single, double> { public void Operate(ref Single x, ref double y) => y += x; }
+        public static double Average2(this Pixel<Double> src)
+        {
+            double dst = 0;
+            src.Accumulate(ref dst, default(OpAverageDouble));
+            return dst / src.GetCount("M");
+        }
+        private struct OpAverageDouble : IBinaryOperatorRef<Double, double> { public void Operate(ref Double x, ref double y) => y += x; }
+
+
         #endregion
 
 
