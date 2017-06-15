@@ -1,0 +1,73 @@
+﻿<#@ template debug="true" hostspecific="true" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ assembly name="Microsoft.Csharp" #>
+<#@ assembly name="$(SolutionDir)DynamicJson.dll" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.Text.RegularExpressions" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="Codeplex.Data" #>
+<#@ output extension=".cs" #>
+<# 
+	//namespaceの変更
+	var src = Regex.Replace(
+		File.ReadAllText(Host.ResolvePath(@"PixelOpenCV.cs")),
+		@"\/\*T4namespace\{([\s\S]*?)\}T4namespace\*\/",
+		(match) => 
+		{
+			return "";
+		});
+	//展開
+	var dst = Regex.Replace(
+		src,
+        @"\/\*T4\{(?<json>[\s\S]*?)T4h\*\/(?<m>[\s\S]*?)\/\*\}T4\*\/",
+		(match) => 
+		{
+			List<Obj> json = DynamicJson.Parse(match.Groups["json"].Value);
+
+			//ダミーに置き換え
+			var dummy = dummystr(match.Groups["m"].Value, json);
+
+			return convert(
+				dummy, 
+				json, "");
+		});
+#><#= dst #>
+<#+
+    public class Obj
+    {
+        public string[] Key { get; set; }
+        public List<string[]> Value { get; set; }
+    }
+	public string dummystr(string src, List<Obj> obj)
+	{
+		string dst = src;
+		int c = 0;
+		foreach (var n in obj)
+        {
+			for(int i = 0; i < n.Key.Length; i++)
+			{
+				dst = dst.Replace(n.Key[i], $"t4dummystr{c:0000}");
+				n.Key[i] = $"t4dummystr{c:0000}";
+				c++;
+			}
+        }
+		return dst;
+	}
+    public string convert(string src, List<Obj> obj, string str)
+    {
+        if (obj.Count < 1) return str + src;
+
+        var now = obj.First();
+        foreach (var v in now.Value)
+        {
+            var buf = src;
+            foreach (var k in now.Key.Select((item, index) => new { item, index }))
+                buf = buf.Replace(k.item, v[k.index]);
+            str = convert(buf, obj.Where(x => x.Key != now.Key).ToList(), str);
+        }
+        return str;
+    }
+#>

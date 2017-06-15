@@ -23,6 +23,7 @@ namespace Pixels.Extend
         public Dictionary<string, string> Condition { get; set; }
         public Dictionary<string, PictureTypes> Picture { get; set; }
         public Dictionary<string, PixelMap> Maps { get; set; }
+        public Dictionary<string, PixelColor> Colors { get; set; }
 
         //設定の読み込み
         public static PixelSeqParam Create(string yaml)
@@ -62,7 +63,8 @@ namespace Pixels.Extend
                         //!!! 設定値の注入が必要
                         Condition = Condition,
                         Picture = Picture,
-                        Maps = Maps
+                        Maps = Maps,
+                        Colors = Colors
                     };
                     result.Add(buf);
                 }
@@ -93,6 +95,7 @@ namespace Pixels.Extend
         public Dictionary<string, string> Condition { get; set; }
         public Dictionary<string, PictureTypes> Picture { get; set; }
         public Dictionary<string, PixelMap> Maps { get; set; }
+        public Dictionary<string, PixelColor> Colors { get; set; }
 
         public Dictionary<(string cond, string pic, string name), string> Result { get; set; }
     }
@@ -119,6 +122,7 @@ namespace Pixels.Extend
         public Dictionary<string, string> Condition { get; set; }
         public Dictionary<string, PictureTypes> Picture { get; set; }
         public Dictionary<string, PixelMap> Maps { get; set; }
+        public Dictionary<string, PixelColor> Colors { get; set; }
 
         public Dictionary<(string cond, string pic, string name), string> Result { get; set; }
 
@@ -157,6 +161,7 @@ namespace Pixels.Extend
 
             pixel = null;
             pixel = PixelFactory.Create<float>(Maps).Read(path, 0, Picture[pic].Type);
+            pixel.Colors = Colors;
             PixelStatus = name;
         }
 
@@ -176,13 +181,14 @@ namespace Pixels.Extend
 
     public static class PixelSeqExtensions
     {
+        public const string outputfilename = "log.txt";
         public static void Output(this ChipStatusMediator src, string key, string value)
         {
             Console.WriteLine($"{key} : {value}");
 
-            using (var sw = new StreamWriter("log.txt", true))
+            using (var sw = new StreamWriter(outputfilename, true))
             {
-                sw.WriteLine($"{src.LotNo}_{src.WfNo}_{src.ChipNo}, {key}, {value}");
+                sw.WriteLine($"{src.LotNo}_{src.WfNo}_{src.ChipNo},{src.Condition}_{src.Picture} {key}, {value}");
             }
             src.AddResult(key, value);
         }
@@ -202,8 +208,18 @@ namespace Pixels.Extend
             return src;
         }
 
-        public static ChipStatusMediator VFPN(this ChipStatusMediator src)
+        public static ChipStatusMediator VFPN(this ChipStatusMediator src, params string[] colors)
         {
+            if (src.pixel == null) return src;
+            var p = src.pixel;
+
+            foreach (var i in colors)
+            {
+                var value = p.AverageV(i);
+                src.Output($"{nameof(VFPN)}_Max_{i}", value.Max().ToString());
+            }
+
+            /*
             if (src.pixel == null)
             {
                 foreach (var n in new int[] { 0, 1, 2, 3 })
@@ -252,6 +268,8 @@ namespace Pixels.Extend
                 }
 
             return src;
+            */
+            return null;
         }
         public static ChipStatusMediator HFPN(this ChipStatusMediator src)
         {
@@ -260,10 +278,19 @@ namespace Pixels.Extend
             return src;
         }
 
-        public static ChipStatusMediator Signal(this ChipStatusMediator src)
+        public static ChipStatusMediator Signal(this ChipStatusMediator src, params string[] color)
         {
             if (src.pixel == null) return src;
             var p = src.pixel;
+
+            foreach(var i in color)
+            {
+                var value = p.Signal(i);
+
+                src.Output($"{nameof(Signal)}_Averaging_{i}", value.Average.ToString());
+                src.Output($"{nameof(Signal)}_Deviation_{i}", value.Deviation.ToString());
+            }
+
             /*
             var m = p.Signal();
             var c = p.SignalBayer();
@@ -352,15 +379,76 @@ namespace Pixels.Extend
         public static ChipStatusMediator Labeling(this ChipStatusMediator src)
         {
             if (src.pixel == null) return src;
-            if (src.pixelfilter == null) return src;
+            //if (src.pixelfilter == null) return src;
 
-            var p = src.pixel.Sub(src.pixelfilter);
+            bool isDark = true;
+            var med = src.pixel
+                    ["Normal"].FilterMedian(5, 5, 12, "Gr", "R", "B", "Gb")
+                    ["HOB-L+"].FilterMedian(5, 5, 12, "M")
+                    ["HOB-R+"].FilterMedian(5, 5, 12, "M")
+                    ["Full"];
+            var defect = isDark
+                ? src.pixel["Full"].Sub(med["Full"])
+                : src.pixel["Full"].Div(med["Full"]);
 
-            var v = p.SubSelf(255).ToMono().Labling();
+            var bin = src.pixel.Clone<bool>();
+            if (isDark)
+            {
+                defect["Full"].Binarization((x, y) => x > 127 || x < -127, "M", bin["Full"]);
+                src.pixel["Effective"].Binarization((x, y) => y || x > 255 || x < -255, "M", bin["Effective"]);
+                src.pixel["HOB-L"].Binarization((x, y) => y || x > 255 || x < -255, "M", bin["HOB-L"]);
+                src.pixel["HOB-R"].Binarization((x, y) => y || x > 255 || x < -255, "M", bin["HOB-R"]);
+            }
+            else
+            {
+                defect["Effective"].Binarization((x, y) => x > 1.02 || x < 0.98, "M", bin["Effective"]);
+                src.pixel["HOB-L"].Binarization((x, y) => y || x > 4095, "M", bin["HOB-L"]);
+                src.pixel["HOB-R"].Binarization((x, y) => y || x > 4095, "M", bin["HOB-R"]);
+            }
 
-            var key = $"{nameof(Labeling)}";
-            var value = v;
-            src.Output(key, value.ToString());
+            int count = 0;
+            foreach (var c in new string[] { "M", "Gr", "R", "B", "Gb", "Gr1", "R1", "B1", "Gb1", "Gr2", "R2", "B2", "Gb2" })
+            {
+                var l = c == "M"
+                    ? bin["Full"].Labling(x => x.Area >= 5, true)
+                    : bin["Effective"].Cut(c).Labling(x => x.Area >= 5, true);
+
+                var result = $"Cluster_{c} Count {l.Count}";
+                if (l.Count >= 1)
+                {
+                    if (count < l.Count) count = l.Count;
+
+                    bool flag_death = false;
+                    bool flag_HFPN = false;
+                    bool flag_VFPN = false;
+                    bool flag_Cluster = false;
+                    foreach (var i in l.Take(64))
+                    {
+                        if (i.Width > 64 && i.Height > 64) flag_death = true;
+                        else if (i.Width > 64) flag_HFPN = true;
+                        else if (i.Height > 64) flag_VFPN = true;
+                        else flag_Cluster = true;
+
+                        //Console.WriteLine($" {i.Width} {i.Height} {i.Area} {r}");
+                    }
+                    var hoge = "";
+                    hoge += flag_death ? " Death" : "";
+                    hoge += flag_HFPN ? " HFPN" : "";
+                    hoge += flag_VFPN ? " VFPN" : "";
+                    hoge += flag_Cluster ? " Cluster" : "";
+                    Console.Write($"{hoge}");
+                    result += $"{hoge}";
+
+                }
+                Console.WriteLine("");
+                src.Output($"{nameof(Labeling)}_{c}", $"{result}");
+            }
+
+            var l1 = bin["Effective"].Matching("M");
+            src.Output($"Matching", $"{l1.Count}");
+
+            var l2 = bin["Effective"].MatchingG();
+            src.Output($"MatchingG", $"{l2.Count}");
 
             return src;
         }
@@ -435,6 +523,4 @@ namespace Pixels.Extend
      //        return this;
      //    }
      //}
-
-
 

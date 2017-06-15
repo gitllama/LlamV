@@ -74,5 +74,10 @@ namespace Pixels.Extend
                 string.Join("\r\n", src.Select(x => $"{x.Key.ToString()}, {x.Value.ToString()}"))
                 , true);
         }
+
+        public static void ToText(this object src, ref string result, Func<dynamic, string> func)
+        {
+            result += func(src);
+        }
     }
 }
