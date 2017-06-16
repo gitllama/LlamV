@@ -162,7 +162,7 @@ namespace Pixels.Stream/*T4namespace{*/.Base/*}T4namespace*/
             }
             int w = src.Width;
             int h = src.Height;
-            int depth = 255;
+            //int depth = 255;
 
             using (StreamWriter sw = new StreamWriter(filename))
             {

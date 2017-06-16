@@ -1,5 +1,4 @@
-﻿using Pixels.Math;
-using Pixels.Stream;
+﻿
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,24 +10,41 @@ using System.Threading.Tasks;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 
+using Pixels.Stream;
+
 namespace Pixels
 {
-    public interface IBinaryOperator<T1, TResult>
+
+    public interface IBinaryOperator<T, T1>
     {
-        TResult Operate(T1 x);
+        void Operate(ref T x, ref T1 y);
     }
-    public interface IBinaryOperator<T1, T2, TResult>
+    public interface IBinaryOperator<T, T1, T2>
     {
-        TResult Operate(T1 x, T2 y);
+        void Operate(ref T x, ref T1 y, ref T2 z);
     }
-    public interface IBinaryOperatorRef<T1, T2>
+    public interface IBinaryOperator<T, T1, T2, T3>
     {
-        void Operate(ref T1 x, ref T2 y);
+        void Operate(ref T x, ref T1 y, ref T2 z, ref T3 w);
     }
-    public interface IBinaryOperatorRef<T1, T2, T3>
+
+    public interface IBinaryOperator_<T>
     {
-        void Operate(ref T1 x, ref T2 y, ref T3 z);
+        void Operate(int index, ref T x);
     }
+    public interface IBinaryOperator_<T, T1>
+    {
+        void Operate(int index, ref T x, ref T1 y);
+    }
+    public interface IBinaryOperator_<T, T1, T2>
+    {
+        void Operate(int index, ref T x, ref T1 y, ref T2 z);
+    }
+    public interface IBinaryOperator_<T, T1, T2, T3>
+    {
+        void Operate(int index, ref T x, ref T1 y, ref T2 z, ref T2 w);
+    }
+
 
     [Serializable]
     public class PixelMap
@@ -79,48 +95,77 @@ namespace Pixels
         public CancellationTokenSource token;
 
         public Dictionary<string, PixelMap> Maps { get; set; }
+
         public int Stride { get; protected set; } = 1;
+
+        public int FullSize { get => pixel.Length; }
 
         public int Left { get; protected set; } = 0;
         public int Top { get; protected set; } = 0;
         public int Width { get; protected set; } = 1;
         public int Height { get; protected set; } = 1;
+        public int StepX { get; protected set; } = 1;
+        public int StepY { get; protected set; } = 1;
+
+
+
+
+
+
 
         public int Size { get => Width * Height; }
 
         public ref T this[int value] { get => ref pixel[value]; }
 
         public ref T this[int x, int y] { get => ref pixel[ConvPoisonMap(x, y)]; }
+
         public int ConvPoisonMap(int x, int y) => (x + Left) + (y + Top) * Stride;
         public (int x, int y) ConvPoisonMap(int index) => ((index % Stride) - Left, (index / Stride) - Top);
 
+
         public Dictionary<string, PixelColor> Colors { get; set; }
 
-        public ref T this[string color, int x, int y] { get => ref pixel[ConvPoisonColor(color, x, y)]; }
-        public int ConvPoisonColor(string color, int x, int y)
-        {
-            var c = Colors[color];
-            return GetLeft(color) + x * c.step_x + (GetTop(color) + y * Colors[color].step_y) * Stride;
-        }
-
-
         public string Map { get; protected set; } = "Full";
-        public Pixel<T> this[string map] => SetMap(map);
-        public Pixel<T> SetMap(string value)
-        {
-            Map = value;
-            Left = Maps[value].Left;
-            Top  = Maps[value].Top;
-            Width = Maps[value].Width;
-            Height = Maps[value].Height;
+        public string[] Color { get; protected set; } = null;
 
+        public Pixel<T> this[string map] => SetMap(map, null);
+        public Pixel<T> this[string map, params string[] colors] => SetMap(map, colors);
+
+        public Pixel<T> SetMap(string map, params string[] colors)
+        {
+            Map = map;
+
+            if((colors?.Length ?? 0) > 0)
+            {
+                var color = colors[0];
+                Left = Maps[map].Left + Colors[color].step_x - 1 - (Maps[map].Left + Colors[color].step_x - Colors[color].x - 1) % Colors[color].step_x;
+                Top = Maps[map].Top + Colors[color].step_y - 1 - (Maps[map].Top + Colors[color].step_y - Colors[color].y - 1) % Colors[color].step_y;
+
+                Width = (Maps[map].Left + Maps[map].Width + (Colors[color].step_x - Colors[color].x - 1)) / Colors[color].step_x
+                 - (Maps[map].Left + (Colors[color].step_x - Colors[color].x - 1)) / Colors[color].step_x;
+                Height = (Maps[map].Top + Maps[map].Height + (Colors[color].step_y - Colors[color].y - 1)) / Colors[color].step_y
+                             - (Maps[map].Top + (Colors[color].step_y - Colors[color].y - 1)) / Colors[color].step_y;
+
+                StepX = Colors[color].step_x;
+                StepY = Colors[color].step_y;
+            }
+            else
+            {
+                Left = Maps[map].Left;
+                Top = Maps[map].Top;
+
+                Width = Maps[map].Width;
+                Height = Maps[map].Height;
+
+                StepX = 1;
+                StepY = 1;
+            }
+
+
+            Color = colors;
             return this;
         }
 
-        public Pixel<T> this[string map, params string[] colors]
-        {
-            get => this;
-        }
 
         public void AddMap(string key,int left, int top, int width,int height)
         {
@@ -153,20 +198,6 @@ namespace Pixels
         }
 
 
-
-        //public (int Left, int Top, int Width, int Height,int StepX, int StepY) GetColor(string key = null)
-        //{
-        //    return
-        //    (
-        //        Left + Colors[key].x,
-        //        Top + Colors[key].y,
-        //        Width + Left,
-        //        Height + Top,
-        //        Colors[key].step_x,
-        //        Colors[key].step_y
-        //    );
-        //}
-
         public Pixel(){  }
         public Pixel(int width, int height)
         {
@@ -181,12 +212,6 @@ namespace Pixels
                 }
             };
             this.Stride = Maps["Full"].Width;
-        }
-
-        public Pixel<T> Cancellation(CancellationTokenSource token)
-        {
-            this.token = token;
-            return this;
         }
 
         //deepcopy
@@ -222,12 +247,15 @@ namespace Pixels
         }
 
 
-
         /******/
 
-        #region Accumulate
+        public Pixel<T> Cancellation(CancellationTokenSource token)
+        {
+            this.token = token;
+            return this;
+        }
 
-        //メソッドチェーン3つ以降は、デリゲートのオーバヘッドよりFuncでまとめたほうが速い
+        //Accumulate
 
         public Pixel<T> AccSelf(Func<T, T> func) => Acc(func, this);
         public Pixel<TResult> Acc<TResult>(Func<T, TResult> func)
@@ -250,7 +278,6 @@ namespace Pixels
             }
             return dst;
         }
-
         public Pixel<TResult> Acc<T1, TResult>(Pixel<T1> src, Func<T, T1, TResult> func, Pixel<TResult> dst)
             where T1 : struct, IComparable
             where TResult : struct, IComparable
@@ -269,21 +296,14 @@ namespace Pixels
             return dst;
         }
 
+        //structは展開されることを利用しているので...
+
         public Pixel<TResult> Accumulate<TResult, TOperator>(Pixel<TResult> dst, TOperator op)
             where TResult : struct, IComparable
             where TOperator : struct, IBinaryOperator<T, TResult>
         {
-            if (this.Map == "Full")
-            {
-                for (int i = 0; i < this.pixel.Length; i++)
-                    dst.pixel[i] = op.Operate(this.pixel[i]);
-            }
-            else
-            {
-                for (int y = 0; y < this.Height; y++)
-                    for (int x = 0; x < this.Width; x++)
-                        dst[x, y] = op.Operate(this[x, y]);
-            }
+            for (int i = 0; i < this.pixel.Length; i++)
+                op.Operate(ref this.pixel[i], ref dst.pixel[i]);
             return dst;
         }
         public Pixel<TResult> Accumulate<T1, TResult, TOperator>(Pixel<TResult> dst, T1 value, TOperator op)
@@ -291,46 +311,133 @@ namespace Pixels
             where T1 : struct, IComparable
             where TOperator : struct, IBinaryOperator<T, T1, TResult>
         {
-            if (this.Map == "Full")
-            {
-                for (int i = 0; i < this.pixel.Length; i++)
-                    dst.pixel[i] = op.Operate(this.pixel[i], value);
-            }
-            else
-            {
-                for (int y = 0; y < this.Height; y++)
-                    for (int x = 0; x < this.Width; x++)
-                        dst[x, y] = op.Operate(this[x, y], value);
-            }
+            for (int i = 0; i < this.pixel.Length; i++)
+                op.Operate(ref this.pixel[i], ref value, ref dst.pixel[i]);
             return dst;
         }
-        public Pixel<TResult> Accumulate<T1, TResult, TOperator>(Pixel<TResult> dst, Pixel<T1> src2, TOperator op)
+        public Pixel<TResult> Accumulate<T1, TResult, TOperator>(Pixel<TResult> dst, Pixel<T1> src1, TOperator op)
             where TResult : struct, IComparable
             where T1 : struct, IComparable
             where TOperator : struct, IBinaryOperator<T, T1, TResult>
         {
-            if (this.Map == "Full")
-            {
-                for (int i = 0; i < this.pixel.Length; i++)
-                    dst.pixel[i] = op.Operate(this.pixel[i], src2.pixel[i]);
-            }
-            else
-            {
-                for (int y = 0; y < this.Height; y++)
-                    for (int x = 0; x < this.Width; x++)
-                        dst[x, y] = op.Operate(this[x, y], src2[x, y]);
-            }
+            for (int i = 0; i < this.pixel.Length; i++)
+                op.Operate(ref this.pixel[i], ref src1.pixel[i], ref dst.pixel[i]);
             return dst;
         }
 
-        public void Accumulate<T1, TOperator>(ref T1 src1, TOperator op)
+        public void Accumulate_<T1, TResult, TOperator>(TResult dst, T1 value, TOperator op)
             where T1 : struct, IComparable
-            where TOperator : struct, IBinaryOperatorRef<T, T1>
+            where TOperator : struct, IBinaryOperator_<T[], T1, TResult>
+        {
+            for (int i = 0; i < this.pixel.Length; i++)
+                op.Operate(i, ref this.pixel, ref value, ref dst);
+        }
+
+        /*
+        public void Accumulate_<TOperator>(TOperator op) where TOperator : struct, IBinaryOperator<T[]>
         {
             if (this.Map == "Full")
             {
                 for (int i = 0; i < this.pixel.Length; i++)
-                    op.Operate(ref this[i], ref src1);
+                    op.Operate(i, ref this.pixel);
+            }
+            else
+            {
+                int l = Left;
+                int t = Top;
+                int c = l + t * Stride;
+
+                int w = Width;
+                int h = Height;
+
+                int inc_col = StepX;
+                int inc_line = Stride - w * StepX + Stride * (StepY - 1);
+
+                for (int y = 0; y < h; y++)
+                {
+                    for (int x = 0; x < w; x++)
+                    {
+                        op.Operate(c, ref this.pixel);
+                        c += inc_col;
+                    }
+                    c += inc_line;
+                }
+            }
+        }
+
+        public void Accumulate_<T1, TOperator>(T1 val1, TOperator op) where TOperator : struct, IBinaryOperator<T[], T1>
+        {
+            if (this.Map == "Full")
+            {
+                for (int i = 0; i < this.pixel.Length; i++)
+                    op.Operate(i, ref this.pixel, ref val1);
+            }
+            else
+            {
+                int l = Left;
+                int t = Top;
+                int c = l + t * Stride;
+
+                int w = Width;
+                int h = Height;
+
+                int inc_col = StepX;
+                int inc_line = Stride - w * StepX + Stride * (StepY - 1);
+
+                for (int y = 0; y < h; y++)
+                {
+                    for (int x = 0; x < w; x++)
+                    {
+                        op.Operate(c, ref this.pixel, ref val1);
+                        c += inc_col;
+                    }
+                    c += inc_line;
+                }
+            }
+        }
+
+        public void Accumulate_<T1, T2, TOperator>(T1 val1, T2 val2, TOperator op) where TOperator : struct, IBinaryOperator<T[], T1, T2>
+        {
+            if (this.Map == "Full")
+            {
+                for (int i = 0; i < this.pixel.Length; i++)
+                    op.Operate(i, ref this.pixel, ref val1);
+            }
+            else
+            {
+                int l = Left;
+                int t = Top;
+                int c = l + t * Stride;
+
+                int w = Width;
+                int h = Height;
+
+                int inc_col = StepX;
+                int inc_line = Stride - w * StepX + Stride * (StepY - 1);
+
+                for (int y = 0; y < h; y++)
+                {
+                    for (int x = 0; x < w; x++)
+                    {
+                        op.Operate(c, ref this.pixel, ref val1);
+                        c += inc_col;
+                    }
+                    c += inc_line;
+                }
+            }
+        }
+
+
+
+
+        public void Accumulate_<TResult, TOperator>(TResult val1, TOperator op)
+            where T1 : struct, IComparable
+            where TOperator : struct, IBinaryOperator<T, T1>
+        {
+            if (this.Map == "Full")
+            {
+                for (int i = 0; i < this.pixel.Length; i++)
+                    op.Operate(ref this[i], ref val1);
             }
             else
             {
@@ -340,20 +447,38 @@ namespace Pixels
             }
             return;
         }
-        #endregion
 
-        /*****/
+        public void Accumulate_<T1, TResult, TOperator>(T1 val1, TResult val2, TOperator op)
+            where T1 : struct, IComparable
+            where TResult : struct, IComparable
+            where TOperator : struct, IBinaryOperator<T, T1, TResult>
+        {
+            if (this.Map == "Full")
+            {
+
+                for (int i = 0; i < this.pixel.Length; i++)
+                    op.Operate(ref this[i], ref val1, ref val2);
+            }
+            else
+            {
+                //for (int y = 0; y < this.Height; y++)
+                //    for (int x = 0; x < this.Width; x++)
+                //        op.Operate(ref i, ref src1, ref src2);
+            }
+            return;
+        }
+
+*/
 
 
-
+        /// <summary>
+        /// MoveNext(),Currentのメソッド呼び出しオーバーヘッドあるので
+        /// Acc()の方が速い
+        /// </summary>
+        /// <returns></returns>
         public IEnumerable<int> GetIndex()
         {
-            //MoveNext() や Current などのメソッド呼び出しのオーバーヘッドがかかる
-            //のでデリゲートの方が実行効率が上がる
-
-            //ループは少ない方が早い
-
-            if (Map != "Full")
+            if (Map == "Full" && Color == null)
             {
                 var e = pixel.Length;
                 for (int i = 0; i < e; i++)
@@ -363,50 +488,35 @@ namespace Pixels
             }
             else
             {
-                int c = Left + Top * Stride;
-                int inc = Stride - Width;
-                for (int y = 0; y < Height; y++)
+                int l = Left;
+                int t = Top;
+                int c = l + t * Stride;
+
+                int w = Width;
+                int h = Height;
+
+                int inc_col = StepX;
+                int inc_line = 
+                    Stride - w * StepX
+                    + Stride * (StepY - 1);
+
+                for (int y = 0; y < h; y++)
                 {
-                    for (int x = 0; x < Width; x++)
+                    for (int x = 0; x < w; x++)
                     {
                         yield return c;
-                        c++;
+                        c += inc_col;
                     }
-                    c += inc;
+                    c += inc_line;
                 }
             }
         }
-        public IEnumerable<int> GetIndex(string color) //, int dimension
+        public IEnumerable<int> GetIndexX()
         {
-            int l = GetLeft(color);
-            int t = GetTop(color);
-            int c = l + t * Stride;
+            int l = Left;
+            int w = Width;
 
-            int w = GetWidth(color);
-            int h = GetHeight(color);
-
-            int inc_col = Colors[color].step_x;
-            int inc_line = 
-                Stride - w * Colors[color].step_x 
-                + Stride * (Colors[color].step_y - 1);
-
-            for (int y = 0; y < h; y++)
-            {
-                for (int x = 0; x < w; x++)
-                {
-                    yield return c;
-                    c += inc_col;
-                }
-                c += inc_line;
-            }
-        }
-
-        public IEnumerable<int> GetIndexX(string color)
-        {
-            int l = GetLeft(color);
-            int w = GetWidth(color);
-
-            int inc_col = Colors[color].step_x;
+            int inc_col = StepX;
             int c = l;
             for (int x = 0; x < w; x++)
             {
@@ -414,12 +524,12 @@ namespace Pixels
                 c += inc_col;
             }
         }
-        public IEnumerable<int> GetIndexY(string color)
+        public IEnumerable<int> GetIndexY()
         {
-            int t = GetTop(color);
-            int h = GetHeight(color);
+            int t = Top;
+            int h = Height;
 
-            int inc_line = Stride * (Colors[color].step_y);
+            int inc_line = Stride * StepY;
 
             int c = t * Stride;
             for (int y = 0; y < h; y++)
@@ -429,22 +539,26 @@ namespace Pixels
             }
         }
 
+
+
+
+
         public IEnumerable<(int center, int left,int right, int top, int bottom, int lefttop, int righttop, int leftbottom, int rightbottom)>
             GetIndexPlus(string color)
         {
-            int l = GetLeft(color);
-            int t = GetTop(color);
+            int l = Left;
+            int t = Top;
             int c = l + t * Stride;
 
-            int w = GetWidth(color);
-            int h = GetHeight(color);
+            int w = Width;
+            int h = Height;
 
-            int inc_col = Colors[color].step_x;
+            int inc_col = StepX;
             int inc_line =
-                Stride - w * Colors[color].step_x
-                + Stride * (Colors[color].step_y - 1);
+                Stride - w * StepY
+                + Stride * (StepY - 1);
 
-            int line = Stride * Colors[color].step_y;
+            int line = Stride * StepY;
             for (int y = 0; y < h; y++)
             {
                 for (int x = 0; x < w; x++)
@@ -466,26 +580,6 @@ namespace Pixels
                 c += inc_line;
             }
         }
-
-
-        public int GetCount() => Width * Height;
-        public int GetCount(string color) => color == null ? GetCount() : GetWidth(color) * GetHeight(color);
-
-        public int GetLeft(string color) => Left + Colors[color].step_x - 1 - (Left + Colors[color].step_x - Colors[color].x - 1) % Colors[color].step_x;
-        public int GetTop(string color) => Top + Colors[color].step_y - 1 - (Top + Colors[color].step_y - Colors[color].y - 1) % Colors[color].step_y;
-        public int GetWidth(string color) 
-            => (Left + Width + (Colors[color].step_x - Colors[color].x - 1)) / Colors[color].step_x
-             - (Left + (Colors[color].step_x - Colors[color].x - 1)) / Colors[color].step_x;
-        public int GetHeight(string color) 
-            => (Top + Height + (Colors[color].step_y - Colors[color].y - 1)) / Colors[color].step_y
-             - (Top + (Colors[color].step_y - Colors[color].y - 1)) / Colors[color].step_y;
-
-        public int GetSize(string color)
-        {
-            return GetWidth(color) * GetHeight(color);
-        }
-
-
 
 
         /// <summary>
@@ -541,20 +635,6 @@ namespace Pixels
 
         #endregion
 
-
-        public static Pixel<T> operator +(Pixel<T> x, float y)
-        {
-            if (false) throw new Exception();
-            /*T4{[
-                {"Key": ["Byte"], "Value": [["Byte"],["UInt16"],["UInt32"],["UInt64"],["Int16"],["Int32"],["Int64"],["Single"],["Double"]]},
-                {"Key": ["Int32"], "Value": [["Boolean"],["Byte"],["UInt16"],["UInt32"],["UInt64"],["Int16"],["Int32"],["Int64"],["Single"],["Double"]]},
-            ]T4h*/
-            else if (typeof(T) == typeof(float))
-            {
-                return (x as Pixel<float>).Add((float)y) as Pixel<T> ?? throw new FormatException();
-            }/*}T4*/
-            else throw new FormatException();
-        }
 
 
     }

@@ -6,12 +6,48 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-/*T4{[ {"Key": [".Base"], "Value": [[""]]} ]T4h*/
-namespace Pixels.Math.Base
-{/*}T4*/
+
+namespace Pixels.Math
+{
 
     public static partial class PixelFilter
     {
+        //切り出し
+        public static Pixel<T> Cut<T>(this Pixel<T> src) where T : struct, IComparable
+        {
+            var dst = new T[src.Size];
+            int c = 0;
+            foreach (var i in src.GetIndex())
+            {
+                dst[c++] = src[i];
+            }
+            return PixelFactory.Create(src.Width, src.Height, dst);
+        }
+
+
+
+        //public static Pixel<T> Cut<T>(this Pixel<T> src, string color) where T : struct, IComparable
+        //{
+        //    var dst = new T[src.GetCount(color)];
+        //    int c = 0;
+        //    foreach (var i in src.GetIndex(color))
+        //    {
+        //        dst[c++] = src[i];
+        //    }
+        //    return PixelFactory.Create(src.GetWidth(color), src.GetHeight(color), dst);
+        //}
+        //public static Pixel<T> Cut<T>(this Pixel<T> src, int x, int y, int width, int height) where T : struct, IComparable
+        //{
+        //    src.SetMap("Full");
+        //    var dst = new T[width * height];
+        //    int i = 0;
+        //    for (int yy = y; yy < height + y; yy++)
+        //        for (int xx = x; xx < width + x; xx++)
+        //            dst[i++] = src[xx, yy];
+        //    return PixelFactory.Create(width, height, dst);
+        //}
+
+
         //スタッガー
 
         public static Pixel<T> Stagger<T>(this Pixel<T> src, Pixel<T> dst, int val = 1) where T : struct, IComparable
@@ -40,32 +76,6 @@ namespace Pixels.Math.Base
             => Stagger(src, src.Clone(), -1);
         public static Pixel<T> StaggerL<T>(this Pixel<T> src) where T : struct, IComparable
             => Stagger(src, src.Clone(), +1);
-
-        //切り出し
-        public static Pixel<T> Cut<T>(this Pixel<T> src) where T : struct, IComparable
-        {
-            var dst = new T[src.Size];
-            int c = 0;
-            foreach (var i in src.GetIndex())
-            {
-                dst[c++] = src[i];
-            }
-            return PixelFactory.Create(src.Width, src.Height, dst);
-        }
-        public static Pixel<T> Cut<T>(this Pixel<T> src, int left, int top, int width, int height) where T : struct, IComparable
-        {
-            src = src["Full"];
-            var dst = new T[width * height];
-            int i = 0;
-            for (int y = top; y < height + top; y++)
-                for (int x = left; x < width + left; x++)
-                    dst[i++] = src[x, y];
-            return PixelFactory.Create(width, height, dst);
-        }
-
-
-
-
 
 
 

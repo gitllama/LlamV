@@ -13,7 +13,7 @@
 <# 
 	//展開
 	var dst = Regex.Replace(
-		File.ReadAllText(Host.ResolvePath(@"PixelMath.cs")),
+		File.ReadAllText(Host.ResolvePath(@"PixelFilter.cs")),
         @"\/\*T4\{(?<json>[\s\S]*?)T4h\*\/(?<m>[\s\S]*?)\/\*\}T4\*\/",
 		(match) => 
 		{
