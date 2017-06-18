@@ -1,0 +1,32 @@
+﻿<#@ template debug="true" hostspecific="true" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ assembly name="Microsoft.Csharp" #>
+<#@ assembly name="$(SolutionDir)DynamicJson.dll" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.Text.RegularExpressions" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="Codeplex.Data" #>
+<#@ output extension=".cs" #>
+<# 
+	var fulltext = File.ReadAllText(Host.ResolvePath(@"PixelAcc.cs"));
+
+	fulltext = fulltext
+		.Replace("#if DEBUG", "")
+		.Replace("#endif", "")
+		.Replace("Pixels.Base", "Pixels")
+		.Replace("PixelBase<T> :", "");
+
+	//展開
+	var loop = Regex.Match(
+		fulltext,
+        @"\/\*loop\{\*\/(?<loop>[\s\S]*?)\/\*\}loop\*\/")
+		.Groups["loop"].Value;
+
+	var dst = fulltext
+		.Replace("throw new Exception(\"T4\");",loop);
+
+
+#><#= dst #>

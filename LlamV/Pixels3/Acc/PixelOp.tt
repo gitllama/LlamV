@@ -1,0 +1,94 @@
+﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ output extension=".cs" #>
+<#
+	var Type = new List<string>()
+	{		
+		"Double","Single","Int64","Int32","Int16","UInt64","UInt32","UInt16","Byte"
+	};
+
+
+	Dictionary<String, String> Op = new Dictionary<String, String>();
+	Op["+"]	= "Add";
+	Op["-"]	= "Sub";
+	Op["*"]	= "Mul";
+	Op["/"]	= "Div";
+
+
+	var Type2 = new List<string>()
+	{
+		"Byte",
+		"UInt16",
+		"UInt32",
+		"UInt64",
+		"Int16",
+		"Int32",
+		"Int64",
+	};
+#>
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
+
+using Pixels.Math;
+
+namespace Pixels
+{
+    public partial class Pixel<T>
+    {
+
+		//暗示キャスト
+		public static implicit operator Pixel<Double>(Pixel<T> x)
+		{
+            Pixel<Double> dst = 
+<# foreach (var T in Type){ #>
+				typeof(T) == typeof(<#= T #>) ? (x as Pixel<<#= T #>>).Accumulate<Double, Op_Cast_<#= T #>Double>() :
+<# } #>
+                null;
+			return dst ?? throw new ArithmeticException();
+		}
+		public static implicit operator Pixel<Int32>(Pixel<T> x)
+		{
+            Pixel<Int32> dst = 
+<# foreach (var T in Type){ #>
+				typeof(T) == typeof(<#= T #>) ? (x as Pixel<<#= T #>>).Accumulate<Double, Op_Cast_<#= T #>Double>() :
+<# } #>
+                null;
+			return dst ?? throw new ArithmeticException();
+		}
+
+<# foreach (var T in Type){ #>
+		struct Op_Cast_<#= T #>Double : IBinaryOperator<<#= T #>, Double> { public Double Operate(<#= T #> x) => (Double)x; }
+		struct Op_Cast_<#= T #>Int32 : IBinaryOperator<<#= T #>, Int32> { public Int32 Operate(<#= T #> x) => (Int32)x; }
+<# } #>
+
+
+
+		//明示キャスト
+<# foreach (var C in new string[]{ "Single","Int64","Int16","UInt64","UInt32","UInt16","Byte" }){ #>
+		public static explicit operator Pixel<<#= C #>>(Pixel<T> x)
+		{
+            Pixel<<#= C #>> dst = 
+<# foreach (var T in Type){ #>
+				typeof(T) == typeof(<#= T #>) ? (x as Pixel<<#= T #>>).Accumulate<<#= C #>, Op_Cast_<#= T #><#= C #>>() :
+<# } #>
+                null;
+			return dst ?? throw new ArithmeticException();
+		}
+<# } #>
+
+<# foreach (var C in new string[]{ "Single","Int64","Int16","UInt64","UInt32","UInt16","Byte" }){ #>
+<# foreach (var T in Type){ #>
+		struct Op_Cast_<#= T #><#= C #> : IBinaryOperator<<#= T #>, <#= C #>> { public <#= C #> Operate(<#= T #> x) => (<#= C #>)x; }
+<# } #>
+<# } #>
+
+    }
+}

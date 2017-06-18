@@ -1,4 +1,31 @@
-﻿            //if (typeof(T) == typeof(bool)) return (dynamic)Binarization((dynamic)src, null, "M", null);
+﻿
+
+    /*T4{[ {"Key": ["PixelBase<T> : Pixel<T>"], "Value": [["Pixel"]]} ]T4h*/
+    public partial class PixelBase<T> : Pixel<T> where T : struct, IComparable
+    {/*}T4*/
+
+        /*T4{[ {"Key": ["throw new Exception();"], 
+                "Value": [[""]]} ]T4h*/
+        public Pixel<TResult> Accumulate<TResult, TOperator>(Pixel<TResult> dst, TOperator op)
+            where TResult : struct, IComparable
+            where TOperator : struct, IBinaryOperator<T, TResult>
+        {
+            throw new Exception();
+            return dst;
+            void f(int i)
+            {
+                op.Operate(ref this.pixel[i], ref dst.pixel[i]);
+            }
+        }/*}T4*/
+    }
+
+
+
+
+
+
+
+            //if (typeof(T) == typeof(bool)) return (dynamic)Binarization((dynamic)src, null, "M", null);
 
 /* 一度退避 */
 
