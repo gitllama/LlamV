@@ -136,6 +136,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConsoleRedirectWriter.cs" />
     <Compile Include="PixelOpenCV.cs" />
     <Compile Include="PixelOpenCVT4.cs">
       <AutoGen>True</AutoGen>

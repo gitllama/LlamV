@@ -11,17 +11,9 @@
 <#@ import namespace="Codeplex.Data" #>
 <#@ output extension=".cs" #>
 <# 
-	//namespaceの変更
-	var src = Regex.Replace(
-		File.ReadAllText(Host.ResolvePath(@"PixelOpenCV.cs")),
-		@"\/\*T4namespace\{([\s\S]*?)\}T4namespace\*\/",
-		(match) => 
-		{
-			return "";
-		});
 	//展開
 	var dst = Regex.Replace(
-		src,
+		File.ReadAllText(Host.ResolvePath(@"PixelOpenCV.cs")),
         @"\/\*T4\{(?<json>[\s\S]*?)T4h\*\/(?<m>[\s\S]*?)\/\*\}T4\*\/",
 		(match) => 
 		{

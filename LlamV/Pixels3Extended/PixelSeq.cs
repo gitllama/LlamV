@@ -141,8 +141,10 @@ namespace Pixels.Extend
         {
             get
             {
+                /*
                 if(pixel != null) pixel.SetMap(map);
                 if (pixelfilter != null) pixelfilter.SetMap(map);
+                */
                 //!!!注意
                 return this;
             }
@@ -179,9 +181,27 @@ namespace Pixels.Extend
 
     }
 
+    /* 
+     * log.txt -> 
+     * 
+     * 
+     * 
+     * 
+     * 
+     */
     public static class PixelSeqExtensions
     {
         public const string outputfilename = "log.txt";
+
+        public static void WriteResult(this object value)
+        {
+
+            Console.WriteLine();
+        }
+
+
+
+
         public static void Output(this ChipStatusMediator src, string key, string value)
         {
             Console.WriteLine($"{key} : {value}");
@@ -215,8 +235,8 @@ namespace Pixels.Extend
 
             foreach (var i in colors)
             {
-                var value = p.AverageV(i);
-                src.Output($"{nameof(VFPN)}_Max_{i}", value.Max().ToString());
+                //var value = p.AverageV(i);
+                //src.Output($"{nameof(VFPN)}_Max_{i}", value.Max().ToString());
             }
 
             /*
@@ -285,10 +305,10 @@ namespace Pixels.Extend
 
             foreach(var i in color)
             {
-                var value = p.Signal(i);
+                //var value = p.Signal(i);
 
-                src.Output($"{nameof(Signal)}_Averaging_{i}", value.Average.ToString());
-                src.Output($"{nameof(Signal)}_Deviation_{i}", value.Deviation.ToString());
+                //src.Output($"{nameof(Signal)}_Averaging_{i}", value.Average.ToString());
+                //src.Output($"{nameof(Signal)}_Deviation_{i}", value.Deviation.ToString());
             }
 
             /*
@@ -380,7 +400,7 @@ namespace Pixels.Extend
         {
             if (src.pixel == null) return src;
             //if (src.pixelfilter == null) return src;
-
+            /*
             bool isDark = true;
             var med = src.pixel
                     ["Normal"].FilterMedian(5, 5, 12, "Gr", "R", "B", "Gb")
@@ -449,7 +469,7 @@ namespace Pixels.Extend
 
             var l2 = bin["Effective"].MatchingG();
             src.Output($"MatchingG", $"{l2.Count}");
-
+            */
             return src;
         }
 

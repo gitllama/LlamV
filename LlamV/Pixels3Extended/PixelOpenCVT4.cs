@@ -14,34 +14,66 @@ using Pixels.Math;
 using System.IO;
 using System.Windows;
 
+
 namespace Pixels.Extend
 {
     public static class PixelOpenCV
     {
         #region Filter
 
-       public static List<(int Left,int Top, int Width, int Height, int Area)> Labling(this Pixel<bool> src, Func<ConnectedComponents.Blob, bool> func, bool connectivity8 = true)
+        public static List<(int Left,int Top, int Width, int Height, int Area)> Labling<T>(this Pixel<T> src, Func<ConnectedComponents.Blob, bool> func, bool connectivity8 = true)
+            where T : struct, IComparable
         {
-            var hoge = src["Full"].ToPixel<byte>();
-
-            using (Mat mat = new Mat(src.Height, src.Width, MatType.CV_8UC1, hoge.pixel))
+            switch((object)src)
             {
-                ConnectedComponents cc = connectivity8 
-                    ? Cv2.ConnectedComponentsEx(mat, PixelConnectivity.Connectivity8) 
-                    : Cv2.ConnectedComponentsEx(mat, PixelConnectivity.Connectivity4);
+                case Pixel<byte> n:
+                    using (Mat mat = new Mat(n.FullHeight, n.FullWidth, MatType.CV_8UC1, n.pixel))
+                    {
+                        return f(mat);
+                    }
+                case Pixel<bool> n:
+                    {
+                        var hoge = n["Full"].Acc<byte>(x => x ? byte.MaxValue : byte.MinValue);
+                        using (Mat mat = new Mat(hoge.FullHeight, hoge.FullWidth, MatType.CV_8UC1, hoge.pixel))
+                        {
+                            return f(mat);
+                        }
+                    }
+                default:
+                    {
+                        var hoge = src["Full"].Acc<byte>(x => x.CompareTo(0) > 0 ? byte.MaxValue : byte.MinValue);
+                        using (Mat mat = new Mat(hoge.FullHeight, hoge.FullWidth, MatType.CV_8UC1, hoge.pixel))
+                        {
+                            return f(mat);
+                        }
+                    }
+            }
 
-                var dst = cc.Blobs
+
+            List<(int Left, int Top, int Width, int Height, int Area)> f(Mat value)
+            {
+                ConnectedComponents cc = connectivity8
+                    ? Cv2.ConnectedComponentsEx(value, PixelConnectivity.Connectivity8)
+                    : Cv2.ConnectedComponentsEx(value, PixelConnectivity.Connectivity4);
+
+                return cc.Blobs
                     .Where(x => func(x)) //.Area >= thr
                     .Where(x => x.Label != 0) //0が背景
                     .OrderByDescending(x => x.Area)
-                    .Select(x => (x.Left, x.Top,x.Width, x.Height, x.Area))
+                    .Select(x => (x.Left, x.Top, x.Width, x.Height, x.Area))
                     .ToList();
-                    
-                return dst;
             }
 
+
+
+
+            //var hoge = src["Full"].ToPixel<byte>();
+            //Pixel<byte> hoge = src["Full"].Acc<byte>(x => x ? (byte)255 : (byte)0 );
+
+
+
             /*
-               at gray = mat.CvtColor(ColorConversionCodes.BGR2GRAY);
+                at gray = mat.CvtColor(ColorConversionCodes.BGR2GRAY);
 
                 //Cv2.NamedWindow("image", WindowMode.Normal);
                 //Cv2.ImShow("image", mat);
@@ -51,7 +83,7 @@ namespace Pixels.Extend
                 //Cv2.ImShow("image", binary);
                 //Cv2.WaitKey();
                 //Cv2.DestroyWindow("image");
-             */
+            */
 
         }
 
