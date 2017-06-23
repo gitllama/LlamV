@@ -46,7 +46,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Acc\PixelAcc.cs" />
+    <Compile Include="Op\PixelOp.cs" />
     <Compile Include="Math\PixelFilterT4.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -60,15 +60,10 @@
     <Compile Include="Pixel.cs" />
     <Compile Include="Math\PixelFilter.cs" />
     <Compile Include="Math\PixelMath.cs" />
-    <Compile Include="Acc\PixelOp.cs">
+    <Compile Include="Op\PixelOpT4.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>PixelOp.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Acc\PixelAccT4.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>PixelAccT4.tt</DependentUpon>
+      <DependentUpon>PixelOpT4.tt</DependentUpon>
     </Compile>
     <Compile Include="Stream\PixelStream.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -87,13 +82,9 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>PixelMathT4.cs</LastGenOutput>
     </Content>
-    <Content Include="Acc\PixelOp.tt">
+    <Content Include="Op\PixelOpT4.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>PixelOp.cs</LastGenOutput>
-    </Content>
-    <Content Include="Acc\PixelAccT4.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>PixelAccT4.cs</LastGenOutput>
+      <LastGenOutput>PixelOpT4.cs</LastGenOutput>
     </Content>
     <Content Include="Stream\PixelStreamT4.tt">
       <Generator>TextTemplatingFileGenerator</Generator>

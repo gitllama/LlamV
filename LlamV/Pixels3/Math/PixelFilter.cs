@@ -42,19 +42,21 @@ namespace Pixels.Math.Base
             => Stagger(src, src.Clone(), +1);
 
         //切り出し
+
         public static Pixel<T> Cut<T>(this Pixel<T> src) where T : struct, IComparable
         {
             var dst = new T[src.Size];
             int c = 0;
-            foreach (var i in src.GetIndex())
-            {
-                dst[c++] = src[i];
-            }
+            for (int y = 0; y < src.Height; y ++)
+                for (int x = 0; x < src.Width; x++)
+                    dst[c++] = src[x, y];
+            //foreach (var i in src.GetIndex())
+            //    dst[c++] = src[i];
             return PixelFactory.Create(src.Width, src.Height, dst);
         }
         public static Pixel<T> Cut<T>(this Pixel<T> src, int left, int top, int width, int height) where T : struct, IComparable
         {
-            src = src["Full"];
+            //src = src["Full"];
             var dst = new T[width * height];
             int i = 0;
             for (int y = top; y < height + top; y++)
@@ -63,43 +65,98 @@ namespace Pixels.Math.Base
             return PixelFactory.Create(width, height, dst);
         }
 
+        //統計・マッチング
 
-
-
-
-
-
-        public static List<System.Windows.Point> Matching(this Pixel<bool> src, string color)
+        //Labling -> OpenCV
+        public static int Matching(this Pixel<bool> src)
         {
-            var dst = new List<System.Windows.Point>();
-
-            foreach(var i in src.GetIndexPlus(color))
+            //Boxの生成
+            var box = new List<(int x, int y)>()
             {
-                if(src[i.center])
+                (0,0),(-1,0),(1,0),(0,-1),(0,0)
+            };
+
+            var dst = src.Count(box, x =>
+            {
+                if (x[0])
                 {
                     var j = 0;
-                    if (src[i.top]) j++;
-                    if (src[i.bottom]) j++;
-                    if (src[i.left]) j++;
-                    if (src[i.right]) j++;
+                    if (x[1]) j++;
+                    if (x[2]) j++;
+                    if (x[3]) j++;
+                    if (x[4]) j++;
 
-                    if (j >= 3)
-                    {
-                        dst.Add(new System.Windows.Point(i.center % src.Stride, i.center / src.Stride));
-                    }
+                    return (j >= 3);
                 }
                 else
                 {
-                    if (src[i.top] && src[i.bottom] && src[i.left] && src[i.right])
-                    {
-                        dst.Add(new System.Windows.Point(i.center % src.Stride, i.center / src.Stride));
-                    }
+                    return (src[1] && src[2] && src[3] && src[4]);
                 }
-            }
+            });
+
+            //List < System.Windows.Point >
             return dst;
         }
+        public static List<int> MatchingList(this Pixel<bool> src)
+        {
+            //Boxの生成
+            var box = new List<(int x, int y)>()
+            {
+                (0,0),(-1,0),(1,0),(0,-1),(0,0)
+            };
+
+            var dst = src.CountList(box, x =>
+            {
+                if (x[0])
+                {
+                    var j = 0;
+                    if (x[1]) j++;
+                    if (x[2]) j++;
+                    if (x[3]) j++;
+                    if (x[4]) j++;
+
+                    return (j >= 3);
+                }
+                else
+                {
+                    return (src[1] && src[2] && src[3] && src[4]);
+                }
+            });
+            return dst;
+        }
+
+
+        //フィルタ
+
+        public static Pixel<T> FilterMedian<T>(this Pixel<T> src, Pixel<T> dst, int WindowX, int WindowY, int rank) where T : struct, IComparable
+        {
+            if (dst == null) dst = src.Clone();
+
+            //Boxの生成
+            var box = new List<(int x, int y)>();
+            for (int y = 0; y < WindowY; y++)
+                for (int x = 0; x < WindowX; x++)
+                    box.Add((x - (WindowX/2), y - (WindowY/2)));
+
+            dst = src.Acc<T, T>(box, x =>
+            {
+                 Array.Sort(x);
+                 return x[rank];
+            }, dst);
+
+            return dst;
+        }
+        public static Pixel<T> FilterMedian<T>(this Pixel<T> src, int WindowX = 5, int WindowY = 5, int rank = 12) where T : struct, IComparable
+            => src.FilterMedian(null, WindowX, WindowY, rank);
+
+
+
+
+
+
         public static List<System.Windows.Point> MatchingG(this Pixel<bool> _src)
         {
+            /*
             var dst = new List<System.Windows.Point>();
 
             var src = _src.Clone();
@@ -134,8 +191,15 @@ namespace Pixels.Math.Base
                         dst.Add(new System.Windows.Point(i.center % src.Stride, i.center / src.Stride));
                 }
             }
-            return dst;
+            */
+            return null;
         }
+
+
+
+
+
+
         //FPN
 
         //アベレージフィルタ
@@ -206,122 +270,6 @@ namespace Pixels.Math.Base
         //    return dst;
         //}
 
-        public static Pixel<T> FilterMedian<T>(this Pixel<T> src, Pixel<T> dst, int WindowX, int WindowY, int rank, params string[] colors) where T : struct, IComparable
-        {
-            if (dst == null) dst = src.Clone();
-            if (colors == null) colors = new string[] { "M" };
-
-            foreach (var color in colors)
-            {
-                //作業領域の生成
-                int[] coordinate = new int[src.Size];
-
-                int c = 0;
-                src = src[src.Map, color];
-                foreach (int i in src.GetIndex())
-                    coordinate[c++] = i;
-
-                //Boxの生成
-                int boxsize = WindowX * WindowY;
-                int center = WindowX * WindowY / 2;
-
-                int startX = WindowX / 2;
-                int startY = WindowY / 2;
-                int endX = src.Width - (WindowX - startX - 1);
-                int endY = src.Height - (WindowY - startY - 1);
-
-                int endline = WindowX - 1;
-
-                //配列生成
-                T[] box = new T[boxsize];
-
-                //参照座標生成
-                int[] col = new int[boxsize];
-                c = 0;
-                for (int y = 0; y < WindowY; y++)
-                    for (int x = 0; x < WindowX; x++)
-                        col[c++] = x + y * src.Width;
-
-                //本体
-                for (int y = startY; y < endY; y++)
-                {
-                    for (int x = startX; x < endX; x++)
-                    {
-                        for (int n = 0; n < boxsize; n++) box[n] = src[coordinate[col[n]]];
-                        Array.Sort(box);
-                        dst[coordinate[col[center]]] = box[rank];
-
-                        for (int n = 0; n < boxsize; n++) col[n]++;
-                    }
-                    //ライン送り
-                    for (int n = 0; n < boxsize; n++) col[n] += endline;
-
-                    //token.Token.ThrowIfCancellationRequested();
-                }
-            }
-
-            return dst;
-        }
-        public static Pixel<T> FilterMedian<T>(this Pixel<T> src, int WindowX = 5, int WindowY = 5, int rank = 12, params string[] colors) where T : struct, IComparable
-            => src.FilterMedian(null, WindowX, WindowY, rank, colors);
-
-
-
-        private static void _FilterAverage(Pixel<float> src, Pixel<float> dst, int[] matrix, int sx, int sy, int ex, int ey)
-        {
-            double buf;
-            for (int y = sy; y < src.Height - ey; y++)
-                for (int x = sx; x < src.Width - ex; x++)
-                {
-                    buf = 0;
-                    for (int i = 0; i < matrix.Length; i++)
-                    {
-                        buf += src.pixel[src.ConvPoisonMap(x, y) + matrix[i]];
-                    }
-                    dst.pixel[dst.ConvPoisonMap(x, y)] = (float)(buf / matrix.Length);
-                }
-        }
-        //public static Pixel<T> FilterAverage<T>(this Pixel<T> src, Pixel<T> dst, int WindowX = 5, int WindowY = 5) where T : struct, IComparable
-        //{
-        //    if (dst == null) dst = src.Clone();
-
-        //    int boxsize = WindowX * WindowY;
-
-        //    int before_center = rank - 1;
-
-        //    int startX = WindowX / 2;
-        //    int startY = WindowY / 2;
-        //    int endX = src.Width - (WindowX - startX - 1);
-        //    int endY = src.Height - (WindowY - startY - 1);
-
-        //    int endline = WindowX - 1;
-
-        //    //配列生成
-        //    T[] box = new T[boxsize];
-
-        //    //参照座標生成
-        //    int[] col = new int[boxsize];
-        //    int i = 0;
-        //    for (int y = 0; y < WindowY; y++)
-        //        for (int x = 0; x < WindowX; x++)
-        //            col[i++] = x + y * src.Width;
-        //    //本体
-        //    for (int y = startY; y < endY; y++)
-        //    {
-        //        for (int x = startX; x < endX; x++)
-        //        {
-        //            for (int n = 0; n < boxsize; n++) box[n] = src.pixel[col[n]++];
-        //            Array.Sort(box);
-        //            dst[x, y] = box[rank];
-        //        }
-        //        //ライン送り
-        //        for (int n = 0; n < boxsize; n++) col[n] += endline;
-        //        //token.Token.ThrowIfCancellationRequested();
-        //    }
-        //    return dst;
-        //}
-        //public static Pixel<T> FilterAverage<T>(this Pixel<T> src, int WindowX = 5, int WindowY = 5, int rank = 12) where T : struct, IComparable
-        //    => src.FilterMedian(null, WindowX, WindowY, rank);
 
 
         private static Pixel<float> FilterHOB(this Pixel<float> src)

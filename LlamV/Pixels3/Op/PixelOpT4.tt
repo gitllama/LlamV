@@ -1,0 +1,108 @@
+﻿<#@ template debug="true" hostspecific="true" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ assembly name="Microsoft.Csharp" #>
+<#@ assembly name="$(SolutionDir)DynamicJson.dll" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.Text.RegularExpressions" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="Codeplex.Data" #>
+<#@ output extension=".cs" #>
+<# 
+	var fulltext = File.ReadAllText(Host.ResolvePath(@"PixelOp.cs"));
+	var fulltext2 = File.ReadAllText(Host.ResolvePath(@"..\Pixel.cs"));
+
+	fulltext = fulltext
+		.Replace("#if DEBUG", "")
+		.Replace("Pixels.Base", "Pixels")
+		.Replace("PixelBase<T> :", "");
+	fulltext = Regex.Replace(
+		fulltext,
+        @"\}([\s]*?)\#endif", "");
+
+	//展開1～5
+	for(int i =0;i<1;i++)
+	{
+		var loop = Regex.Match(
+		fulltext2,
+        @"\/\*loop" + $"{i}" + @"\{\*\/(?<loop>[\s\S]*?)\/\*\}loop" + $"{i}" + @"\*\/")
+		.Groups["loop"].Value;
+
+		fulltext = Regex.Replace(
+		fulltext,
+        @"\/\*_loop" + $"{i}" + @"\{\*\/(?<loop>[\s\S]*?)\/\*\}_loop" + $"{i}" + @"\*\/",
+		(match) => loop.Replace("yield return index;",match.Groups["loop"].Value));
+	}
+	var dst = fulltext;
+
+
+#><#= dst #>
+
+	public static class PixelOp
+	{
+
+
+
+
+<# foreach (var C in new string[]{ "Double","Single","Int64","Int32","Int16","UInt64","UInt32","UInt16","Byte" }){ #>
+<# foreach (var T in new string[]{ "Double","Single","Int64","Int32","Int16","UInt64","UInt32","UInt16","Byte" }){ #>
+		public struct Op_Cast_<#= T #><#= C #> : IBinaryOperator<<#= T #>, <#= C #>> { public <#= C #> Operate(<#= T #> x) => (<#= C #>)x; }
+<# } #>
+<# } #>
+<# foreach (var C in new string[]{ "Double","Single","Int64","Int32","Int16","UInt64","UInt32","UInt16","Byte" }){ #>
+		public struct Op_Cast_Boolean<#= C #> : IBinaryOperator<Boolean, <#= C #>> { public <#= C #> Operate(Boolean x) => x ? <#= C #>.MaxValue: <#= C #>.MinValue; }
+<# } #>
+	}
+
+
+	/*Op Block*/
+    public partial class Pixel<T>
+    {
+		//明示キャスト
+<# foreach (var C in new string[]{ "Double","Single","Int64","Int32","Int16","UInt64","UInt32","UInt16","Byte" }){ #>
+		public static explicit operator Pixel<<#= C #>>(Pixel<T> x)
+		{
+            Pixel<<#= C #>> dst = x.Clone<<#= C #>>();
+			if(x == null) throw new ArithmeticException();
+<# foreach (var T in new string[]{ "Double","Single","Int64","Int32","Int16","UInt64","UInt32","UInt16","Byte" }){ #>
+			else if(typeof(T) == typeof(<#= T #>)) (x as Pixel<<#= T #>>).Accumulate<<#= C #>, PixelOp.Op_Cast_<#= T #><#= C #>>(dst);
+<# } #>
+			else if(typeof(T) == typeof(Boolean))(x as Pixel<Boolean>).Accumulate<<#= C #>, PixelOp.Op_Cast_Boolean<#= C #>>(dst);
+			else dst = null;
+			return dst ?? throw new InvalidCastException();
+		}
+<# } #>
+
+
+
+
+		public static Pixel<T> operator+ (Pixel<T> x, T y)
+		{
+			var dst = x.Clone();
+			if(x == null) throw new ArithmeticException();
+<# foreach (var T in new string[]{ "Double","Single","Int64","Int32","Int16","UInt64","UInt32","UInt16","Byte" }){ #>
+			else if(typeof(T) == typeof(<#= T #>)) (x as Pixel<<#= T #>>).Accumulate<<#= T #>, <#= T #>, Op_Add_<#= T #>>((<#= T #>)(object)y, dst as Pixel<<#= T #>>);
+<# } #>
+			else dst = null;
+			return dst ?? throw new InvalidCastException();
+		}
+		public static Pixel<T> operator+ (Pixel<T> x, Pixel<T> y)
+		{
+			var dst = x.Clone();
+			if(x == null) throw new ArithmeticException();
+<# foreach (var T in new string[]{ "Double","Single","Int64","Int32","Int16","UInt64","UInt32","UInt16","Byte" }){ #>
+			else if(typeof(T) == typeof(<#= T #>)) (x as Pixel<<#= T #>>).Accumulate<<#= T #>, <#= T #>, Op_Add_<#= T #>>(y as Pixel<<#= T #>>, dst as Pixel<<#= T #>>);
+<# } #>
+			else dst = null;
+			return dst ?? throw new InvalidCastException();
+		}
+
+<# foreach (var T in new string[]{ "Double","Single","Int64","Int32","Int16","UInt64","UInt32","UInt16","Byte" }){ #>
+		public struct Op_Add_<#= T #> : IBinaryOperator<<#= T #>, <#= T #>, <#= T #>> { public <#= T #> Operate(<#= T #> x, <#= T #> y) => (<#= T #>)(x + y); }
+<# } #>
+
+
+    }
+}

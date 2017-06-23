@@ -31,6 +31,7 @@ namespace Pixels
         public int step_y { get; set; } = 0;
     }
 
+
     public class PixelFormat
     {
         public string Model { get; set; } = "unknown";
@@ -64,8 +65,9 @@ namespace Pixels
         public Dictionary<string, PixelMap> Maps { get; set; }
 
         public int Stride { get; protected set; } = 1;
-
         public int FullSize { get => pixel.Length; }
+        public int FullWidth { get => Stride; }
+        public int FullHeight { get => pixel.Length / Stride; }
 
         public int Left { get; protected set; } = 0;
         public int Top { get; protected set; } = 0;
@@ -78,12 +80,12 @@ namespace Pixels
 
         public int Size { get => Width * Height; }
 
-        public ref T this[int value] { get => ref pixel[value]; }
+        public ref T this[int index] { get => ref pixel[index]; }
 
-        public ref T this[int x, int y] { get => ref pixel[ConvPoisonMap(x, y)]; }
+        public ref T this[int x, int y] { get => ref pixel[ConvPoison(x, y)]; }
 
-        public int ConvPoisonMap(int x, int y) => (x + Left) + (y + Top) * Stride;
-        public (int x, int y) ConvPoisonMap(int index) => ((index % Stride) - Left, (index / Stride) - Top);
+        public int ConvPoison(int x, int y) => (x * StepX + Left) + (y * StepY + Top) * Stride;
+        public (int x, int y) ConvPoison(int index) => (((index % Stride) - Left) / StepX, ((index / Stride) - Top)/StepY);
 
 
         public Dictionary<string, PixelColor> Colors { get; set; }
@@ -91,15 +93,28 @@ namespace Pixels
         public string Map { get; protected set; } = "Full";
         public string[] Color { get; protected set; } = null;
 
-        public Pixel<T> this[string map] => SetMap(map, null);
-        public Pixel<T> this[string map, params string[] colors] => SetMap(map, colors);
-        public Pixel<T> SetMap(string map, params string[] colors)
+        public Pixel<T> this[string map]
         {
-            Map = map;
-
-            if ((colors?.Length ?? 0) > 0)
+            get
             {
-                var color = colors[0];
+                Map = map;
+                Color = null;
+                return SetMap(Map, null);
+            }
+        }
+        public Pixel<T> this[string map, params string[] colors]
+        {
+            get
+            {
+                Map = map;
+                Color = colors;
+                return colors == null ? SetMap(map, null) : SetMap(map, colors[0]);
+            }
+        }
+        protected Pixel<T> SetMap(string map, string color)
+        {
+            if (color != null)
+            {
                 Left = Maps[map].Left + Colors[color].step_x - 1 - (Maps[map].Left + Colors[color].step_x - Colors[color].x - 1) % Colors[color].step_x;
                 Top = Maps[map].Top + Colors[color].step_y - 1 - (Maps[map].Top + Colors[color].step_y - Colors[color].y - 1) % Colors[color].step_y;
 
@@ -123,8 +138,6 @@ namespace Pixels
                 StepY = 1;
             }
 
-
-            Color = colors;
             return this;
         }
 
@@ -193,6 +206,10 @@ namespace Pixels
                     ((T[])pixel).CopyTo(i, 0);
                     dst.pixel = i;
                 }
+                else
+                {
+                    dst.pixel = new T[this.pixel.Length];
+                }
 
                 return dst;
             }
@@ -216,7 +233,124 @@ namespace Pixels
         }
 
 
+        //
 
+        protected (int l, int t, int c, int w, int h, int inc_col, int inc_line) utilLoop()
+        {
+            int l = Left;
+            int t = Top;
+            int c = l + t * Stride;
+
+            int w = Width;
+            int h = Height;
+
+            int inc_col = StepX;
+            int inc_line =
+                Stride - w * StepX
+                + Stride * (StepY - 1);
+
+            return (l, t, c, w, h, inc_col, inc_line);
+        }
+
+        public IEnumerable<int> GetIndex()
+        {
+            int index = 0;
+            /*loop0{*/
+            if (Map == "Full" && Color == null)
+            {
+                for (index = 0; index < this.pixel.Length; index++)
+                {
+                    yield return index;
+                }
+            }
+            else
+            {
+                var hogehoge = Color ?? new string[] { "Flat" };
+                foreach (var c in hogehoge)
+                {
+                    if (c == "Flat") SetMap(Map, null);
+                    else SetMap(Map, c);
+
+                    var hoge = utilLoop();
+                    index = hoge.c;
+                    for (int y = 0; y < hoge.h; y++)
+                    {
+                        for (int x = 0; x < hoge.w; x++)
+                        {
+                            yield return index;
+                            index += hoge.inc_col;
+                        }
+                        index += hoge.inc_line;
+                    }
+                }
+                //あとしまつ
+                if (Color != null) SetMap(Map, Color[0]);
+            }
+            /*}loop0*/
+        }
+        public IEnumerable<int> GetIndexX()
+        {
+            int l = Left;
+            int w = Width;
+
+            int inc_col = StepX;
+            int c = l;
+            for (int x = 0; x < w; x++)
+            {
+                yield return c;
+                c += inc_col;
+            }
+        }
+        public IEnumerable<int> GetIndexY()
+        {
+            int t = Top;
+            int h = Height;
+
+            int inc_line = Stride * StepY;
+
+            int c = t * Stride;
+            for (int y = 0; y < h; y++)
+            {
+                yield return c;
+                c += inc_line;
+            }
+        }
+        public IEnumerable<(int center, int left, int right, int top, int bottom, int lefttop, int righttop, int leftbottom, int rightbottom)> GetIndexPlus(string color)
+        {
+            int l = Left;
+            int t = Top;
+            int c = l + t * Stride;
+
+            int w = Width;
+            int h = Height;
+
+            int inc_col = StepX;
+            int inc_line =
+                Stride - w * StepY
+                + Stride * (StepY - 1);
+
+            int line = Stride * StepY;
+            for (int y = 0; y < h; y++)
+            {
+                for (int x = 0; x < w; x++)
+                {
+                    yield return
+                    (
+                        c,
+                        c - inc_col,
+                        c + inc_col,
+                        c - line,
+                        c + line,
+                        c - inc_col - line,
+                        c + inc_col - line,
+                        c - inc_col + line,
+                        c + inc_col + line
+                    );
+                    c += inc_col;
+                }
+                c += inc_line;
+            }
+        }
 
         /// <summary>
         /// 配列の定義し直し
@@ -351,5 +485,33 @@ namespace Pixels
 
         }
 
+    }
+
+
+    public static class PixelUtil
+    {
+        public static TR SwitchFunc<T1, T2, T3, T4, T5, T6, T7, T8, T9, TR>(this object obj,
+            Func<T1, TR> t1, 
+            Func<T2, TR> t2, 
+            Func<T3, TR> t3,
+            Func<T4, TR> t4,
+            Func<T5, TR> t5, 
+            Func<T6, TR> t6, 
+            Func<T7, TR> t7, 
+            Func<T8, TR> t8, 
+            Func<T9, TR> t9)
+        {
+            if (obj is T1) return t1((T1)obj);
+            else if (obj is T2) return t2((T2)obj);
+            else if (obj is T3) return t3((T3)obj);
+            else if (obj is T4) return t4((T4)obj);
+            else if (obj is T5) return t5((T5)obj);
+            else if (obj is T6) return t6((T6)obj);
+            else if (obj is T7) return t7((T7)obj);
+            else if (obj is T8) return t8((T8)obj);
+            else if (obj is T9) return t9((T9)obj);
+
+            else throw new Exception("条件に合う型がありません");
+        }
     }
 }

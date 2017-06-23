@@ -1,31 +1,100 @@
 ﻿
 
-    /*T4{[ {"Key": ["PixelBase<T> : Pixel<T>"], "Value": [["Pixel"]]} ]T4h*/
-    public partial class PixelBase<T> : Pixel<T> where T : struct, IComparable
-    {/*}T4*/
+        #region Cast
 
-        /*T4{[ {"Key": ["throw new Exception();"], 
-                "Value": [[""]]} ]T4h*/
-        public Pixel<TResult> Accumulate<TResult, TOperator>(Pixel<TResult> dst, TOperator op)
-            where TResult : struct, IComparable
-            where TOperator : struct, IBinaryOperator<T, TResult>
+        /*T4{[
+            {"Key": ["Int32"], "Value": [["Boolean"],["Byte"],["UInt16"],["UInt32"],["UInt64"],["Int16"],["Int32"],["Int64"],["Single"],["Double"]]}
+        ]T4h*/
+        public static Pixel<TResult> ToPixel<TResult>(this Pixel<Int32> src) where TResult : struct, IComparable
+            => ToPixel<Int32, TResult>(src);/*}T4*/
+
+        public static Pixel<TResult> ToPixel<T1, TResult>(this Pixel<T1> src)
+        where T1 : struct, IComparable
+        where TResult : struct, IComparable
         {
-            throw new Exception();
-            return dst;
-            void f(int i)
-            {
-                op.Operate(ref this.pixel[i], ref dst.pixel[i]);
-            }
-        }/*}T4*/
-    }
+            return
+                /*T4{[
+                    {"Key": ["Byte"], "Value": [["Byte"],["UInt16"],["UInt32"],["UInt64"],["Int16"],["Int32"],["Int64"],["Single"],["Double"]]},
+                    {"Key": ["Int32"], "Value": [["Boolean"],["Byte"],["UInt16"],["UInt32"],["UInt64"],["Int16"],["Int32"],["Int64"],["Single"],["Double"]]},
+                ]T4h*/
+                typeof(TResult) == typeof(Byte) && typeof(T1) == typeof(Int32) 
+                    ? (src as Pixel<Int32>).Accumulate(src.Clone<Byte>(), default(Op_Cast_Int32Byte)) as Pixel<TResult> :
+                /*}T4*/
+                throw new FormatException($"{typeof(T1)},{typeof(TResult)}");
+        }
 
+        /*T4{[
+            {"Key": ["Byte"], "Value": [["Byte"],["UInt16"],["UInt32"],["UInt64"],["Int16"],["Int32"],["Int64"],["Single"],["Double"]]},
+            {"Key": ["Int32"], "Value": [["Byte"],["UInt16"],["UInt32"],["UInt64"],["Int16"],["Int32"],["Int64"],["Single"],["Double"]]}
+        ]T4h*/
+        struct Op_Cast_Int32Byte : IBinaryOperator<Int32, Byte>{ public Byte Operate(Int32 x) => (Byte)x; }/*}T4*/
 
+        //(x > Byte.MaxValue ? Byte.MaxValue : x < Byte.MinValue ? Byte.MinValue : (Byte)x); }
 
+        /*T4{[
+            {"Key": ["Byte"], "Value": [["Byte"],["UInt16"],["UInt32"],["UInt64"],["Int16"],["Int32"],["Int64"],["Single"],["Double"]]}
+        ]T4h*/
+        struct Op_Cast_BooleanByte : IBinaryOperator<Boolean, Byte> { public void Operate(ref Boolean x, ref Byte y) => y = x ? Byte.MaxValue : (Byte)0; }/*}T4*/
+
+        #endregion
 
 
 
 
             //if (typeof(T) == typeof(bool)) return (dynamic)Binarization((dynamic)src, null, "M", null);
+
+
+		        #region Op
+
+        //UInt64と他の演算は明示キャストしないとだめなので省略
+        /*T4{[
+            {"Key": ["Add","(x + y)"], "Value": [["Add","(x + y)"],["Sub","(x - y)"],["Mul","(x * y)"],["Div","(x / y)"]]},
+            {"Key": ["Int32"], "Value": [["Byte"],["UInt16"],["UInt32"],["Int16"],["Int32"],["Int64"],["Single"],["Double"]]},
+            {"Key": ["Byte"], "Value": [["Byte"],["UInt16"],["UInt32"],["Int16"],["Int32"],["Int64"],["Single"],["Double"]]},
+        ]T4h*/
+        struct Op_Add_Int32Byte : IBinaryOperator<Int32, Byte, Int32> { public void Operate(ref Int32 x, ref Byte y, ref Int32 z) => z = (Int32)(x + y); }/*}T4*/
+
+        /*T4{[
+            {"Key": ["Add","(x + y)"], "Value": [["Add","(x + y)"],["Sub","(x - y)"],["Mul","(x * y)"],["Div","(x / y)"]]},
+        ]T4h*/
+        struct Op_Add_UInt64UInt64 : IBinaryOperator<UInt64, UInt64, UInt64> { public void Operate(ref UInt64 x, ref UInt64 y, ref UInt64 z) => z = (x + y); }/*}T4*/
+
+        /*T4{[
+            {"Key": ["ShiftLeft","(x << y)"], "Value": [["ShiftLeft","(x << y)"],["ShiftRight","(x >> y)"]]},
+            {"Key": ["Int32"], "Value": [["Byte"],["UInt16"],["UInt32"],["UInt64"],["Int16"],["Int32"],["Int64"]]}
+        ]T4h*/
+        struct Op_ShiftLeft_Int32 : IBinaryOperator<Int32, int, Int32> { public void Operate(ref Int32 x, ref int y, ref Int32 z) => z = (Int32)(x << y); }/*}T4*/
+
+
+
+        /*T4{[
+            {"Key": ["Add"], "Value": [["Add"],["Sub"],["Mul"],["Div"]]},
+            {"Key": ["Int32"], "Value": [["Byte"],["UInt16"],["UInt32"],["Int16"],["Int32"],["Int64"],["Single"],["Double"]]},
+            {"Key": ["Byte"], "Value": [["Byte"],["UInt16"],["UInt32"],["Int16"],["Int32"],["Int64"],["Single"],["Double"]]},
+        ]T4h*/
+        public static Pixel<Int32> AddSelf(this Pixel<Int32> src, Byte value) => src.Accumulate(src, value, default(Op_Add_Int32Byte));
+        public static Pixel<Int32> Add(this Pixel<Int32> src, Byte value) => src.Accumulate(src.Clone(), value, default(Op_Add_Int32Byte));
+        public static Pixel<Int32> Add(this Pixel<Int32> src, Pixel<Int32> dst, Byte value) => src.Accumulate(dst, value, default(Op_Add_Int32Byte));
+        public static Pixel<Int32> AddSelf(this Pixel<Int32> src1, Pixel<Byte> src2) => src1.Accumulate(src1, src2, default(Op_Add_Int32Byte));
+        public static Pixel<Int32> Add(this Pixel<Int32> src1, Pixel<Byte> src2) => src1.Accumulate(src1.Clone(), src2, default(Op_Add_Int32Byte));
+        public static Pixel<Int32> Add(this Pixel<Int32> src1, Pixel<Int32> dst, Pixel<Byte> src2) => src1.Accumulate(dst, src2, default(Op_Add_Int32Byte));/*}T4*/
+
+        /*T4{[
+            {"Key": ["Add"], "Value": [["Add"],["Sub"],["Mul"],["Div"]]}
+        ]T4h*/
+        public static Pixel<UInt64> AddSelf(this Pixel<UInt64> src1, Pixel<UInt64> src2) => src1.Accumulate(src1, src2, default(Op_Add_UInt64UInt64));
+        public static Pixel<UInt64> Add(this Pixel<UInt64> src1, Pixel<UInt64> src2) => src1.Accumulate(src1.Clone(), src2, default(Op_Add_UInt64UInt64));
+        public static Pixel<UInt64> Add(this Pixel<UInt64> src1, Pixel<UInt64> dst, Pixel<UInt64> src2) => src1.Accumulate(dst, src2, default(Op_Add_UInt64UInt64));/*}T4*/
+
+        /*T4{[
+            {"Key": ["ShiftLeft","(x << y)"], "Value": [["ShiftLeft","(x << y)"],["ShiftRight","(x >> y)"]]},
+            {"Key": ["Int32"], "Value": [["Byte"],["UInt16"],["UInt32"],["UInt64"],["Int16"],["Int32"],["Int64"]]}
+        ]T4h*/
+        public static Pixel<Int32> ShiftLeftSelf(this Pixel<Int32> src, int value) => src.Accumulate(src, value, default(Op_ShiftLeft_Int32));
+        public static Pixel<Int32> ShiftLeft(this Pixel<Int32> src, int value) => src.Accumulate(src.Clone(), value, default(Op_ShiftLeft_Int32));
+        public static Pixel<Int32> ShiftLeft(this Pixel<Int32> src, Pixel<Int32> dst, int value) => src.Accumulate(dst, value, default(Op_ShiftLeft_Int32));/*}T4*/
+
+        #endregion
 
 /* 一度退避 */
 
