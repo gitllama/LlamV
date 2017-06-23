@@ -229,10 +229,12 @@ namespace LlamV.Models
                 ContentData[id].Raw = globals.raw;
                 //書き戻したら再描画必要
                 Developing(id);
+                Console.WriteLine("-----Script End-----");
             }
             catch (Exception e)
             {
                 Console.WriteLine($"{e.ToString()}");
+                Console.WriteLine("-----Script End-----");
             }
         }
 
@@ -258,10 +260,16 @@ namespace LlamV.Models
                     Rect = new Rect(i.Left, i.Top, i.Width, i.Height);
                     break;
                 case "MouseWheelCtrl+":
-                    Depth = (int)System.Math.Pow(2, (int)(System.Math.Log(Depth + 1, 2)) + 1) - 1;
+                    {
+                        var hoge = (int)System.Math.Pow(2, (int)(System.Math.Log(Depth + 1, 2)) + 1) - 1;
+                        Depth = hoge;
+                    }
                     break;
                 case "MouseWheelCtrl-":
-                    Depth = (int)System.Math.Pow(2, (int)(System.Math.Log(Depth + 1, 2)) - 1) - 1;
+                    {
+                        var hoge = (int)System.Math.Pow(2, (int)(System.Math.Log(Depth + 1, 2)) - 1) - 1;
+                        Depth = hoge < 1 ? 1 : hoge;
+                    }
                     break;
             }
         }

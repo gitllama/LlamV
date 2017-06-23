@@ -1,8 +1,110 @@
 ﻿Console.WriteLine("Script Start");
 
-//スタッガー処理
-var src = raw["Stagger"].StaggerRSelf().Clone();
+var isDark = true;
 
+/*前処理*/
+raw = raw["Stagger"].StaggerRSelf();
+
+string[] color1 = new string[] { "Gr1", "R1", "B1", "Gb1", "Gr2", "R2", "B2", "Gb2" };
+string[] color2 = new string[] { "Gr", "R", "B", "Gb" };
+
+var A = raw["Full"].Clone();
+var B = raw["Effective", color2].FilterMedian()
+            ["HOB-L"].FilterMedian()
+            ["HOB-R"].FilterMedian();
+var C = isDark 
+        ? A["Full"].Acc<float, float>(B["Full"], (x, y) => x - y, raw.Clone(false))
+        : A["Full"].Acc<float, float>(B["Full"], (x, y) => x / y, raw.Clone(false));
+var D = C.Clone<bool>();
+
+/*スペックの計算*/
+
+//Signal
+Console.WriteLine(A["Effective", "Gr"].Average());
+Console.WriteLine(A["Effective", "R"].Average());
+Console.WriteLine(A["Effective", "B"].Average());
+Console.WriteLine(A["Effective", "Gb"].Average());
+
+//Labling
+if (isDark)
+{
+    D["Full"].AccSelf(C["Full"], (x, y) => (y > 127 || y < -127));
+    D["Effective"].AccSelf(A["Full"], (x, y) => x || (y > 255 || y < -255));
+    D["HOB-L"].AccSelf(A["HOB-L"], (x, y) => x || (y > 255 || y < -255));
+    D["HOB-R"].AccSelf(A["HOB-R"], (x, y) => x || (y > 255 || y < -255));
+
+    //raw = (Pixel<float>)D["Full"];
+}
+else
+{
+    D["Effective"].AccSelf(C["Effective"], (x, y) => (y > 1.02 || y < 0.98));
+    D["HOB-L"].AccSelf(A["HOB-L"], (x, y) => x || (y > 4095));
+    D["HOB-R"].AccSelf(A["HOB-R"], (x, y) => x || (y > 4095));
+}
+Console.WriteLine(D["Full"].Labling(x => x.Area >= 5).Count());
+foreach (var i in D["Full"].Labling(x => x.Area >= 5))
+    Console.WriteLine($"({i.Left} {i.Top}) {i.Area}");
+Console.WriteLine(D["Full","M1"].Cut().Labling(x => x.Area >= 5).Count());
+Console.WriteLine(D["Full","M2"].Cut().Labling(x => x.Area >= 5).Count());
+Console.WriteLine(D["Full","M3"].Cut().Labling(x => x.Area >= 5).Count());
+Console.WriteLine(D["Full","M4"].Cut().Labling(x => x.Area >= 5).Count());
+Console.WriteLine(D["Effective", "Gr"].Cut().Labling(x => x.Area >= 5).Count());
+Console.WriteLine(D["Effective", "R"].Cut().Labling(x => x.Area >= 5).Count());
+Console.WriteLine(D["Effective", "B"].Cut().Labling(x => x.Area >= 5).Count());
+Console.WriteLine(D["Effective", "Gb"].Cut().Labling(x => x.Area >= 5).Count());
+Console.WriteLine(D["Effective", "Gr1"].Cut().Labling(x => x.Area >= 5).Count());
+Console.WriteLine(D["Effective", "Gr2"].Cut().Labling(x => x.Area >= 5).Count());
+Console.WriteLine(D["Effective", "R1"].Cut().Labling(x => x.Area >= 5).Count());
+Console.WriteLine(D["Effective", "R2"].Cut().Labling(x => x.Area >= 5).Count());
+Console.WriteLine(D["Effective", "B1"].Cut().Labling(x => x.Area >= 5).Count());
+Console.WriteLine(D["Effective", "B2"].Cut().Labling(x => x.Area >= 5).Count());
+Console.WriteLine(D["Effective", "Gb1"].Cut().Labling(x => x.Area >= 5).Count());
+Console.WriteLine(D["Effective", "Gb2"].Cut().Labling(x => x.Area >= 5).Count());
+
+//Matching
+Console.WriteLine(D["Effective", "Gr","R","B","Gb"].Matching());
+foreach (var i in D["Effective", "Gr", "R", "B", "Gb"].MatchingList())
+    Console.WriteLine($"({i % D.FullWidth},{i / D.FullWidth})");
+
+//WD 出力10%程度のバラつきあり
+
+//出力10%程度のバラつきあり、だいたい25%Countズレる -> 閾値厳しくする場合highシャッタとの差分の方がいい
+/*
+Console.WriteLine(C["Effective"].Count(x => x > 58));
+
+Console.WriteLine(C["Effective", "Gr","R"].Count(x => x > 64));
+Console.WriteLine(C["Effective", "B","Gb"].Count(x => x > 64));
+Console.WriteLine(C["Effective"].Count(x => x > 127));
+Console.WriteLine(C["Effective"].Count(x => x > 255));
+
+Console.WriteLine(C["HOB-L"].Count(x => x > 64));
+Console.WriteLine(C["HOB-R"].Count(x => x > 64));
+*/
+
+
+
+
+
+
+//raw = raw["Full", "Gr1"].Acc(x => (float)0);
+//raw = raw["Full", "Gr"].Cut();
+/*
+
+var A = new List<(int x, int y)>()
+{
+    (-1,-1),
+    (1,-1),
+    (0,0),
+    (-1,1),
+    (1,1),
+};
+var raw2 = raw["Effective", "Gr", "Gb", "R", "B"].AccBox<float, float>(A, x => { Array.Sort(x); return x[2]; }, raw.Clone());
+raw2 = raw2["HOB-L", "M"].AccBox<float, float>(A, x => { Array.Sort(x); return x[2]; }, raw2.Clone());
+raw2 = raw2["HOB-R", "M"].AccBox<float, float>(A, x => { Array.Sort(x); return x[2]; }, raw2.Clone());
+raw = raw["Full"].Acc<float, float>(raw2, (x, y) => x - y, raw.Clone(false));
+
+    */
+/*
 //傷カウント用フィルタリング画像作成
 var p = ClusterPixel(src, true);
 
@@ -33,34 +135,6 @@ foreach (var instance in instances)
     //raw = HFPN(src);
     //raw = Defect(src, true);
 
-Pixel<bool> ClusterPixel(Pixel<float> src, bool isDark)
-{
-    var med = src
-            ["Normal"].FilterMedian(5, 5, 12, "Gr", "R", "B", "Gb")
-            ["HOB-L+"].FilterMedian(5, 5, 12, "M")
-            ["HOB-R+"].FilterMedian(5, 5, 12, "M")
-            ["Full"];
-    var defect = isDark
-        ? src["Full"].Sub(med["Full"])
-        : src["Full"].Div(med["Full"]);
-
-    var bin = src.Clone<bool>();
-    if (isDark)
-    {
-        defect["Full"].Binarization((x, y) => (x > 127 || x < -127), "M", bin["Full"]);
-        src["Effective"].Binarization((x, y) => y || (x > 255 || x < -255), "M", bin["Effective"]);
-        src["HOB-L"].Binarization((x, y) => y || (x > 255 || x < -255), "M", bin["HOB-L"]);
-        src["HOB-R"].Binarization((x, y) => y || (x > 255 || x < -255), "M", bin["HOB-R"]);
-    }
-    else
-    {
-        defect["Effective"].Binarization((x, y) => x > 1.02 || x < 0.98, "M", bin["Effective"]);
-        src["HOB-L"].Binarization((x, y) => y || x > 4095, "M", bin["HOB-L"]);
-        src["HOB-R"].Binarization((x, y) => y || x > 4095, "M", bin["HOB-R"]);
-    }
-
-    return bin;
-}
 
 bool Cluster(Pixel<bool> src, ref Pixel<float> dst, bool flag = false)
 {
@@ -136,6 +210,8 @@ bool MatchingG(Pixel<bool> src, bool flag = false)
 
     return false;
 }
+*/
+
 
 /*
 Pixel<float> VFPN(Pixel<float> src, bool flag = false)

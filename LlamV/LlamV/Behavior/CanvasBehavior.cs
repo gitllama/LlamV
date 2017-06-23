@@ -93,7 +93,9 @@ namespace LlamV.Behavior
         private void AssociatedObject_MouseMove(object sender, MouseEventArgs e)
         {
             var buf = e.GetPosition(cnv);//(Canvas)sender
+
             MouseMove = new Point(buf.X / Scale, buf.Y / Scale); 
+
 
             //Shift
             if ((Keyboard.Modifiers & ModifierKeys.Shift) > 0)

@@ -16,7 +16,8 @@
             <behav:FileDropBehavior TargetCommand="{Binding FileDropCommand}" />
             <behav:ScroolBarBehavior
                 ScrollBarPosition="{Binding ScrollBar.Value, Mode=TwoWay}" 
-                MouseWheel="{Binding MouseWheel.Value, Mode=TwoWay}"
+                Scale="{Binding Scale.Value, Mode=TwoWay}"
+                KeyState="{Binding KeyState.Value, Mode=OneWayToSource}"
                 ShortcutCommand="{Binding ShortcutCommand}"/>
         </i:Interaction.Behaviors>
 

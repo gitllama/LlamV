@@ -32,6 +32,7 @@ namespace AvalonDockUtil
             InitializeTools();
             return;
             // backup default layout
+            /*
             using (var ms = new MemoryStream())
             {
                 var serializer = new XmlLayoutSerializer(dockManager);
@@ -52,6 +53,7 @@ namespace AvalonDockUtil
 
             // restore layout
             LoadLayoutFromBytes(dockManager, bytes);
+            */
         }
 
         String LayoutFile
@@ -94,6 +96,7 @@ namespace AvalonDockUtil
             }
             catch (Exception ex)
             {
+                var i = ex;
                 return false;
             }
         }

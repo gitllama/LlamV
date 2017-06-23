@@ -24,7 +24,11 @@ namespace LlamV.ViewModels
         {
             consoleRedirectWriter.OnWrite += (x) => 
             {
-                Output += $"{x}";
+                var dt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
+                if (x == "#clear") Output = "";
+                else Output += $"{dt} {x}";
+
                 RaisePropertyChanged(nameof(Output));
             };
         }

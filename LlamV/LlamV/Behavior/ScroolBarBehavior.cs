@@ -13,8 +13,12 @@ namespace LlamV.Behavior
     public class ScroolBarBehavior : BehaviorBase<ScrollViewer>
     {
         public static readonly DependencyProperty ScaleProperty = DependencyProperty.Register(
-            "MouseWheel", typeof(double), typeof(ScroolBarBehavior), new UIPropertyMetadata(1.0));
-        public double MouseWheel { get => (double)GetValue(ScaleProperty); set => SetValue(ScaleProperty, value); }
+            "Scale", typeof(double), typeof(ScroolBarBehavior), new UIPropertyMetadata(1.0));
+        public double Scale { get => (double)GetValue(ScaleProperty); set => SetValue(ScaleProperty, value); }
+
+        public static readonly DependencyProperty KeyStateProperty = DependencyProperty.Register(
+            "KeyState", typeof((bool,bool,bool)), typeof(ScroolBarBehavior), new UIPropertyMetadata((false,false,false)));
+        public (bool, bool, bool) KeyState { get => ((bool, bool, bool))GetValue(KeyStateProperty); set => SetValue(KeyStateProperty, value); }
 
         public static readonly DependencyProperty ScrollBarPositionProperty = DependencyProperty.Register(
             "ScrollBarPosition", typeof(Point), typeof(ScroolBarBehavior), new UIPropertyMetadata(new Point(0,0), ScrollBarPositionPropertyChanged));
@@ -44,7 +48,9 @@ namespace LlamV.Behavior
             this.AssociatedObject.PreviewMouseWheel += AssociatedObject_MouseWheel;
             this.AssociatedObject.MouseDown += AssociatedObject_MouseDown;
             this.AssociatedObject.PreviewKeyDown += AssociatedObject_KeyDown;
+            this.AssociatedObject.PreviewKeyUp += AssociatedObject_PreviewKeyUp; ;
         }
+
         protected override void OnCleanup()
         {
             this.AssociatedObject.ScrollChanged -= AssociatedObject_ScrollChanged;
@@ -52,6 +58,7 @@ namespace LlamV.Behavior
             this.AssociatedObject.PreviewMouseWheel -= AssociatedObject_MouseWheel;
             this.AssociatedObject.MouseDown -= AssociatedObject_MouseDown;
             this.AssociatedObject.PreviewKeyDown -= AssociatedObject_KeyDown;
+            this.AssociatedObject.PreviewKeyUp -= AssociatedObject_PreviewKeyUp;
             //sv = null;
             base.OnCleanup();
         }
@@ -109,11 +116,21 @@ namespace LlamV.Behavior
                 if (e.Delta / 120 > 0) ShortcutCommand.Execute("MouseWheelCtrl+");
                 if (e.Delta / 120 < 0) ShortcutCommand.Execute("MouseWheelCtrl-");
                 e.Handled = true;
+
+                //暫定
+                KeyState = (
+                    (Keyboard.Modifiers & ModifierKeys.Shift) > 0,
+                    (Keyboard.Modifiers & ModifierKeys.Control) <= 0,
+                    (Keyboard.Modifiers & ModifierKeys.Alt) > 0);
+                KeyState = (
+                    (Keyboard.Modifiers & ModifierKeys.Shift) > 0,
+                    (Keyboard.Modifiers & ModifierKeys.Control) > 0,
+                    (Keyboard.Modifiers & ModifierKeys.Alt) > 0);
             }
             else
             {
                 var a = System.Math.Pow(2, e.Delta / 120);
-                MouseWheel *= a;
+                Scale *= a;
                 double x = 0;
                 double y = 0;
                 var i = e.GetPosition(sender as ScrollViewer);
@@ -134,6 +151,7 @@ namespace LlamV.Behavior
             }
 
         }
+
         private void AssociatedObject_KeyDown(object sender, KeyEventArgs e)
         {
             switch (e.Key)
@@ -153,12 +171,26 @@ namespace LlamV.Behavior
                 case Key.Home:
                     sv.ScrollToVerticalOffset(0);
                     sv.ScrollToHorizontalOffset(0);
-                    MouseWheel = 1;
+                    Scale = 1;
                     break;
             }
             if (e.Key == (Key.P & Key.LeftShift))
                 ShortcutCommand.Execute("XButton1");
+
+            KeyState = (
+                (Keyboard.Modifiers & ModifierKeys.Shift) > 0,
+                (Keyboard.Modifiers & ModifierKeys.Control) > 0,
+                (Keyboard.Modifiers & ModifierKeys.Alt) > 0);
         }
+
+        private void AssociatedObject_PreviewKeyUp(object sender, KeyEventArgs e)
+        {
+            KeyState = (
+                (Keyboard.Modifiers & ModifierKeys.Shift) > 0,
+                (Keyboard.Modifiers & ModifierKeys.Control) > 0,
+                (Keyboard.Modifiers & ModifierKeys.Alt) > 0);
+        }
+
         private void AssociatedObject_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.XButton1 == MouseButtonState.Pressed) ShortcutCommand.Execute("XButton1");

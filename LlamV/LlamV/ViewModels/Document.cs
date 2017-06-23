@@ -58,16 +58,16 @@ namespace LlamV.ViewModels
 
         [Browsable(false)]
         public ReactiveProperty<bool> isLinkage { get; private set; }
-
-        public ReactiveProperty<double> MouseWheel { get; private set; }
-        public ReactiveProperty<int> MouseWheelShift { get; private set; }
-
+        //[Browsable(false)]
+        //public ReactiveProperty<double> MouseWheel { get; private set; }
+        [Browsable(false)]
+        public ReactiveProperty<(bool,bool,bool)> KeyState { get; private set; }
+        [Browsable(false)]
         public ReactiveProperty<List<Shape>> Shapes { get; private set; }
         [Browsable(false)]
         public ReactiveProperty<Point> MouseMove { get; private set; }
         [Browsable(false)]
         public ReactiveProperty<Rect> RectMove { get; private set; }
-
         [Browsable(false)]
         public ReactiveProperty<Brush> Background { get; private set; }
 
@@ -105,17 +105,6 @@ namespace LlamV.ViewModels
 
             isLinkage = model.ObserveProperty(x => x.isLinkage).ToReactiveProperty().AddTo(this.Disposable);
 
-            //MouseWheel = model.ToReactivePropertyAsSynchronized(
-            //    x => x.Scale,
-            //    convert: x => (int)Math.Log(x, 2),
-            //    convertBack: x => Math.Pow(2, x))
-            //    .AddTo(this.Disposable);
-            MouseWheel = model.ToReactivePropertyAsSynchronized(
-                x => x.Scale,
-                convert: x => x,
-                convertBack: x => x)
-                .AddTo(this.Disposable);
-
             ScrollBar = model.ToReactivePropertyAsSynchronized(
                 x => x.ScrollBar,
                 convert: x => { _ScrollBar = x; return x; },
@@ -134,14 +123,15 @@ namespace LlamV.ViewModels
 
             #endregion
 
+            KeyState = new ReactiveProperty<(bool, bool, bool)>().AddTo(this.Disposable);
 
             MouseMove = new ReactiveProperty<Point>().AddTo(this.Disposable);
             RectMove = model.ToReactivePropertyAsSynchronized(x => x.Rect).AddTo(this.Disposable);
 
-            Shapes = MouseMove.CombineLatest(RectMove, (x, y) =>
+            Shapes = MouseMove.CombineLatest(RectMove, KeyState, (x, y, z) =>
             {
                 var i = new List<Shape>();
-                DrawL(i, x);
+                DrawL(i, x, z.Item1, z.Item2);
                 DrawShift(i, y);
                 return i;
             }).ToReactiveProperty().AddTo(this.Disposable);
@@ -250,11 +240,8 @@ namespace LlamV.ViewModels
 
 
         //..Take(1)
-        public void DrawL(List<Shape> a, Point x)
+        public void DrawL(List<Shape> a, Point x, bool shift, bool ctrl)
         {
-            //Shiftだと消す
-            //Ctrlだと明るさ
-
             var c = Colors.Red;
             var f = Colors.Red;
             f.A = 30;
@@ -263,32 +250,53 @@ namespace LlamV.ViewModels
             if (!model.ContentData.ContainsKey(this.ContentId)) return;
             if (model.ContentData[this.ContentId].Raw == null) return;
             var buf = model.ContentData[this.ContentId].Raw;
-
-
             if (!buf.Maps.ContainsKey("Full")) return;
             if (x.X >= buf["Full"].Width) return;
             if (x.Y >= buf["Full"].Height) return;
+            if (x.X < 0) return;
+            if (x.Y < 0) return;
 
-            var lsb = buf["Full"][(int)(x.X), (int)(x.Y)].ToString() ?? "";
+            //Shiftだと消す
+            //Ctrlだと明るさ
+            if (shift)
+            {
 
-            a.Add(new Shape()
+            }
+            else if (ctrl)
             {
-                Key = "Text",
-                Left = (int)(x.X + 1),
-                Top = (int)(x.Y + 1),// - 16 / Scale.Value,
-                Size = 16,
-                Text = $"({(int)(x.X)},{(int)(x.Y)})\r\n{lsb}"
-            });
-            a.Add(new Shape()
+                a.Add(new Shape()
+                {
+                    Key = "Text",
+                    Left = (int)(x.X + 1),
+                    Top = (int)(x.Y + 1),// - 16 / Scale.Value,
+                    Size = 16,
+                    Text = $"Depth:{model.Depth}\r\nOffset:{model.Offset}"
+                });
+            }
+            else
             {
-                Key = "Rect",
-                Left = (int)x.X,
-                Top = (int)x.Y,
-                Width = 1,
-                Height = 1,
-                Brush = c,
-                Fill = f
-            });
+                var lsb = buf["Full"][(int)(x.X), (int)(x.Y)].ToString() ?? "";
+
+                a.Add(new Shape()
+                {
+                    Key = "Text",
+                    Left = (int)(x.X + 1),
+                    Top = (int)(x.Y + 1),// - 16 / Scale.Value,
+                    Size = 16,
+                    Text = $"({(int)(x.X)},{(int)(x.Y)})\r\n{lsb}"
+                });
+                a.Add(new Shape()
+                {
+                    Key = "Rect",
+                    Left = (int)x.X,
+                    Top = (int)x.Y,
+                    Width = 1,
+                    Height = 1,
+                    Brush = c,
+                    Fill = f
+                });
+            }
+
         }
         public void DrawShift(List<Shape> a, Rect x)
         {

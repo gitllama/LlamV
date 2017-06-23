@@ -142,16 +142,6 @@
       Top    : 49
       Width  : 128
       Height : 1096
-    HOB-L+ : 
-      Left   : 10 
-      Top    : 47
-      Width  : 132
-      Height : 1100
-    HOB-R+ : 
-      Left   : 2114
-      Top    : 47
-      Width  : 132
-      Height : 1100
 - Model : Single
   FileName :
   - "\\d{1,12}\\.bin$"
@@ -288,16 +278,6 @@
       Top    : 49
       Width  : 128
       Height : 1096
-    HOB-L+ : 
-      Left   : 10 
-      Top    : 47
-      Width  : 132
-      Height : 1100
-    HOB-R+ : 
-      Left   : 2114
-      Top    : 47
-      Width  : 132
-      Height : 1100
 - Model : NSingle
   FileName :
   - "\\d{1,12}\\.btn$"
