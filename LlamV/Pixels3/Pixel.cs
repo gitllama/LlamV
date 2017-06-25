@@ -223,7 +223,7 @@ namespace Pixels
             dst.Maps = this.Maps;
             dst.Colors = this.Colors;
 
-            return dst[Map];
+            return dst[Map, Color];
         }
 
         public Pixel<T> Cancellation(CancellationTokenSource token)
@@ -351,6 +351,7 @@ namespace Pixels
                 c += inc_line;
             }
         }
+
 
         /// <summary>
         /// 配列の定義し直し
